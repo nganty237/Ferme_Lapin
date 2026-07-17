@@ -1,6 +1,12 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { FarmService } from '../../core/services/farm.service';
 import { KpiService } from '../../core/services/kpi.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -15,25 +21,50 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-ventes',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule,
-    PageHeaderComponent, MetricCardComponent,
-    MatButtonModule, MatInputModule, MatSelectModule, MatIconModule
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    MetricCardComponent,
+    MatButtonModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
   ],
   template: `
     <div class="page-container">
       <app-page-header
         title="Gestion des ventes"
-        subtitle="Enregistrez les commandes et suivez le taux de service commercial">
+        subtitle="Enregistrez les commandes et suivez le taux de service commercial"
+      >
       </app-page-header>
 
       <!-- KPIs -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <app-metric-card label="Taux de service" [value]="serviceRate() + '%'"
-          hint="Proportion des commandes honorees" icon="verified" iconBg="#f0fdf4" iconColor="#166534"></app-metric-card>
-        <app-metric-card label="Lapins livres" [value]="totalSold() + ''" 
-          hint="Total des livraisons effectuees" icon="local_shipping" iconBg="#eef2ff" iconColor="#4338ca"></app-metric-card>
-        <app-metric-card label="Chiffre d'affaires" [value]="formattedRevenue()"
-          hint="Revenus cumules" icon="account_balance_wallet" iconBg="#eff6ff" iconColor="#1e40af"></app-metric-card>
+        <app-metric-card
+          label="Taux de service"
+          [value]="serviceRate() + '%'"
+          hint="Proportion des commandes honorees"
+          icon="verified"
+          iconBg="#f0fdf4"
+          iconColor="#166534"
+        ></app-metric-card>
+        <app-metric-card
+          label="Lapins livres"
+          [value]="totalSold() + ''"
+          hint="Total des livraisons effectuees"
+          icon="local_shipping"
+          iconBg="#eef2ff"
+          iconColor="#4338ca"
+        ></app-metric-card>
+        <app-metric-card
+          label="Chiffre d'affaires"
+          [value]="formattedRevenue()"
+          hint="Revenus cumules"
+          icon="account_balance_wallet"
+          iconBg="#eff6ff"
+          iconColor="#1e40af"
+        ></app-metric-card>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -42,11 +73,11 @@ import { MatIconModule } from '@angular/material/icon';
           <div class="panel">
             <p class="panel__title"><mat-icon>add_circle_outline</mat-icon> Nouvelle commande</p>
             <form [formGroup]="saleForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-              <mat-form-field class="w-full" appearance="outline">
+              <mat-form-field class="w-full" appearance="outline" floatLabel="always" hideRequiredMarker>
                 <mat-label>Date de commande</mat-label>
-                <input matInput type="date" formControlName="dateOrder">
+                <input matInput type="date" formControlName="dateOrder" />
               </mat-form-field>
-              <mat-form-field class="w-full" appearance="outline">
+              <mat-form-field class="w-full" appearance="outline" floatLabel="always" hideRequiredMarker>
                 <mat-label>Client</mat-label>
                 <mat-select formControlName="customer">
                   <mat-option value="Centragel">Centragel Bastos</mat-option>
@@ -54,20 +85,27 @@ import { MatIconModule } from '@angular/material/icon';
                   <mat-option value="Autre">Autre</mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-form-field class="w-full" appearance="outline">
+              <mat-form-field class="w-full" appearance="outline" floatLabel="always" hideRequiredMarker>
                 <mat-label>Quantite commandee</mat-label>
-                <input matInput type="number" formControlName="nbRequested">
+                <input matInput type="number" formControlName="nbRequested" />
               </mat-form-field>
-              <mat-form-field class="w-full" appearance="outline">
+              <mat-form-field class="w-full" appearance="outline" floatLabel="always" hideRequiredMarker>
                 <mat-label>Quantite livree</mat-label>
-                <input matInput type="number" formControlName="nbDelivered">
+                <input matInput type="number" formControlName="nbDelivered" />
               </mat-form-field>
-              <mat-form-field class="w-full" appearance="outline">
+              <mat-form-field class="w-full" appearance="outline" floatLabel="always" hideRequiredMarker>
                 <mat-label>Prix par kg (FCFA)</mat-label>
-                <input matInput type="number" formControlName="pricePerKg">
+                <input matInput type="number" formControlName="pricePerKg" />
               </mat-form-field>
-              <button mat-flat-button color="primary" type="submit" [disabled]="saleForm.invalid"
-                style="width:100%; border-radius:8px; height:42px;">Enregistrer</button>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="saleForm.invalid"
+                style="width:100%; border-radius:8px; height:42px;"
+              >
+                Enregistrer
+              </button>
             </form>
           </div>
         </div>
@@ -92,18 +130,26 @@ import { MatIconModule } from '@angular/material/icon';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let sale of sales()">
-                    <td style="font-variant-numeric:tabular-nums;">{{ sale.dateOrder }}</td>
-                    <td style="font-weight:500;">{{ sale.customer }}</td>
-                    <td style="text-align:center;">{{ sale.nbRequested }}</td>
-                    <td style="text-align:center;">{{ sale.nbDelivered }}</td>
-                    <td style="text-align:right;">{{ sale.pricePerKg | number }}</td>
-                    <td style="text-align:right; font-weight:600;">{{ sale.totalAmount | number }} FCFA</td>
-                    <td style="text-align:center;">
-                      <span *ngIf="sale.nbDelivered >= sale.nbRequested" class="badge badge--success">Complet</span>
-                      <span *ngIf="sale.nbDelivered < sale.nbRequested" class="badge badge--danger">Rupture</span>
-                    </td>
-                  </tr>
+                  @for (sale of sales(); track sale) {
+                    <tr>
+                      <td style="font-variant-numeric:tabular-nums;">{{ sale.dateOrder }}</td>
+                      <td style="font-weight:500;">{{ sale.customer }}</td>
+                      <td style="text-align:center;">{{ sale.nbRequested }}</td>
+                      <td style="text-align:center;">{{ sale.nbDelivered }}</td>
+                      <td style="text-align:right;">{{ sale.pricePerKg | number }}</td>
+                      <td style="text-align:right; font-weight:600;">
+                        {{ sale.totalAmount | number }} FCFA
+                      </td>
+                      <td style="text-align:center;">
+                        @if (sale.nbDelivered >= sale.nbRequested) {
+                          <span class="badge badge--success">Complet</span>
+                        }
+                        @if (sale.nbDelivered < sale.nbRequested) {
+                          <span class="badge badge--danger">Rupture</span>
+                        }
+                      </td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
@@ -112,7 +158,13 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </div>
   `,
-  styles: [`:host { display: block; }`]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
 })
 export class VentesComponent {
   private farmService = inject(FarmService);
@@ -136,7 +188,7 @@ export class VentesComponent {
     customer: ['Centragel', [Validators.required]],
     nbRequested: [50, [Validators.required, Validators.min(1)]],
     nbDelivered: [50, [Validators.required, Validators.min(0)]],
-    pricePerKg: [2800, [Validators.required, Validators.min(100)]]
+    pricePerKg: [2800, [Validators.required, Validators.min(100)]],
   });
 
   onSubmit(): void {
@@ -144,15 +196,22 @@ export class VentesComponent {
       const v = this.saleForm.value;
       const totalAmount = Math.round(v.nbDelivered * 2.3 * v.pricePerKg);
       this.farmService.addSale({
-        dateOrder: v.dateOrder, customer: v.customer,
-        nbRequested: Number(v.nbRequested), nbDelivered: Number(v.nbDelivered),
-        pricePerKg: Number(v.pricePerKg), totalAmount
+        dateOrder: v.dateOrder,
+        customer: v.customer,
+        nbRequested: Number(v.nbRequested),
+        nbDelivered: Number(v.nbDelivered),
+        pricePerKg: Number(v.pricePerKg),
+        totalAmount,
       });
       this.notifier.success('Vente enregistree.');
       this.saleForm.reset({
         dateOrder: new Date().toISOString().split('T')[0],
-        customer: 'Centragel', nbRequested: 50, nbDelivered: 50, pricePerKg: 2800
+        customer: 'Centragel',
+        nbRequested: 50,
+        nbDelivered: 50,
+        pricePerKg: 2800,
       });
     }
   }
 }
+

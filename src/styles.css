@@ -1,3 +1,4 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import 'tailwindcss';
 
 /* ═══════════════════════════════════════════════════
@@ -421,3 +422,50 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-light); }
+
+/* --- Professional Form Adjustments --- */
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+  background-color: var(--color-surface) !important;
+  transition: all 0.2s ease !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline__trailing {
+  border-color: var(--color-primary-light) !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--color-primary) !important;
+  border-width: 2px !important;
+}
+
+/* Margin for numbers so they aren't stuck to the left */
+input[type="number"].mat-mdc-input-element {
+  padding-left: 12px !important;
+  text-align: left !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Select styling to look professional */
+.mat-mdc-select-value {
+  color: var(--color-text-main) !important;
+  font-weight: 500 !important;
+}
+.mat-mdc-select-arrow svg {
+  fill: var(--color-text-muted) !important;
+}
+
+/* === Professional Adjustments === */
+.mat-mdc-form-field { --mdc-shape-small: 12px; }
+.mdc-menu-surface.mat-mdc-select-panel { background-color: #ffffff !important; border-radius: 12px !important; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1) !important; }
+.mat-mdc-form-field-hint { color: var(--color-text-muted) !important; font-size: 12px !important; font-weight: 500; }
+
+/* --- Button Polish --- */
+.mat-mdc-button, .mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-mdc-outlined-button { letter-spacing: 0.02em !important; font-weight: 500 !important; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+.mat-mdc-outlined-button:hover { background-color: var(--color-surface-hover) !important; border-color: var(--color-primary-light) !important; }
+.mat-mdc-flat-button.mat-warn, .mat-mdc-unelevated-button.mat-warn { background-color: #fee2e2 !important; color: #dc2626 !important; font-weight: 600 !important; box-shadow: none !important; }
+.mat-mdc-flat-button.mat-warn:hover, .mat-mdc-unelevated-button.mat-warn:hover { background-color: #fca5a5 !important; }
