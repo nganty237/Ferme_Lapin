@@ -1,1 +1,65 @@
-<router-outlet />
+<mat-sidenav-container class="h-screen w-screen overflow-hidden">
+  <mat-sidenav mode="side" opened class="sidebar-container" style="width:240px; border:none;">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="flex items-center gap-3">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
+          <mat-icon style="color:var(--color-primary-light);font-size:20px;width:20px;height:20px;">pets</mat-icon>
+        </div>
+        <div>
+          <h1>Saveurs du Lapin</h1>
+          <p>Gestion de l'elevage</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav style="padding:16px 0; flex:1;">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <mat-icon>space_dashboard</mat-icon>
+        Tableau de bord
+      </a>
+      <a routerLink="/bandes" routerLinkActive="active" class="nav-link">
+        <mat-icon>view_list</mat-icon>
+        Bandes
+      </a>
+      <a routerLink="/production" routerLinkActive="active" class="nav-link">
+        <mat-icon>science</mat-icon>
+        Production
+      </a>
+      <a routerLink="/ventes" routerLinkActive="active" class="nav-link">
+        <mat-icon>point_of_sale</mat-icon>
+        Ventes
+      </a>
+      <a routerLink="/rapports" routerLinkActive="active" class="nav-link">
+        <mat-icon>summarize</mat-icon>
+        Rapports
+      </a>
+      <a routerLink="/parametres" routerLinkActive="active" class="nav-link">
+        <mat-icon>tune</mat-icon>
+        Parametres
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <div style="padding:16px 20px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
+      <span style="font-size:11px; color:rgba(255,255,255,0.4);">Projet academique 2026</span>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content style="background:var(--color-bg-main); display:flex; flex-direction:column;">
+    <!-- Toolbar -->
+    <mat-toolbar style="background:var(--color-surface); border-bottom:1px solid var(--color-border); height:56px; min-height:56px; padding:0 24px; font-size:14px; color:var(--color-text-muted); display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:500;">Pilotage technico-economique — conduite en bandes</span>
+      <div class="flex items-center gap-2">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--color-success);"></div>
+        <span style="font-size:12px; color:var(--color-text-light);">Hors-ligne</span>
+      </div>
+    </mat-toolbar>
+
+    <main style="flex:1; overflow-y:auto; overflow-x:hidden;">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
