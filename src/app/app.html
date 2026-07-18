@@ -1,1 +1,52 @@
-<router-outlet />
+<div class="h-screen w-screen overflow-hidden flex" style="background:var(--color-bg-main);">
+  <!-- Sidebar -->
+  <aside class="sidebar-container h-full shrink-0 z-20" [style.width.px]="sidebarCollapsed ? 80 : 240" style="transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 8px rgba(0,0,0,0.05);">
+    <app-sidebar [collapsed]="sidebarCollapsed" (toggle)="sidebarCollapsed = !sidebarCollapsed"></app-sidebar>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col min-w-0 h-full relative" style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+    <!-- Modern, Professional Header -->
+    <header class="flex justify-between items-center px-6 h-16 sticky top-0 z-10 transition-all duration-300" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+      
+      <!-- Coherent, Professional Title -->
+      <div class="flex items-center gap-2">
+        <span style="color: var(--color-text-main); font-size: 16px; font-weight: 700; letter-spacing: -0.02em; font-family: 'Inter', sans-serif;">
+          CuniGest
+        </span>
+        <!-- Brand Theme Colors -->
+        <div class="flex items-center gap-1 ml-1">
+          <span class="h-2 w-2 rounded-full" style="background-color: #15803d;" title="Vert Émeraude - Élevage et Nature"></span>
+          <span class="h-2 w-2 rounded-full" style="background-color: #475569;" title="Gris Ardoise - Structure et Professionnalisme"></span>
+          <span class="h-2 w-2 rounded-full" style="background-color: #d97706;" title="Ambre Chaleureux - Énergie et Alimentation"></span>
+        </div>
+      </div>
+
+      <!-- Actions & Profile -->
+      <div class="flex items-center gap-3">
+        <!-- Notification Button -->
+        <button mat-icon-button class="text-slate-400 hover:text-slate-600 transition-colors relative" style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+          <mat-icon style="font-size: 22px; width: 22px; height: 22px; color: var(--color-text-muted);">notifications</mat-icon>
+          <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
+
+        <!-- Settings Quick Link -->
+        <a routerLink="/parametres" class="text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center" style="width: 40px; height: 40px; border-radius: 50%; color: var(--color-text-muted); text-decoration: none; cursor: pointer;">
+          <mat-icon style="font-size: 22px; width: 22px; height: 22px;">settings</mat-icon>
+        </a>
+
+        <!-- Profile Avatar -->
+        <div class="flex items-center border-l pl-3" style="border-color: var(--color-border);">
+          <div class="h-8 w-8 rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-shadow" style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark)); color: white; font-weight: 600; font-size: 13px;">
+            A
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-6">
+      <router-outlet />
+    </div>
+  </main>
+  <app-toast-container></app-toast-container>
+</div>
