@@ -276,11 +276,13 @@ export class NotificationService implements OnDestroy {
     }
 
     // ── CRITIQUE : Mâle décédé ──
+    const reproducteurs = this.calcService.reproducteurs;
     for (const dec of deces) {
-      if (dec.sexe === 'M' || dec.type === 'male') {
+      const repro = reproducteurs.find(r => r.id === dec.reproducteurId);
+      if (repro && repro.sexe === 'M') {
         notifs.push(this.createNotif(
           'CRITIQUE',
-          `Mâle décédé${dec.nom ? ' : ' + dec.nom : ''}. Vérifier le plan de reproduction.`,
+          `Mâle décédé${repro.nom ? ' : ' + repro.nom : ''}. Vérifier le plan de reproduction.`,
           'error',
           `deces_male_${dec.id}`
         ));

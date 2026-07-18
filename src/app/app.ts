@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
-import { ToastContainerComponent } from './shared/components/toast/toast.component';
+import { ToastContainerComponent } from '@shared/components';
 
 @Component({
   selector: 'app-root',

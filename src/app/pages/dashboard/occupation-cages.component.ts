@@ -1,8 +1,8 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '../../core/services/calculation.service';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CalculationService } from '@core/services';
+import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 
 interface SevrageEnCours {

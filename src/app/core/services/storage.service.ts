@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Reproducteur, Saillie, MiseBas, Sevrage, Vente, Deces, Configuration } from '../models';
 
 /** Préfixe localStorage pour éviter les collisions */
 const PREFIX = 'cunicole_';
@@ -106,156 +107,156 @@ export class StorageService {
   //  CRUD REPRODUCTEURS
   // ══════════════════════════════════════════════
 
-  getAllReproducteurs(): any[] {
-    return this.getItems(STORAGE_KEYS.REPRODUCTEURS);
+  getAllReproducteurs(): Reproducteur[] {
+    return this.getItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS);
   }
 
-  addReproducteur(item: any): any {
+  addReproducteur(item: Reproducteur): Reproducteur {
     const entry = { ...item, id: item.id || this.generateId('rep') };
     const all = this.getAllReproducteurs();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.REPRODUCTEURS, all);
+    this.setItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS, all);
     return entry;
   }
 
-  updateReproducteur(updated: any): void {
+  updateReproducteur(updated: Reproducteur): void {
     const all = this.getAllReproducteurs().map(r => r.id === updated.id ? { ...r, ...updated } : r);
-    this.setItems(STORAGE_KEYS.REPRODUCTEURS, all);
+    this.setItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS, all);
   }
 
   deleteReproducteur(id: string): void {
     const all = this.getAllReproducteurs().filter(r => r.id !== id);
-    this.setItems(STORAGE_KEYS.REPRODUCTEURS, all);
+    this.setItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS, all);
   }
 
   // ══════════════════════════════════════════════
   //  CRUD SAILLIES
   // ══════════════════════════════════════════════
 
-  getAllSaillies(): any[] {
-    return this.getItems(STORAGE_KEYS.SAILLIES);
+  getAllSaillies(): Saillie[] {
+    return this.getItems<Saillie>(STORAGE_KEYS.SAILLIES);
   }
 
-  addSaillie(item: any): any {
+  addSaillie(item: Saillie): Saillie {
     const entry = { ...item, id: item.id || this.generateId('sal') };
     const all = this.getAllSaillies();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.SAILLIES, all);
+    this.setItems<Saillie>(STORAGE_KEYS.SAILLIES, all);
     return entry;
   }
 
-  updateSaillie(updated: any): void {
+  updateSaillie(updated: Saillie): void {
     const all = this.getAllSaillies().map(s => s.id === updated.id ? { ...s, ...updated } : s);
-    this.setItems(STORAGE_KEYS.SAILLIES, all);
+    this.setItems<Saillie>(STORAGE_KEYS.SAILLIES, all);
   }
 
   deleteSaillie(id: string): void {
     const all = this.getAllSaillies().filter(s => s.id !== id);
-    this.setItems(STORAGE_KEYS.SAILLIES, all);
+    this.setItems<Saillie>(STORAGE_KEYS.SAILLIES, all);
   }
 
   // ══════════════════════════════════════════════
   //  CRUD MISES BAS
   // ══════════════════════════════════════════════
 
-  getAllMisesBas(): any[] {
-    return this.getItems(STORAGE_KEYS.MISES_BAS);
+  getAllMisesBas(): MiseBas[] {
+    return this.getItems<MiseBas>(STORAGE_KEYS.MISES_BAS);
   }
 
-  addMiseBas(item: any): any {
+  addMiseBas(item: MiseBas): MiseBas {
     const entry = { ...item, id: item.id || this.generateId('mb') };
     const all = this.getAllMisesBas();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.MISES_BAS, all);
+    this.setItems<MiseBas>(STORAGE_KEYS.MISES_BAS, all);
     return entry;
   }
 
-  updateMiseBas(updated: any): void {
+  updateMiseBas(updated: MiseBas): void {
     const all = this.getAllMisesBas().map(m => m.id === updated.id ? { ...m, ...updated } : m);
-    this.setItems(STORAGE_KEYS.MISES_BAS, all);
+    this.setItems<MiseBas>(STORAGE_KEYS.MISES_BAS, all);
   }
 
   deleteMiseBas(id: string): void {
     const all = this.getAllMisesBas().filter(m => m.id !== id);
-    this.setItems(STORAGE_KEYS.MISES_BAS, all);
+    this.setItems<MiseBas>(STORAGE_KEYS.MISES_BAS, all);
   }
 
   // ══════════════════════════════════════════════
   //  CRUD SEVRAGES
   // ══════════════════════════════════════════════
 
-  getAllSevrages(): any[] {
-    return this.getItems(STORAGE_KEYS.SEVRAGES);
+  getAllSevrages(): Sevrage[] {
+    return this.getItems<Sevrage>(STORAGE_KEYS.SEVRAGES);
   }
 
-  addSevrage(item: any): any {
+  addSevrage(item: Sevrage): Sevrage {
     const entry = { ...item, id: item.id || this.generateId('sev') };
     const all = this.getAllSevrages();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.SEVRAGES, all);
+    this.setItems<Sevrage>(STORAGE_KEYS.SEVRAGES, all);
     return entry;
   }
 
-  updateSevrage(updated: any): void {
+  updateSevrage(updated: Sevrage): void {
     const all = this.getAllSevrages().map(s => s.id === updated.id ? { ...s, ...updated } : s);
-    this.setItems(STORAGE_KEYS.SEVRAGES, all);
+    this.setItems<Sevrage>(STORAGE_KEYS.SEVRAGES, all);
   }
 
   deleteSevrage(id: string): void {
     const all = this.getAllSevrages().filter(s => s.id !== id);
-    this.setItems(STORAGE_KEYS.SEVRAGES, all);
+    this.setItems<Sevrage>(STORAGE_KEYS.SEVRAGES, all);
   }
 
   // ══════════════════════════════════════════════
   //  CRUD VENTES
   // ══════════════════════════════════════════════
 
-  getAllVentes(): any[] {
-    return this.getItems(STORAGE_KEYS.VENTES);
+  getAllVentes(): Vente[] {
+    return this.getItems<Vente>(STORAGE_KEYS.VENTES);
   }
 
-  addVente(item: any): any {
+  addVente(item: Vente): Vente {
     const entry = { ...item, id: item.id || this.generateId('ven') };
     const all = this.getAllVentes();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.VENTES, all);
+    this.setItems<Vente>(STORAGE_KEYS.VENTES, all);
     return entry;
   }
 
-  updateVente(updated: any): void {
+  updateVente(updated: Vente): void {
     const all = this.getAllVentes().map(v => v.id === updated.id ? { ...v, ...updated } : v);
-    this.setItems(STORAGE_KEYS.VENTES, all);
+    this.setItems<Vente>(STORAGE_KEYS.VENTES, all);
   }
 
   deleteVente(id: string): void {
     const all = this.getAllVentes().filter(v => v.id !== id);
-    this.setItems(STORAGE_KEYS.VENTES, all);
+    this.setItems<Vente>(STORAGE_KEYS.VENTES, all);
   }
 
   // ══════════════════════════════════════════════
   //  CRUD DÉCÈS
   // ══════════════════════════════════════════════
 
-  getAllDeces(): any[] {
-    return this.getItems(STORAGE_KEYS.DECES);
+  getAllDeces(): Deces[] {
+    return this.getItems<Deces>(STORAGE_KEYS.DECES);
   }
 
-  addDeces(item: any): any {
+  addDeces(item: Deces): Deces {
     const entry = { ...item, id: item.id || this.generateId('dec') };
     const all = this.getAllDeces();
     all.push(entry);
-    this.setItems(STORAGE_KEYS.DECES, all);
+    this.setItems<Deces>(STORAGE_KEYS.DECES, all);
     return entry;
   }
 
-  updateDeces(updated: any): void {
+  updateDeces(updated: Deces): void {
     const all = this.getAllDeces().map(d => d.id === updated.id ? { ...d, ...updated } : d);
-    this.setItems(STORAGE_KEYS.DECES, all);
+    this.setItems<Deces>(STORAGE_KEYS.DECES, all);
   }
 
   deleteDeces(id: string): void {
     const all = this.getAllDeces().filter(d => d.id !== id);
-    this.setItems(STORAGE_KEYS.DECES, all);
+    this.setItems<Deces>(STORAGE_KEYS.DECES, all);
   }
 
   // ══════════════════════════════════════════════
@@ -273,12 +274,12 @@ export class StorageService {
     prixVenteDefaut: 3000,
   };
 
-  getConfiguration(): any {
-    return this.getObject(STORAGE_KEYS.CONFIGURATION, this.DEFAULT_CONFIG);
+  getConfiguration(): Configuration {
+    return this.getObject<Configuration>(STORAGE_KEYS.CONFIGURATION, this.DEFAULT_CONFIG);
   }
 
-  updateConfiguration(config: any): void {
-    this.setObject(STORAGE_KEYS.CONFIGURATION, { ...this.DEFAULT_CONFIG, ...config });
+  updateConfiguration(config: Partial<Configuration>): void {
+    this.setObject<Configuration>(STORAGE_KEYS.CONFIGURATION, { ...this.DEFAULT_CONFIG, ...config });
   }
 
   // ══════════════════════════════════════════════

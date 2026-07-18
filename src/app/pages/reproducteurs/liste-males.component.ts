@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '../../core/services/calculation.service';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CalculationService } from '@core/services';
+import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 

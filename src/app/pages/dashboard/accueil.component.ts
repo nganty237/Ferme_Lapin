@@ -1,12 +1,8 @@
 import { Component, inject, computed, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '../../core/services/calculation.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { MetricCardComponent } from '../../shared/components/metric-card/metric-card.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { AlertCardComponent } from '../../shared/components/alert-card/alert-card.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { CalculationService, NotificationService } from '@core/services';
+import { MetricCardComponent, PageHeaderComponent, AlertCardComponent, EmptyStateComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Chart, registerables } from 'chart.js';

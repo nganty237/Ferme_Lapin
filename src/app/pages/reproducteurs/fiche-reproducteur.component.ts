@@ -3,8 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '../../core/services/calculation.service';
-import { StorageService } from '../../core/services/storage.service';
+import { CalculationService, StorageService } from '@core/services';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 

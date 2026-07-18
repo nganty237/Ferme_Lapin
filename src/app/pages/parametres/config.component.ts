@@ -1,10 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { StorageService } from '../../core/services/storage.service';
-import { CalculationService } from '../../core/services/calculation.service';
-import { NotificationService } from '../../core/services/notification.service';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { StorageService, CalculationService, NotificationService } from '@core/services';
+import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';

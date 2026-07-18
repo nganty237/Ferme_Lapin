@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StorageService } from './storage.service';
+import { Reproducteur, Saillie, MiseBas, Sevrage, Vente, Deces, Configuration } from '../models';
 
 /**
  * Interface des 6 KPIs critiques calculés automatiquement.
@@ -66,13 +67,13 @@ export class CalculationService {
   //  ÉTAT RÉACTIF — BehaviorSubjects
   // ══════════════════════════════════════════════
 
-  private readonly _reproducteurs$ = new BehaviorSubject<any[]>([]);
-  private readonly _saillies$ = new BehaviorSubject<any[]>([]);
-  private readonly _misesBas$ = new BehaviorSubject<any[]>([]);
-  private readonly _sevrages$ = new BehaviorSubject<any[]>([]);
-  private readonly _ventes$ = new BehaviorSubject<any[]>([]);
-  private readonly _deces$ = new BehaviorSubject<any[]>([]);
-  private readonly _config$ = new BehaviorSubject<any>({
+  private readonly _reproducteurs$ = new BehaviorSubject<Reproducteur[]>([]);
+  private readonly _saillies$ = new BehaviorSubject<Saillie[]>([]);
+  private readonly _misesBas$ = new BehaviorSubject<MiseBas[]>([]);
+  private readonly _sevrages$ = new BehaviorSubject<Sevrage[]>([]);
+  private readonly _ventes$ = new BehaviorSubject<Vente[]>([]);
+  private readonly _deces$ = new BehaviorSubject<Deces[]>([]);
+  private readonly _config$ = new BehaviorSubject<Configuration>({
     nombreCagesTotal: 144,
     densiteParCage: 3,
     dureeGestationJours: 31,
@@ -506,31 +507,31 @@ export class CalculationService {
   //  ACCESSEURS SYNCHRONES (snapshot de la valeur courante)
   // ══════════════════════════════════════════════
 
-  get reproducteurs(): any[] {
+  get reproducteurs(): Reproducteur[] {
     return this._reproducteurs$.getValue();
   }
 
-  get saillies(): any[] {
+  get saillies(): Saillie[] {
     return this._saillies$.getValue();
   }
 
-  get misesBas(): any[] {
+  get misesBas(): MiseBas[] {
     return this._misesBas$.getValue();
   }
 
-  get sevrages(): any[] {
+  get sevrages(): Sevrage[] {
     return this._sevrages$.getValue();
   }
 
-  get ventes(): any[] {
+  get ventes(): Vente[] {
     return this._ventes$.getValue();
   }
 
-  get deces(): any[] {
+  get deces(): Deces[] {
     return this._deces$.getValue();
   }
 
-  get config(): any {
+  get config(): Configuration {
     return this._config$.getValue();
   }
 
@@ -542,31 +543,31 @@ export class CalculationService {
   //  MUTATEURS (mise à jour état + persistance)
   // ══════════════════════════════════════════════
 
-  setReproducteurs(data: any[]): void {
+  setReproducteurs(data: Reproducteur[]): void {
     this._reproducteurs$.next(data);
   }
 
-  setSaillies(data: any[]): void {
+  setSaillies(data: Saillie[]): void {
     this._saillies$.next(data);
   }
 
-  setMisesBas(data: any[]): void {
+  setMisesBas(data: MiseBas[]): void {
     this._misesBas$.next(data);
   }
 
-  setSevrages(data: any[]): void {
+  setSevrages(data: Sevrage[]): void {
     this._sevrages$.next(data);
   }
 
-  setVentes(data: any[]): void {
+  setVentes(data: Vente[]): void {
     this._ventes$.next(data);
   }
 
-  setDeces(data: any[]): void {
+  setDeces(data: Deces[]): void {
     this._deces$.next(data);
   }
 
-  setConfig(data: any): void {
+  setConfig(data: Configuration): void {
     this._config$.next(data);
   }
 
@@ -706,7 +707,7 @@ export class CalculationService {
     }
   }
 
-  updateReproducteur(updated: any): void {
+  updateReproducteur(updated: Reproducteur): void {
     this.storageService.updateReproducteur(updated);
     const current = this._reproducteurs$.getValue();
     this._reproducteurs$.next(current.map(r => r.id === updated.id ? { ...r, ...updated } : r));
@@ -718,7 +719,7 @@ export class CalculationService {
     this._reproducteurs$.next(current.filter(r => r.id !== id));
   }
 
-  updateConfiguration(config: any): void {
+  updateConfiguration(config: Partial<Configuration>): void {
     this.storageService.updateConfiguration(config);
     this._config$.next(this.storageService.getConfiguration());
   }

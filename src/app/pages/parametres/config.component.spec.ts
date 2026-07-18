@@ -1,9 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ConfigComponent } from './config.component';
-import { StorageService } from '../../core/services/storage.service';
-import { CalculationService } from '../../core/services/calculation.service';
-import { NotificationService } from '../../core/services/notification.service';
+import { StorageService, CalculationService, NotificationService } from '@core/services';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 describe('ConfigComponent', () => {
