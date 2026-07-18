@@ -68,7 +68,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
               <!-- Femelle -->
               <mat-form-field appearance="outline" floatLabel="always" class="w-full">
                 <mat-label>Femelle</mat-label>
-                <mat-select formControlName="femelle" placeholder="Sélectionner la lapine" [disabled]="!saillieForm.get('bande')?.value">
+                <mat-select formControlName="femelle" placeholder="Sélectionner la lapine">
                   <mat-option *ngFor="let f of filteredFemelles()" [value]="f.id">
                     {{ f.nom }} ({{ f.id }}) — {{ f.etat }}
                   </mat-option>
@@ -146,6 +146,18 @@ import { provideNativeDateAdapter } from '@angular/material/core';
                   <span class="text-sm font-bold text-slate-800">{{ formatDate(previsions()!.vente) }}</span>
                 </div>
               </div>
+
+              <!-- Simulation de capacité réactive -->
+              <div class="p-3 border rounded-xl" [ngClass]="simulationSaillie()?.hasMargin ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'" *ngIf="simulationSaillie()">
+                <span class="text-[11px] uppercase tracking-wider font-bold block" [ngClass]="simulationSaillie()?.hasMargin ? 'text-emerald-700' : 'text-red-700'">Alerte de Capacité Cages</span>
+                <p class="text-xs text-slate-600 mt-1">
+                  Cages engraissement après sevrage : <strong>{{ simulationSaillie()?.futureOccupees }}/{{ simulationSaillie()?.totalEngraissement }}</strong> ({{ simulationSaillie()?.futurePct }}%).
+                </p>
+                <div class="flex items-center gap-1.5 mt-2 text-xs font-bold" [ngClass]="simulationSaillie()?.hasMargin ? 'text-emerald-700' : 'text-red-700'">
+                  <mat-icon style="font-size:16px;width:16px;height:16px;">{{ simulationSaillie()?.hasMargin ? 'check_circle' : 'warning' }}</mat-icon>
+                  <span>{{ simulationSaillie()?.hasMargin ? '✅ Marge disponible (Saillie autorisée)' : '❌ Risque de saturation' }}</span>
+                </div>
+              </div>
             } @else {
               <div class="flex flex-col items-center justify-center text-center p-8 text-slate-400 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
                 <mat-icon style="font-size:32px; width:32px; height:32px; margin-bottom:8px;">date_range</mat-icon>
@@ -174,11 +186,36 @@ export class SaisieSaillieComponent {
   private fb = inject(FormBuilder);
 
   reproducteurs = toSignal(this.calcService.reproducteurs$);
+  kpis = toSignal(this.calcService.kpis$);
+  config = toSignal(this.calcService.config$);
+
+  simulationSaillie = computed(() => {
+    const kpiVal = this.kpis();
+    const configVal = this.config();
+    if (!kpiVal || !configVal) return null;
+
+    const currentOccupees = kpiVal.occupationCages.occupees;
+    const totalEngraissement = configVal.nombreCagesTotal - configVal.nombreCagesReproductrices;
+
+    // Simulation: 1 femelle saillie = 8 lapereaux attendus = 3 cages d'engraissement requises
+    const expectedCages = 3;
+    const futureOccupees = currentOccupees + expectedCages;
+    const futurePct = totalEngraissement > 0 ? Math.round((futureOccupees / totalEngraissement) * 100) : 0;
+    const hasMargin = futurePct <= 95;
+
+    return {
+      expectedCages,
+      futureOccupees,
+      totalEngraissement,
+      futurePct,
+      hasMargin
+    };
+  });
 
   // Formulaire réactif
   saillieForm: FormGroup = this.fb.group({
     bande: ['', [Validators.required]],
-    femelle: ['', [Validators.required, this.femelleValidator.bind(this)]],
+    femelle: [{ value: '', disabled: true }, [Validators.required, this.femelleValidator.bind(this)]],
     male: ['', [Validators.required]],
     date: [new Date(), [Validators.required, this.dateValidator.bind(this)]],
     observations: ['']
@@ -193,9 +230,17 @@ export class SaisieSaillieComponent {
       this.dateSelectionnee.set(val ? new Date(val) : null);
     });
 
-    // Quand la bande change, on vide le choix de la femelle
-    this.saillieForm.get('bande')?.valueChanges.subscribe(() => {
-      this.saillieForm.get('femelle')?.setValue('');
+    // Quand la bande change, on vide le choix de la femelle et gère l'état d'activation
+    this.saillieForm.get('bande')?.valueChanges.subscribe(bande => {
+      const femelleCtrl = this.saillieForm.get('femelle');
+      if (femelleCtrl) {
+        femelleCtrl.setValue('');
+        if (bande) {
+          femelleCtrl.enable();
+        } else {
+          femelleCtrl.disable();
+        }
+      }
     });
   }
 

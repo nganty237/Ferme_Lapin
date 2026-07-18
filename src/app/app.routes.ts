@@ -34,6 +34,27 @@ export const routes: Routes = [
         (m) => m.PrevisionsComponent
       ),
   },
+  {
+    path: 'dashboard/projection',
+    loadComponent: () =>
+      import('./pages/dashboard/projection.component').then(
+        (m) => m.ProjectionComponent
+      ),
+  },
+  {
+    path: 'dashboard/optimisation',
+    loadComponent: () =>
+      import('./pages/dashboard/optimisation.component').then(
+        (m) => m.OptimisationComponent
+      ),
+  },
+  {
+    path: 'dashboard/rentabilite',
+    loadComponent: () =>
+      import('./pages/dashboard/rentabilite.component').then(
+        (m) => m.RentabiliteComponent
+      ),
+  },
 
   // ── Reproducteurs ──
   {
@@ -76,6 +97,27 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/events/saisie-mise-bas.component').then(
         (m) => m.SaisieMiseBasComponent
+      ),
+  },
+  {
+    path: 'sevrages',
+    loadComponent: () =>
+      import('./pages/events/saisie-sevrage.component').then(
+        (m) => m.SaisieSevrageComponent
+      ),
+  },
+  {
+    path: 'ventes',
+    loadComponent: () =>
+      import('./pages/events/saisie-vente.component').then(
+        (m) => m.SaisieVenteComponent
+      ),
+  },
+  {
+    path: 'deces',
+    loadComponent: () =>
+      import('./pages/events/saisie-deces.component').then(
+        (m) => m.SaisieDecesComponent
       ),
   },
 

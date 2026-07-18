@@ -4,4 +4,7 @@ export interface Configuration {
   dureeGestationJours: number;
   dureeAllaitementJours: number;
   dureeEngraissementJours: number;
+  nombreCagesReproductrices: number;
+  prixAlimentKg: number;
+  prixVenteDefaut: number;
 }

@@ -263,12 +263,12 @@ export class StorageService {
   // ══════════════════════════════════════════════
 
   private readonly DEFAULT_CONFIG = {
-    nombreCagesTotal: 144,
+    nombreCagesTotal: 180,
     densiteParCage: 3,
     dureeGestationJours: 31,
     dureeAllaitementJours: 31,
     dureeEngraissementJours: 120,
-    nombreCagesReproductrices: 24,
+    nombreCagesReproductrices: 36,
     prixAlimentKg: 350,
     prixVenteDefaut: 3000,
   };
@@ -393,11 +393,14 @@ export class StorageService {
     this.setItems(STORAGE_KEYS.VENTES, seedVentes);
     this.setItems(STORAGE_KEYS.DECES, seedDeces);
     this.updateConfiguration({
-      nombreCagesTotal: 144,
+      nombreCagesTotal: 180,
       densiteParCage: 3,
       dureeGestationJours: 31,
       dureeAllaitementJours: 31,
-      dureeEngraissementJours: 120
+      dureeEngraissementJours: 120,
+      nombreCagesReproductrices: 36,
+      prixAlimentKg: 350,
+      prixVenteDefaut: 3000,
     });
   }
 }

@@ -7,17 +7,43 @@ import { StorageService } from './storage.service';
  * Interface des 6 KPIs critiques calculés automatiquement.
  */
 export interface KPIs {
-  /** Lapereaux nés / femelle active / mois */
-  productiviteParFemelle: number;
-  /** % de survie pendant l'allaitement (sevrés / nés * 100) */
-  tauxSurvieAllaitement: number;
-  /** Occupation des cages d'engraissement */
+  // --- Groupe 1 : Capacité ---
+  capaciteTheorique: number;
+  capaciteReelle: number;
+  tauxUtilisationCages: number;
   occupationCages: { pourcentage: number; occupees: number; totales: number };
-  /** % de femelles enceintes par rapport aux saillies */
+  prochainesLiberations: { j30: number; j60: number; j90: number };
+  delaiLiberationCagesJours: number;
+  prochaineVenteDate?: string;
+
+  // --- Groupe 2 : Production ---
+  productiviteParFemelleAn: number;
+  tailleMoyennePortee: number;
+  porteesParFemelleAn: number;
+
+  // --- Groupe 3 : Viabilité ---
+  viabiliteImmediate: number;
+  tauxSurvieAllaitement: number;
+  tauxSurvieEngraissement: number;
+
+  // --- Groupe 4 : Performance Mâles ---
+  productiviteParMale: Record<string, number>;
+
+  // --- Groupe 5 : Économiques ---
+  revenuMoyenPortee: number;
+  coutProductionParLapin: number;
+  margeBruteTotale: number;
+  rentabiliteFemelleAn: number;
+
+  // --- Groupe 6 : Optimisation ---
+  goulotPrincipal: 'Cages engraissement' | 'Femelles reproductrices' | 'Mâles' | 'Aucun';
+  cagesSupplementairesPourObjectif: number;
+  roiAjouterCages: { investissement: number; revenuNetMensuel: number; paybackMonths: number; roiAnnuelPourcent: number };
+
+  // --- Héritage ---
+  productiviteParFemelle: number;
   tauxFecondite: number;
-  /** Nombre de portées non encore vendues */
   nombrePorteesEnCours: number;
-  /** Phase actuelle de chaque bande (A, B, C) */
   phasesBandes: { A: string; B: string; C: string };
 }
 
@@ -145,10 +171,154 @@ export class CalculationService {
     ventes: any[],
     config: any
   ): KPIs {
+    const totalSevres = sevrages.reduce((sum: number, s: any) => sum + (s.sevres || 0), 0);
+    const totalVendus = ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
+    const activeEngraissement = Math.max(0, totalSevres - totalVendus);
+
+    const capacityEngraissement = (config.nombreCagesTotal || 180) - (config.nombreCagesReproductrices || 36);
+    const density = config.densiteParCage || 3;
+    const capacityTheorique = capacityEngraissement * density;
+
+    const occupees = Math.ceil(activeEngraissement / density);
+    const pourcentage = capacityEngraissement > 0 ? Math.round((occupees / capacityEngraissement) * 100) : 0;
+    const occupationCages = { pourcentage: Math.min(pourcentage, 100), occupees, totales: capacityEngraissement };
+
+    const capacityReal = activeEngraissement;
+    const utilizationRate = capacityTheorique > 0 ? Math.round((capacityReal / capacityTheorique) * 100) : 0;
+
+    // Helper FIFO function to check if a weaning is fully sold
+    const isWeaningSold = (weaning: any): boolean => {
+      const sortedSevrages = [...sevrages].sort((a, b) => new Date(a.dateSevrage).getTime() - new Date(b.dateSevrage).getTime());
+      const idx = sortedSevrages.findIndex(item => item.id === weaning.id);
+      if (idx === -1) return false;
+      let cumulativeSevres = 0;
+      for (let i = 0; i <= idx; i++) {
+        cumulativeSevres += sortedSevrages[i].sevres || 0;
+      }
+      return totalVendus >= cumulativeSevres;
+    };
+
+    // Prochaines libérations
+    let j30 = 0, j60 = 0, j90 = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let nextSaleDays = 999;
+    let nextSaleDateStr = undefined;
+
+    for (const s of sevrages) {
+      if (!isWeaningSold(s)) {
+        const dateSevrage = new Date(s.dateSevrage);
+        const expectedSaleDate = new Date(dateSevrage);
+        expectedSaleDate.setDate(expectedSaleDate.getDate() + 120);
+        expectedSaleDate.setHours(0, 0, 0, 0);
+
+        const diffTime = expectedSaleDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        const cagesCount = Math.ceil((s.sevres || 0) / density);
+        if (diffDays <= 30) j30 += cagesCount;
+        else if (diffDays <= 60) j60 += cagesCount;
+        else j90 += cagesCount;
+
+        if (diffDays > 0 && diffDays < nextSaleDays) {
+          nextSaleDays = diffDays;
+          nextSaleDateStr = expectedSaleDate.toISOString().slice(0, 10);
+        }
+      }
+    }
+
+    const delayLiberation = nextSaleDays === 999 ? 0 : nextSaleDays;
+
+    // Production KPIs
+    const femellesActives = reproducteurs.filter(
+      (r) => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort'
+    );
+    const nbFemelles = femellesActives.length || 1;
+
+    // Last year nés
+    const oneYearAgo = new Date();
+    oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+    const nbInLastYear = misesBas.filter(mb => new Date(mb.dateMiseBas) >= oneYearAgo)
+      .reduce((sum, mb) => sum + (mb.vivants || 0), 0);
+    const prodFemelleAn = Math.round((nbInLastYear / nbFemelles) * 10) / 10;
+
+    const averageLitter = misesBas.length > 0 ? Math.round((misesBas.reduce((sum, mb) => sum + (mb.vivants || 0), 0) / misesBas.length) * 10) / 10 : 0;
+    const littersPerFemelleAn = misesBas.length > 0 ? Math.round((misesBas.length / nbFemelles) * 10) / 10 : 0;
+
+    // Viabilité
+    const totalBorn = misesBas.reduce((sum, mb) => sum + (mb.nes || 0), 0);
+    const totalLiveBorn = misesBas.reduce((sum, mb) => sum + (mb.vivants || 0), 0);
+    const viabImmediate = totalBorn > 0 ? Math.round((totalLiveBorn / totalBorn) * 100) : 0;
+
+    const survieAllaitement = totalLiveBorn > 0 ? Math.round((totalSevres / totalLiveBorn) * 100) : 0;
+    const survieEngraissement = totalSevres > 0 ? Math.round((totalVendus / totalSevres) * 100) : 0;
+
+    // Performance Mâles
+    const productiviteParMale: Record<string, number> = {};
+    for (const m of reproducteurs.filter(r => r.sexe === 'M')) {
+      const maleSaillies = saillies.filter(s => s.maleId === m.id);
+      const maleSailliesIds = maleSaillies.map(s => s.id);
+      const maleMisesBas = misesBas.filter(mb => maleSailliesIds.includes(mb.saillieId));
+      const totalMaleVivants = maleMisesBas.reduce((sum, mb) => sum + (mb.vivants || 0), 0);
+      productiviteParMale[m.id] = maleSaillies.length > 0 ? Math.round((totalMaleVivants / maleSaillies.length) * 10) / 10 : 0;
+    }
+
+    // Economique
+    const totalRevenue = ventes.reduce((sum: number, v: any) => sum + (v.prixTotal || 0), 0);
+    const averageRevenuePortee = sevrages.length > 0 ? Math.round(totalRevenue / sevrages.length) : 0;
+
+    const coutAlimentParLapin = (config.prixAlimentKg || 350) * 5; // e.g. 5kg per rabbit
+    const coutProductionParLapin = coutAlimentParLapin + 500; // feed + cage/infra cost
+    const totalProdCosts = totalVendus * coutProductionParLapin;
+    const totalMargin = Math.max(0, totalRevenue - totalProdCosts);
+    const marginPerFemelleAn = Math.round(totalMargin / nbFemelles);
+
+    // Goulot & ROI
+    const capacityFemales = nbFemelles * 8; // 8 nés par femelle par mois
+    const capacityCages = capacityEngraissement * density;
+    const goulotPrincipal = capacityFemales < capacityCages ? 'Femelles reproductrices' : 'Cages engraissement';
+
+    // objective 600
+    const cagesSupplementairesPourObjectif = Math.max(0, 800 - capacityEngraissement);
+
+    // ROI 50 cages
+    const marginPerRabbit = (config.prixVenteDefaut || 3000) - coutProductionParLapin;
+    const addRabbitsSalesPerMonth = (50 * 3) / 4; // 150 rabbits capacity / 4 months cycle = 37.5 sold per month
+    const netMonthlyROI = Math.round(addRabbitsSalesPerMonth * marginPerRabbit);
+    const paybackMonths = netMonthlyROI > 0 ? Math.round((2000000 / netMonthlyROI) * 10) / 10 : 0;
+    const roiAnnuelPourcent = netMonthlyROI > 0 ? Math.round(((netMonthlyROI * 12) / 2000000) * 100) : 0;
+
     return {
+      capaciteTheorique: capacityTheorique,
+      capaciteReelle: capacityReal,
+      tauxUtilisationCages: utilizationRate,
+      occupationCages,
+      prochainesLiberations: { j30, j60, j90 },
+      delaiLiberationCagesJours: delayLiberation,
+      prochaineVenteDate: nextSaleDateStr,
+
+      productiviteParFemelleAn: prodFemelleAn,
+      tailleMoyennePortee: averageLitter,
+      porteesParFemelleAn: littersPerFemelleAn,
+
+      viabiliteImmediate: viabImmediate,
+      tauxSurvieAllaitement: survieAllaitement,
+      tauxSurvieEngraissement: survieEngraissement,
+
+      productiviteParMale,
+
+      revenuMoyenPortee: averageRevenuePortee,
+      coutProductionParLapin,
+      margeBruteTotale: totalMargin,
+      rentabiliteFemelleAn: marginPerFemelleAn,
+
+      goulotPrincipal,
+      cagesSupplementairesPourObjectif,
+      roiAjouterCages: { investissement: 2000000, revenuNetMensuel: netMonthlyROI, paybackMonths, roiAnnuelPourcent },
+
+      // Héritage
       productiviteParFemelle: this.calcProductiviteParFemelle(reproducteurs, misesBas),
-      tauxSurvieAllaitement: this.calcTauxSurvieAllaitement(misesBas, sevrages),
-      occupationCages: this.calcOccupationCages(sevrages, ventes, config),
       tauxFecondite: this.calcTauxFecondite(saillies, misesBas),
       nombrePorteesEnCours: this.countPorteesEnCours(sevrages, ventes),
       phasesBandes: this.calcPhasesBandes(saillies, misesBas, sevrages),
@@ -464,6 +634,76 @@ export class CalculationService {
       return r;
     });
     this._reproducteurs$.next(updatedRepros);
+  }
+
+  addSevrage(sevrage: any): void {
+    const sevres = Number(sevrage.sevres);
+    const density = this.config.densiteParCage || 3;
+    const cagesOccupees = Math.ceil(sevres / density);
+
+    const newSevrage = this.storageService.addSevrage({
+      ...sevrage,
+      sevres,
+      cagesOccupees
+    });
+
+    const currentSevrages = this._sevrages$.getValue();
+    this._sevrages$.next([...currentSevrages, newSevrage]);
+
+    // Mettre à jour l'état de la femelle liée en "Au repos"
+    const mb = this.misesBas.find((m: any) => m.id === sevrage.miseBasId);
+    if (mb) {
+      const currentRepros = this._reproducteurs$.getValue();
+      const updatedRepros = currentRepros.map((r) => {
+        if (r.id === mb.femelleId) {
+          const updated = { ...r, etat: 'Au repos' as const };
+          this.storageService.updateReproducteur(updated);
+          return updated;
+        }
+        return r;
+      });
+      this._reproducteurs$.next(updatedRepros);
+    }
+  }
+
+  addVente(vente: any): void {
+    const vendus = Number(vente.vendus);
+    const prixKg = Number(vente.prixKg || 0);
+    const prixTotal = Number(vente.prixTotal || 0);
+
+    const newVente = this.storageService.addVente({
+      ...vente,
+      vendus,
+      prixKg,
+      prixTotal
+    });
+
+    const currentVentes = this._ventes$.getValue();
+    this._ventes$.next([...currentVentes, newVente]);
+  }
+
+  addDeces(deces: any): void {
+    const newDeces = this.storageService.addDeces({
+      ...deces,
+      dateDeces: deces.dateDeces ? new Date(deces.dateDeces) : new Date()
+    });
+
+    const currentDeces = this._deces$.getValue();
+    this._deces$.next([...currentDeces, newDeces]);
+
+    // Si le décès concerne un reproducteur, on met à jour son état à "Mort"
+    if (deces.reproducteurId) {
+      const currentRepros = this._reproducteurs$.getValue();
+      const updatedRepros = currentRepros.map((r) => {
+        if (r.id === deces.reproducteurId) {
+          const updated = { ...r, etat: 'Mort' as const };
+          this.storageService.updateReproducteur(updated);
+          return updated;
+        }
+        return r;
+      });
+      this._reproducteurs$.next(updatedRepros);
+    }
   }
 
   updateReproducteur(updated: any): void {

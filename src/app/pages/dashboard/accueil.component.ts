@@ -47,8 +47,8 @@ Chart.register(...registerables);
 
         <app-metric-card
           label="Productivité / femelle"
-          [value]="kpis()!.productiviteParFemelle + ' / mois'"
-          hint="Lapereaux nés par femelle active"
+          [value]="kpis()!.productiviteParFemelleAn + ' / an'"
+          hint="Lapereaux nés par femelle active par an"
           icon="trending_up"
           iconBg="var(--color-primary-alpha)" iconColor="var(--color-primary)">
         </app-metric-card>
@@ -70,16 +70,16 @@ Chart.register(...registerables);
         </app-metric-card>
 
         <app-metric-card
-          label="Portées en cours"
-          [value]="kpis()!.nombrePorteesEnCours.toString()"
-          hint="Portées en engraissement"
-          icon="pets"
+          label="Marge Brute"
+          [value]="(kpis()!.margeBruteTotale | number:'1.0-0') + ' F'"
+          hint="Revenus - coûts de production"
+          icon="attach_money"
           iconBg="var(--color-info-bg)" iconColor="var(--color-info)">
         </app-metric-card>
       </div>
 
-      <!-- Alerts + Charts -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Alerts + Charts (Maintenant affichés en premier) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Alerts -->
         <div>
           <div class="section-title">
@@ -131,6 +131,81 @@ Chart.register(...registerables);
           </div>
         </div>
       </div>
+
+      <!-- Section Cages & Décision (Maintenant affichée après les graphiques) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" *ngIf="kpis() && config()">
+        <!-- Cages Reproductrices et Engraissement -->
+        <div class="panel lg:col-span-2">
+          <p class="panel__title">
+            <mat-icon>grid_view</mat-icon> État Cages (Temps Réel)
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <!-- Repro -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages Reproductrices</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-slate-800">{{ config()!.nombreCagesReproductrices }}</span>
+                <span class="text-slate-500">cages réservées (100% occupées)</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-2">
+                Chaque femelle reproductrice occupe une cage individuelle pour la mise-bas et l'allaitement.
+              </p>
+            </div>
+            <!-- Engraissement -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages d'engraissement</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-slate-800">{{ kpis()!.occupationCages.occupees }} / {{ kpis()!.occupationCages.totales }}</span>
+                <span class="text-slate-500">cages occupées ({{ kpis()!.occupationCages.pourcentage }}%)</span>
+              </div>
+              <!-- Prochaines libérations -->
+              <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-200 text-center text-xs">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J0-30</span>
+                  <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j30 }} cages</strong>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J30-60</span>
+                  <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j60 }} cages</strong>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J60+</span>
+                  <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j90 }} cages</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Décision & Alertes de Capacité -->
+        <div class="panel" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'border-red-100 bg-red-50/10' : 'border-emerald-100 bg-emerald-50/10'">
+          <p class="panel__title" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'text-red-800' : 'text-emerald-800'">
+            <mat-icon>{{ kpis()!.occupationCages.pourcentage > 80 ? 'warning' : 'assistant' }}</mat-icon> Aide à la Décision
+          </p>
+          <div class="mt-4 flex flex-col gap-4">
+            <div>
+              <span class="text-[11px] uppercase tracking-wider text-slate-500 block">Prochaine libération de cages</span>
+              <strong class="text-sm text-slate-800" *ngIf="kpis()!.prochaineVenteDate; else noVente">
+                Dans {{ kpis()!.delaiLiberationCagesJours }} jours (le {{ kpis()!.prochaineVenteDate | date:'dd/MM/yyyy' }})
+              </strong>
+              <ng-template #noVente>
+                <strong class="text-sm text-slate-800 text-slate-500">Aucune vente planifiée à court terme.</strong>
+              </ng-template>
+            </div>
+            
+            <div class="p-3.5 rounded-xl border text-xs leading-normal" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'">
+              <span class="font-bold block mb-1">Recommandation :</span>
+              <span>
+                @if (kpis()!.occupationCages.pourcentage > 80) {
+                  ⚠️ Engraissement saturé à {{ kpis()!.occupationCages.pourcentage }}%. <strong>Ne planifiez pas de nouvelles saillies</strong> pour éviter de manquer de cages au sevrage.
+                } @else {
+                  ✅ Espace suffisant. <strong>Vous pouvez saillir les femelles de la prochaine bande</strong> (cages disponibles : {{ kpis()!.occupationCages.totales - kpis()!.occupationCages.occupees }}).
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`:host { display: block; }`]
@@ -146,6 +221,7 @@ export class AccueilComponent implements AfterViewInit {
   private barChart?: Chart;
 
   kpis = toSignal(this.calcService.kpis$);
+  config = toSignal(this.calcService.config$);
   notifications = toSignal(this.notifService.notifications$);
 
   ngAfterViewInit(): void {
@@ -177,6 +253,22 @@ export class AccueilComponent implements AfterViewInit {
       }
     });
 
+    // Gradients pour les courbes
+    const ctxLine = this.lineChartCanvas.nativeElement.getContext('2d');
+    let infoGradient: any = infoAlpha;
+    let primaryGradient: any = primaryAlpha;
+    if (ctxLine) {
+      const g1 = ctxLine.createLinearGradient(0, 0, 0, 200);
+      g1.addColorStop(0, 'rgba(59, 130, 246, 0.18)');
+      g1.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      infoGradient = g1;
+
+      const g2 = ctxLine.createLinearGradient(0, 0, 0, 200);
+      g2.addColorStop(0, 'rgba(21, 128, 61, 0.18)');
+      g2.addColorStop(1, 'rgba(21, 128, 61, 0)');
+      primaryGradient = g2;
+    }
+
     this.lineChart = new Chart(this.lineChartCanvas.nativeElement, {
       type: 'line',
       data: {
@@ -186,21 +278,25 @@ export class AccueilComponent implements AfterViewInit {
             label: 'Nés vivants',
             data: misesBas.slice(-6).map(mb => mb.vivants || 0),
             borderColor: infoColor,
-            backgroundColor: infoAlpha,
+            backgroundColor: infoGradient,
             fill: true,
-            tension: 0.35,
-            borderWidth: 2,
-            pointRadius: 3
+            tension: 0.4, // Courbes plus fluides et douces
+            borderWidth: 2.5,
+            pointRadius: 2,
+            pointHoverRadius: 6,
+            pointBackgroundColor: infoColor
           },
           {
             label: 'Sevrés',
             data: sevrages.slice(-6).map(s => s.sevres || 0),
             borderColor: primaryColor,
-            backgroundColor: primaryAlpha,
+            backgroundColor: primaryGradient,
             fill: true,
-            tension: 0.35,
-            borderWidth: 2,
-            pointRadius: 3
+            tension: 0.4, // Courbes plus fluides et douces
+            borderWidth: 2.5,
+            pointRadius: 2,
+            pointHoverRadius: 6,
+            pointBackgroundColor: primaryColor
           }
         ]
       },
@@ -212,23 +308,54 @@ export class AccueilComponent implements AfterViewInit {
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-          y: { beginAtZero: true, grid: { color: borderColor }, ticks: { font: { size: 10 } } }
+          y: { 
+            beginAtZero: true, 
+            grid: { color: borderColor, borderDash: [5, 5] } as any, // Lignes de repère en pointillés
+            ticks: { font: { size: 10 } } 
+          }
         }
       }
     });
 
-    // Agrégation des ventes pour le graphique en barres
-    const clients = Array.from(new Set(ventes.map(v => v.client || 'Marché Local')));
+    // Agrégation chronologique des ventes par mois
+    const ventesTriees = [...ventes].sort((a, b) => new Date(a.dateVente).getTime() - new Date(b.dateVente).getTime());
+    const ventesParMois: Record<string, number> = {};
+    for (const v of ventesTriees) {
+      if (v.dateVente) {
+        try {
+          const dateVal = new Date(v.dateVente);
+          const monthStr = dateVal.toLocaleDateString('fr-FR', { month: 'short' });
+          const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
+          ventesParMois[capitalizedMonth] = (ventesParMois[capitalizedMonth] || 0) + (v.vendus || 0);
+        } catch {
+          // fallback
+        }
+      }
+    }
+    const moisLabels = Object.keys(ventesParMois);
+    const ventesData = Object.values(ventesParMois);
+
+    // Gradient vertical pour les barres de ventes
+    const ctxBar = this.barChartCanvas.nativeElement.getContext('2d');
+    let barGradient: any = primaryColor;
+    if (ctxBar) {
+      const g = ctxBar.createLinearGradient(0, 0, 0, 200);
+      g.addColorStop(0, '#22c55e'); // Vert clair au sommet
+      g.addColorStop(1, '#166534'); // Vert forêt à la base
+      barGradient = g;
+    }
+
     this.barChart = new Chart(this.barChartCanvas.nativeElement, {
       type: 'bar',
       data: {
-        labels: clients,
+        labels: moisLabels.length > 0 ? moisLabels : ['Aucune vente'],
         datasets: [
           {
             label: 'Lapins vendus',
-            data: clients.map(c => ventes.filter(v => (v.client || 'Marché Local') === c).reduce((sum, v) => sum + (v.vendus || 0), 0)),
-            backgroundColor: primaryColor,
-            borderRadius: 4
+            data: ventesData.length > 0 ? ventesData : [0],
+            backgroundColor: barGradient,
+            borderRadius: 6,
+            maxBarThickness: 28 // Barres moins imposantes, plus pro
           }
         ]
       },
@@ -240,7 +367,11 @@ export class AccueilComponent implements AfterViewInit {
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-          y: { beginAtZero: true, grid: { color: borderColor }, ticks: { font: { size: 10 } } }
+          y: { 
+            beginAtZero: true, 
+            grid: { color: borderColor, borderDash: [5, 5] } as any, 
+            ticks: { font: { size: 10 } } 
+          }
         }
       }
     });

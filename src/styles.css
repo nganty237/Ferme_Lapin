@@ -67,7 +67,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .mat-mdc-button.mat-primary, 
 .mat-mdc-unelevated-button.mat-primary,
-.mat-mdc-raised-button.mat-primary {
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-flat-button.mat-primary {
   background-color: var(--color-primary) !important;
   color: var(--color-primary-contrast) !important;
 }
@@ -97,8 +98,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-brand {
-  padding: 24px 20px;
+  height: 64px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
 }
 .sidebar-brand h1 {
   font-size: 17px;
@@ -465,6 +471,30 @@ input[type="number"].mat-mdc-input-element {
 .mat-mdc-form-field-hint { color: var(--color-text-muted) !important; font-size: 12px !important; font-weight: 500; }
 
 /* --- Button Polish --- */
+button,
+[role="button"],
+.btn,
+.nav-link,
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-flat-button {
+  cursor: pointer !important;
+}
+
+button:disabled,
+button[disabled],
+.btn:disabled,
+.mat-mdc-button:disabled,
+.mat-mdc-unelevated-button:disabled,
+.mat-mdc-raised-button:disabled,
+.mat-mdc-outlined-button:disabled,
+.mat-mdc-flat-button:disabled,
+[disabled] {
+  cursor: not-allowed !important;
+}
+
 .mat-mdc-button, .mat-mdc-unelevated-button, .mat-mdc-raised-button, .mat-mdc-outlined-button { letter-spacing: 0.02em !important; font-weight: 500 !important; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
 .mat-mdc-outlined-button:hover { background-color: var(--color-surface-hover) !important; border-color: var(--color-primary-light) !important; }
 .mat-mdc-flat-button.mat-warn, .mat-mdc-unelevated-button.mat-warn { background-color: #fee2e2 !important; color: #dc2626 !important; font-weight: 600 !important; box-shadow: none !important; }

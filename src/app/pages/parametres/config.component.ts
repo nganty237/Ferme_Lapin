@@ -90,10 +90,15 @@ import { MatIconModule } from '@angular/material/icon';
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-full mt-4" [disabled]="configForm.invalid">
-                <mat-icon style="font-size:18px;width:18px;height:18px;">save</mat-icon>
-                Enregistrer les paramètres
-              </button>
+              <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                <button type="button" class="btn btn-outline justify-center" (click)="resetForm()" style="height: 42px;">
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary justify-center flex-1" [disabled]="configForm.invalid" style="height: 42px;">
+                  <mat-icon style="font-size:18px;width:18px;height:18px;">save</mat-icon>
+                  Enregistrer les paramètres
+                </button>
+              </div>
             </form>
           </div>
 
@@ -388,6 +393,18 @@ export class ConfigComponent implements OnInit {
     } else {
       this.notifier.error('Veuillez corriger les erreurs du formulaire.');
     }
+  }
+
+  resetForm(): void {
+    const config = this.storageService.getConfiguration();
+    this.configForm.reset({
+      nombreCagesTotal: config.nombreCagesTotal || 144,
+      nombreCagesReproductrices: config.nombreCagesReproductrices || 24,
+      densiteParCage: config.densiteParCage || 3,
+      prixAlimentKg: config.prixAlimentKg || 350,
+      prixVenteDefaut: config.prixVenteDefaut || 3000
+    });
+    this.notifier.info('Modifications annulées.');
   }
 
   exportData(): void {

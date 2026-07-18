@@ -16,6 +16,7 @@ interface FemelleRow {
   portees: number;
   tailleMoyenne: number;
   survie: number;
+  cages: number;
   etat: string;
 }
 
@@ -84,13 +85,16 @@ interface FemelleRow {
                 <th class="cursor-pointer select-none" (click)="sortBy('survie')">
                   Survie % <mat-icon *ngIf="sortCol === 'survie'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
+                <th class="cursor-pointer select-none" (click)="sortBy('cages')">
+                  Cages occupées <mat-icon *ngIf="sortCol === 'cages'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                </th>
                 <th>État</th>
               </tr>
             </thead>
             <tbody>
               @if (filteredFemelles().length === 0) {
                 <tr>
-                  <td colspan="7" class="text-center py-8 text-slate-400">Aucune femelle trouvée avec ces filtres.</td>
+                  <td colspan="8" class="text-center py-8 text-slate-400">Aucune femelle trouvée avec ces filtres.</td>
                 </tr>
               } @else {
                 <tr *ngFor="let f of filteredFemelles()" class="cursor-pointer hover:bg-slate-50 transition-colors" (click)="goToDetail(f.id)">
@@ -102,6 +106,7 @@ interface FemelleRow {
                   <td class="text-center">
                     <span class="badge" [ngClass]="f.survie >= 90 ? 'badge--success' : f.survie >= 75 ? 'badge--warning' : 'badge--danger'">{{ f.survie }}%</span>
                   </td>
+                  <td class="text-center font-mono font-semibold">{{ f.cages }}</td>
                   <td>
                     <span class="badge" [ngClass]="getEtatClass(f.etat)">{{ f.etat }}</span>
                   </td>
@@ -171,9 +176,31 @@ export class ListeFemellesComponent {
 
       // Survie : sevrés / nés vivants
       let totalSevres = 0;
+      let cages = 0;
+      const config = this.calcService.config;
+      const density = config.densiteParCage || 3;
+      const totalVendus = this.calcService.ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
+
+      // FIFO check helper for this specific list
+      const isWeaningSold = (weaning: any): boolean => {
+        const sortedSevrages = [...sevList].sort((a, b) => new Date(a.dateSevrage).getTime() - new Date(b.dateSevrage).getTime());
+        const idx = sortedSevrages.findIndex(item => item.id === weaning.id);
+        if (idx === -1) return false;
+        let cumulativeSevres = 0;
+        for (let i = 0; i <= idx; i++) {
+          cumulativeSevres += sortedSevrages[i].sevres || 0;
+        }
+        return totalVendus >= cumulativeSevres;
+      };
+
       for (const mb of femellesMb) {
         const sev = sevList.find((s: any) => s.miseBasId === mb.id);
-        if (sev) totalSevres += sev.sevres || 0;
+        if (sev) {
+          totalSevres += sev.sevres || 0;
+          if (!isWeaningSold(sev)) {
+            cages += Math.ceil((sev.sevres || 0) / density);
+          }
+        }
       }
       const survie = totalVivants > 0 ? Math.round((totalSevres / totalVivants) * 100) : 0;
 
@@ -184,6 +211,7 @@ export class ListeFemellesComponent {
         portees,
         tailleMoyenne,
         survie,
+        cages,
         etat: f.etat || 'Actif'
       };
     });

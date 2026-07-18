@@ -177,13 +177,7 @@ export class SaisieMiseBasComponent {
   misesBas = toSignal(this.calcService.misesBas$);
 
   // Formulaire réactif
-  miseBasForm: FormGroup = this.fb.group({
-    femelle: ['', [Validators.required]],
-    date: [new Date(), [Validators.required, this.dateMiseBasValidator.bind(this)]],
-    nes: [8, [Validators.required, Validators.min(1)]],
-    vivants: [8, [Validators.required, Validators.min(1), this.vivantsValidator.bind(this)]],
-    observations: ['']
-  });
+  miseBasForm!: FormGroup;
 
   // Signaux pour suivre les inputs et recalculer réactivement
   private dateSelectionnee = signal<Date | null>(new Date());
@@ -191,6 +185,14 @@ export class SaisieMiseBasComponent {
   private vivantsSelectionne = signal<number>(8);
 
   constructor() {
+    this.miseBasForm = this.fb.group({
+      femelle: ['', [Validators.required]],
+      date: [new Date(), [Validators.required, this.dateMiseBasValidator.bind(this)]],
+      nes: [8, [Validators.required, Validators.min(1)]],
+      vivants: [8, [Validators.required, Validators.min(1), this.vivantsValidator.bind(this)]],
+      observations: ['']
+    });
+
     // Écouter les changements pour les calculs auto
     this.saillieFormChanges();
   }
@@ -221,6 +223,7 @@ export class SaisieMiseBasComponent {
   activeSaillie = computed(() => {
     const list = this.saillies() || [];
     const mbList = this.misesBas() || [];
+    if (!this.miseBasForm) return null;
     const selectedFemelle = this.miseBasForm.get('femelle')?.value;
     if (!selectedFemelle) return null;
 
@@ -266,6 +269,7 @@ export class SaisieMiseBasComponent {
       return { futureDate: true };
     }
 
+    if (!this.miseBasForm) return null;
     const saillie = this.activeSaillie();
     if (saillie) {
       const saillieDate = new Date(saillie.dateSaillie);
@@ -278,7 +282,8 @@ export class SaisieMiseBasComponent {
 
   private vivantsValidator(control: FormControl) {
     const vivants = Number(control.value);
-    const nes = Number(this.miseBasForm?.get('nes')?.value);
+    if (!this.miseBasForm) return null;
+    const nes = Number(this.miseBasForm.get('nes')?.value);
     if (vivants > nes) {
       return { tooManyVivants: true };
     }
@@ -336,6 +341,9 @@ export class SaisieMiseBasComponent {
   }
 
   onReset(): void {
+    // La réinitialisation du formulaire réactif déclenche automatiquement les abonnements
+    // de type valueChanges configurés dans le constructeur (saillieFormChanges).
+    // Cela réinitialise correctement les signaux réactifs de calculs (dateSelectionnee, nesSelectionne, vivantsSelectionne).
     this.miseBasForm.reset({
       femelle: '',
       date: new Date(),

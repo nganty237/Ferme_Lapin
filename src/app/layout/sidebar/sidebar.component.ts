@@ -11,8 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
   template: `
     <div class="sidebar-inner" [class.collapsed]="collapsed">
       <!-- Brand -->
-      <div class="sidebar-brand" [style.padding]="collapsed ? '24px 12px' : '24px 20px'" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <div class="flex items-center" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
+      <div class="sidebar-brand" [style.padding]="collapsed ? '0 12px' : '0 20px'" style="height: 64px; box-sizing: border-box; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); width: 100%; flex-shrink: 0;">
+        <div class="flex items-center w-full" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
           <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
             <mat-icon style="color:var(--color-primary-contrast);font-size:20px;width:20px;height:20px;">pets</mat-icon>
           </div>
@@ -44,6 +44,18 @@ import { MatButtonModule } from '@angular/material/button';
           <mat-icon>event_note</mat-icon>
           @if (!collapsed) { <span>Prévisions</span> }
         </a>
+        <a routerLink="/dashboard/projection" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>timeline</mat-icon>
+          @if (!collapsed) { <span>Projection 3 mois</span> }
+        </a>
+        <a routerLink="/dashboard/optimisation" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>trending_up</mat-icon>
+          @if (!collapsed) { <span>Goulots & ROI</span> }
+        </a>
+        <a routerLink="/dashboard/rentabilite" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>attach_money</mat-icon>
+          @if (!collapsed) { <span>Rentabilité</span> }
+        </a>
 
         <!-- Section: Élevage -->
         @if (!collapsed) {
@@ -73,6 +85,18 @@ import { MatButtonModule } from '@angular/material/button';
         <a routerLink="/mises-bas" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
           <mat-icon>child_friendly</mat-icon>
           @if (!collapsed) { <span>Mises-bas</span> }
+        </a>
+        <a routerLink="/sevrages" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>no_food</mat-icon>
+          @if (!collapsed) { <span>Sevrages</span> }
+        </a>
+        <a routerLink="/ventes" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>point_of_sale</mat-icon>
+          @if (!collapsed) { <span>Ventes</span> }
+        </a>
+        <a routerLink="/deces" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
+          <mat-icon>report</mat-icon>
+          @if (!collapsed) { <span>Décès</span> }
         </a>
 
         <!-- Section: Système -->

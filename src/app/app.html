@@ -9,29 +9,35 @@
     <!-- Modern, Professional Header -->
     <header class="flex justify-between items-center px-6 h-16 sticky top-0 z-10 transition-all duration-300" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
       
-      <!-- Minimalist Title -->
-      <div class="flex items-center gap-4">
-        <span style="color: var(--color-text-main); font-size: 16px; font-weight: 600; letter-spacing: -0.01em;">
-          Espace de Gestion
+      <!-- Coherent, Professional Title -->
+      <div class="flex items-center gap-2">
+        <span style="color: var(--color-text-main); font-size: 16px; font-weight: 700; letter-spacing: -0.02em; font-family: 'Inter', sans-serif;">
+          CuniGest
         </span>
+        <!-- Brand Theme Colors -->
+        <div class="flex items-center gap-1 ml-1">
+          <span class="h-2 w-2 rounded-full" style="background-color: #15803d;" title="Vert Émeraude - Élevage et Nature"></span>
+          <span class="h-2 w-2 rounded-full" style="background-color: #475569;" title="Gris Ardoise - Structure et Professionnalisme"></span>
+          <span class="h-2 w-2 rounded-full" style="background-color: #d97706;" title="Ambre Chaleureux - Énergie et Alimentation"></span>
+        </div>
       </div>
 
       <!-- Actions & Profile -->
-      <div class="flex items-center gap-5">
-        <!-- Status Indicator (Professional, pulsing) -->
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="background: var(--color-success-bg); border: 1px solid rgba(22, 163, 74, 0.2);">
-          <div class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background: var(--color-success);"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2" style="background: var(--color-success);"></span>
-          </div>
-          <span style="font-size: 11px; font-weight: 600; color: var(--color-success); text-transform: uppercase; letter-spacing: 0.05em;">
-            En ligne
-          </span>
-        </div>
+      <div class="flex items-center gap-3">
+        <!-- Notification Button -->
+        <button mat-icon-button class="text-slate-400 hover:text-slate-600 transition-colors relative" style="width: 40px; height: 40px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+          <mat-icon style="font-size: 22px; width: 22px; height: 22px; color: var(--color-text-muted);">notifications</mat-icon>
+          <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
 
-        <!-- Profile / Notifications -->
-        <div class="flex items-center gap-4 border-l pl-5" style="border-color: var(--color-border);">
-          <div class="h-9 w-9 rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-shadow" style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark)); color: white; font-weight: 600; font-size: 14px;">
+        <!-- Settings Quick Link -->
+        <a routerLink="/parametres" class="text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center" style="width: 40px; height: 40px; border-radius: 50%; color: var(--color-text-muted); text-decoration: none; cursor: pointer;">
+          <mat-icon style="font-size: 22px; width: 22px; height: 22px;">settings</mat-icon>
+        </a>
+
+        <!-- Profile Avatar -->
+        <div class="flex items-center border-l pl-3" style="border-color: var(--color-border);">
+          <div class="h-8 w-8 rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-shadow" style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark)); color: white; font-weight: 600; font-size: 13px;">
             A
           </div>
         </div>
