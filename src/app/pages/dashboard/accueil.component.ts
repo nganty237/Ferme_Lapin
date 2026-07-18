@@ -1,8 +1,8 @@
 import { Component, inject, computed, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FarmService } from '../../core/services/farm.service';
-import { KpiService } from '../../core/services/kpi.service';
-import { AlertEngineService } from '../../core/services/alert-engine.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CalculationService } from '../../core/services/calculation.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { MetricCardComponent } from '../../shared/components/metric-card/metric-card.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { AlertCardComponent } from '../../shared/components/alert-card/alert-card.component';
@@ -14,7 +14,7 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-accueil-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -31,54 +31,50 @@ Chart.register(...registerables);
       <div class="flex justify-between items-start">
         <app-page-header
           title="Tableau de bord"
-          subtitle="Vue d'ensemble de la performance de l'elevage">
+          subtitle="Vue d'ensemble de la performance de l'élevage">
         </app-page-header>
-        <button mat-stroked-button (click)="resetDemoData()" style="font-size:13px; color:var(--color-text-muted);">
-          <mat-icon style="font-size:16px;width:16px;height:16px;margin-right:4px;">refresh</mat-icon>
-          Reinitialiser
-        </button>
       </div>
 
       <!-- KPIs -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8" *ngIf="kpis()">
         <app-metric-card
-          label="Taux de fertilite"
-          [value]="fertilityRate() + '%'"
-          hint="Objectif: superieur a 80%"
-          icon="monitor_heart"
+          label="Taux de fécondité"
+          [value]="kpis()!.tauxFecondite + '%'"
+          hint="Objectif: supérieur à 80%"
+          icon="favorite"
           iconBg="var(--color-primary-alpha)" iconColor="var(--color-primary)">
         </app-metric-card>
 
         <app-metric-card
-          label="Prolificite"
-          [value]="prolificacy() + ' nes/portee'"
-          hint="Lapereaux nes vivants par mise bas"
-          icon="groups"
-          iconBg="var(--color-info-bg)" iconColor="var(--color-info)">
+          label="Productivité / femelle"
+          [value]="kpis()!.productiviteParFemelle + ' / mois'"
+          hint="Lapereaux nés par femelle active"
+          icon="trending_up"
+          iconBg="var(--color-primary-alpha)" iconColor="var(--color-primary)">
         </app-metric-card>
 
         <app-metric-card
-          label="Mortalite pre-sevrage"
-          [value]="mortalityRate() + '%'"
+          label="Survie allaitement"
+          [value]="kpis()!.tauxSurvieAllaitement + '%'"
           hint="Pertes entre naissance et sevrage"
-          icon="trending_down"
+          icon="child_friendly"
+          iconBg="var(--color-success-bg)" iconColor="var(--color-success)">
+        </app-metric-card>
+
+        <app-metric-card
+          label="Occupation cages"
+          [value]="kpis()!.occupationCages.pourcentage + '%'"
+          hint="Cages d'engraissement occupées"
+          icon="grid_view"
           iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)">
         </app-metric-card>
 
         <app-metric-card
-          label="GMQ moyen"
-          [value]="avgDailyGain() + ' g/j'"
-          hint="Gain moyen quotidien en engraissement"
-          icon="speed"
-          iconBg="#faf5ff" iconColor="#7e22ce">
-        </app-metric-card>
-
-        <app-metric-card
-          label="Chiffre d'affaires"
-          [value]="formattedRevenue()"
-          hint="Montant total des ventes"
-          icon="account_balance_wallet"
-          iconBg="var(--color-primary-alpha)" iconColor="var(--color-primary)">
+          label="Portées en cours"
+          [value]="kpis()!.nombrePorteesEnCours.toString()"
+          hint="Portées en engraissement"
+          icon="pets"
+          iconBg="var(--color-info-bg)" iconColor="var(--color-info)">
         </app-metric-card>
       </div>
 
@@ -88,19 +84,19 @@ Chart.register(...registerables);
         <div>
           <div class="section-title">
             <mat-icon>notifications_none</mat-icon>
-            Alertes de l'elevage
+            Alertes de l'élevage
           </div>
 
-          <div *ngIf="alerts().length === 0">
-            <app-empty-state icon="check_circle_outline" message="Aucune alerte, l'elevage est stable."></app-empty-state>
+          <div *ngIf="!notifications() || notifications()!.length === 0">
+            <app-empty-state icon="check_circle_outline" message="Aucune alerte, l'élevage est stable."></app-empty-state>
           </div>
 
-          <div class="flex flex-col gap-3" style="max-height:480px; overflow-y:auto;">
+          <div class="flex flex-col gap-3" style="max-height:480px; overflow-y:auto;" *ngIf="notifications()">
             <app-alert-card
-              *ngFor="let alert of alerts()"
-              [type]="alert.type"
+              *ngFor="let alert of notifications()"
+              [type]="alert.type === 'CRITIQUE' ? 'danger' : alert.type === 'WARNING' ? 'warning' : 'info'"
               [message]="alert.message"
-              [tag]="alert.category">
+              [tag]="alert.type">
             </app-alert-card>
           </div>
         </div>
@@ -116,7 +112,7 @@ Chart.register(...registerables);
             <div class="panel">
               <p class="panel__title">
                 <mat-icon>timeline</mat-icon>
-                Naissance et sevrage par bande
+                Naissance et sevrage récents
               </p>
               <div style="position:relative; height:220px;">
                 <canvas #lineChartCanvas></canvas>
@@ -126,7 +122,7 @@ Chart.register(...registerables);
             <div class="panel">
               <p class="panel__title">
                 <mat-icon>bar_chart</mat-icon>
-                Commandes et livraisons par client
+                Ventes par mois
               </p>
               <div style="position:relative; height:220px;">
                 <canvas #barChartCanvas></canvas>
@@ -139,10 +135,9 @@ Chart.register(...registerables);
   `,
   styles: [`:host { display: block; }`]
 })
-export class DashboardComponent implements AfterViewInit {
-  private farmService = inject(FarmService);
-  private kpiService = inject(KpiService);
-  private alertEngine = inject(AlertEngineService);
+export class AccueilComponent implements AfterViewInit {
+  private calcService = inject(CalculationService);
+  private notifService = inject(NotificationService);
 
   @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('barChartCanvas') barChartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -150,26 +145,8 @@ export class DashboardComponent implements AfterViewInit {
   private lineChart?: Chart;
   private barChart?: Chart;
 
-  fertilityRate = computed(() => this.kpiService.calculateFertilityRate(this.farmService.reproductions()));
-  prolificacy = computed(() => this.kpiService.calculateProlificacy(this.farmService.reproductions()));
-  mortalityRate = computed(() => this.kpiService.calculatePreWeaningMortality(this.farmService.reproductions()));
-  avgDailyGain = computed(() => this.kpiService.calculateAvgDailyGain(this.farmService.fattenings(), this.farmService.weanings()));
-  revenue = computed(() => this.kpiService.calculateRevenue(this.farmService.sales()));
-  formattedRevenue = computed(() => {
-    const r = this.revenue();
-    if (r >= 1_000_000) return (r / 1_000_000).toFixed(1) + ' M FCFA';
-    if (r >= 1_000) return (r / 1_000).toFixed(0) + ' k FCFA';
-    return r + ' FCFA';
-  });
-
-  alerts = computed(() => this.alertEngine.alerts());
-
-  resetDemoData(): void {
-    if (confirm('Reinitialiser toutes les donnees de demonstration ?')) {
-      this.farmService.resetSeedData();
-      setTimeout(() => this.renderCharts(), 100);
-    }
-  }
+  kpis = toSignal(this.calcService.kpis$);
+  notifications = toSignal(this.notifService.notifications$);
 
   ngAfterViewInit(): void {
     setTimeout(() => this.renderCharts(), 100);
@@ -180,11 +157,10 @@ export class DashboardComponent implements AfterViewInit {
     if (this.lineChart) this.lineChart.destroy();
     if (this.barChart) this.barChart.destroy();
 
-    const reproductions = this.farmService.reproductions();
-    const weanings = this.farmService.weanings();
-    const sales = this.farmService.sales();
+    const misesBas = this.calcService.misesBas;
+    const sevrages = this.calcService.sevrages;
+    const ventes = this.calcService.ventes;
     
-    // Get root styles for colors
     const rootStyles = getComputedStyle(document.documentElement);
     const primaryColor = rootStyles.getPropertyValue('--color-primary').trim() || '#15803d';
     const primaryAlpha = rootStyles.getPropertyValue('--color-primary-alpha').trim() || 'rgba(21, 128, 61, 0.1)';
@@ -192,9 +168,13 @@ export class DashboardComponent implements AfterViewInit {
     const infoAlpha = 'rgba(59, 130, 246, 0.1)';
     const borderColor = rootStyles.getPropertyValue('--color-border').trim() || '#e8eaed';
 
-    const labels = reproductions.map(r => {
-      const band = this.farmService.bands().find(b => b.id === r.bandId);
-      return band ? band.name.split(' - ')[0] : r.dateBreeding;
+    // Tri et agrégation pour le graphique des naissances/sevrages
+    const labels = misesBas.slice(-6).map(mb => {
+      try {
+        return new Date(mb.dateMiseBas).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+      } catch {
+        return String(mb.dateMiseBas);
+      }
     });
 
     this.lineChart = new Chart(this.lineChartCanvas.nativeElement, {
@@ -203,8 +183,8 @@ export class DashboardComponent implements AfterViewInit {
         labels,
         datasets: [
           {
-            label: 'Nes vivants',
-            data: reproductions.map(r => r.nbBornAlive || 0),
+            label: 'Nés vivants',
+            data: misesBas.slice(-6).map(mb => mb.vivants || 0),
             borderColor: infoColor,
             backgroundColor: infoAlpha,
             fill: true,
@@ -213,11 +193,8 @@ export class DashboardComponent implements AfterViewInit {
             pointRadius: 3
           },
           {
-            label: 'Sevres',
-            data: reproductions.map(r => {
-              const w = weanings.find(w => w.reproductionId === r.id);
-              return w ? w.nbWeaned : 0;
-            }),
+            label: 'Sevrés',
+            data: sevrages.slice(-6).map(s => s.sevres || 0),
             borderColor: primaryColor,
             backgroundColor: primaryAlpha,
             fill: true,
@@ -240,21 +217,16 @@ export class DashboardComponent implements AfterViewInit {
       }
     });
 
-    const clients = Array.from(new Set(sales.map(s => s.customer)));
+    // Agrégation des ventes pour le graphique en barres
+    const clients = Array.from(new Set(ventes.map(v => v.client || 'Marché Local')));
     this.barChart = new Chart(this.barChartCanvas.nativeElement, {
       type: 'bar',
       data: {
         labels: clients,
         datasets: [
           {
-            label: 'Commandes',
-            data: clients.map(c => sales.filter(s => s.customer === c).reduce((sum, s) => sum + s.nbRequested, 0)),
-            backgroundColor: '#cbd5e1',
-            borderRadius: 4
-          },
-          {
-            label: 'Livres',
-            data: clients.map(c => sales.filter(s => s.customer === c).reduce((sum, s) => sum + s.nbDelivered, 0)),
+            label: 'Lapins vendus',
+            data: clients.map(c => ventes.filter(v => (v.client || 'Marché Local') === c).reduce((sum, v) => sum + (v.vendus || 0), 0)),
             backgroundColor: primaryColor,
             borderRadius: 4
           }

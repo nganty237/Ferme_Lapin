@@ -1,0 +1,486 @@
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { StorageService } from './storage.service';
+
+/**
+ * Interface des 6 KPIs critiques calculés automatiquement.
+ */
+export interface KPIs {
+  /** Lapereaux nés / femelle active / mois */
+  productiviteParFemelle: number;
+  /** % de survie pendant l'allaitement (sevrés / nés * 100) */
+  tauxSurvieAllaitement: number;
+  /** Occupation des cages d'engraissement */
+  occupationCages: { pourcentage: number; occupees: number; totales: number };
+  /** % de femelles enceintes par rapport aux saillies */
+  tauxFecondite: number;
+  /** Nombre de portées non encore vendues */
+  nombrePorteesEnCours: number;
+  /** Phase actuelle de chaque bande (A, B, C) */
+  phasesBandes: { A: string; B: string; C: string };
+}
+
+/**
+ * CalculationService — État réactif centralisé + moteur de calcul KPIs.
+ *
+ * Responsabilités :
+ * - Charger toutes les données depuis StorageService au démarrage
+ * - Exposer chaque entité via BehaviorSubject (observable)
+ * - Calculer les 6 KPIs critiques via combineLatest (auto-update)
+ * - Servir de single source of truth réactive pour les composants
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class CalculationService {
+  private storageService = inject(StorageService);
+
+  // ══════════════════════════════════════════════
+  //  ÉTAT RÉACTIF — BehaviorSubjects
+  // ══════════════════════════════════════════════
+
+  private readonly _reproducteurs$ = new BehaviorSubject<any[]>([]);
+  private readonly _saillies$ = new BehaviorSubject<any[]>([]);
+  private readonly _misesBas$ = new BehaviorSubject<any[]>([]);
+  private readonly _sevrages$ = new BehaviorSubject<any[]>([]);
+  private readonly _ventes$ = new BehaviorSubject<any[]>([]);
+  private readonly _deces$ = new BehaviorSubject<any[]>([]);
+  private readonly _config$ = new BehaviorSubject<any>({
+    nombreCagesTotal: 144,
+    densiteParCage: 3,
+    dureeGestationJours: 31,
+    dureeAllaitementJours: 31,
+    dureeEngraissementJours: 120,
+    nombreCagesReproductrices: 24,
+    prixAlimentKg: 350,
+    prixVenteDefaut: 3000,
+  });
+  private readonly _notifications$ = new BehaviorSubject<any[]>([]);
+
+  // ══════════════════════════════════════════════
+  //  OBSERVABLES PUBLICS (lecture seule)
+  // ══════════════════════════════════════════════
+
+  /** Flux réactif des reproducteurs */
+  readonly reproducteurs$ = this._reproducteurs$.asObservable();
+
+  /** Flux réactif des saillies */
+  readonly saillies$ = this._saillies$.asObservable();
+
+  /** Flux réactif des mises-bas */
+  readonly misesBas$ = this._misesBas$.asObservable();
+
+  /** Flux réactif des sevrages */
+  readonly sevrages$ = this._sevrages$.asObservable();
+
+  /** Flux réactif des ventes */
+  readonly ventes$ = this._ventes$.asObservable();
+
+  /** Flux réactif des décès */
+  readonly deces$ = this._deces$.asObservable();
+
+  /** Flux réactif de la configuration */
+  readonly config$ = this._config$.asObservable();
+
+  /** Flux réactif des notifications */
+  readonly notifications$ = this._notifications$.asObservable();
+
+  // ══════════════════════════════════════════════
+  //  KPIs RÉACTIFS — Auto-update via combineLatest
+  // ══════════════════════════════════════════════
+
+  /**
+   * Observable des 6 KPIs critiques.
+   * Se recalcule automatiquement dès qu'une source de données change.
+   */
+  readonly kpis$: Observable<KPIs> = combineLatest([
+    this._reproducteurs$,
+    this._saillies$,
+    this._misesBas$,
+    this._sevrages$,
+    this._ventes$,
+    this._config$,
+  ]).pipe(
+    map(([reproducteurs, saillies, misesBas, sevrages, ventes, config]) =>
+      this.computeAllKpis(reproducteurs, saillies, misesBas, sevrages, ventes, config)
+    )
+  );
+
+  // ══════════════════════════════════════════════
+  //  INITIALISATION
+  // ══════════════════════════════════════════════
+
+  constructor() {
+    this.loadAllData();
+  }
+
+  /**
+   * Charge toutes les données depuis le StorageService
+   * et met à jour chaque BehaviorSubject.
+   */
+  loadAllData(): void {
+    this._reproducteurs$.next(this.storageService.getAllReproducteurs());
+    this._saillies$.next(this.storageService.getAllSaillies());
+    this._misesBas$.next(this.storageService.getAllMisesBas());
+    this._sevrages$.next(this.storageService.getAllSevrages());
+    this._ventes$.next(this.storageService.getAllVentes());
+    this._deces$.next(this.storageService.getAllDeces());
+    this._config$.next(this.storageService.getConfiguration());
+    // Notifications initialisées vides (pas de persistance pour l'instant)
+  }
+
+  // ══════════════════════════════════════════════
+  //  CALCULS KPIs PRIVÉS
+  // ══════════════════════════════════════════════
+
+  /**
+   * Agrège tous les KPIs en un seul objet.
+   */
+  private computeAllKpis(
+    reproducteurs: any[],
+    saillies: any[],
+    misesBas: any[],
+    sevrages: any[],
+    ventes: any[],
+    config: any
+  ): KPIs {
+    return {
+      productiviteParFemelle: this.calcProductiviteParFemelle(reproducteurs, misesBas),
+      tauxSurvieAllaitement: this.calcTauxSurvieAllaitement(misesBas, sevrages),
+      occupationCages: this.calcOccupationCages(sevrages, ventes, config),
+      tauxFecondite: this.calcTauxFecondite(saillies, misesBas),
+      nombrePorteesEnCours: this.countPorteesEnCours(sevrages, ventes),
+      phasesBandes: this.calcPhasesBandes(saillies, misesBas, sevrages),
+    };
+  }
+
+  /**
+   * KPI 1 — Productivité par femelle (lapereaux nés / femelle active / mois).
+   * Formule : Σ(vivants) / nombre femelles actives / 12
+   */
+  private calcProductiviteParFemelle(reproducteurs: any[], misesBas: any[]): number {
+    const femellesActives = reproducteurs.filter(
+      (r) => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort'
+    );
+    const nbFemelles = femellesActives.length;
+    if (nbFemelles === 0) return 0;
+
+    const totalNes = misesBas.reduce((sum: number, mb: any) => sum + (mb.vivants || 0), 0);
+
+    // Productivité annualisée ramenée au mois
+    const result = totalNes / nbFemelles / 12;
+    return Math.round(result * 100) / 100;
+  }
+
+  /**
+   * KPI 2 — Taux de survie allaitement (%).
+   * Formule : Moyenne(sevrés / nés vivants) * 100
+   * On apparie chaque sevrage à sa mise-bas via miseBasId.
+   */
+  private calcTauxSurvieAllaitement(misesBas: any[], sevrages: any[]): number {
+    if (misesBas.length === 0 || sevrages.length === 0) return 0;
+
+    let totalNes = 0;
+    let totalSevres = 0;
+
+    for (const sev of sevrages) {
+      const mb = misesBas.find((m: any) => m.id === sev.miseBasId);
+      if (mb && mb.vivants > 0) {
+        totalNes += mb.vivants;
+        totalSevres += sev.sevres || 0;
+      }
+    }
+
+    if (totalNes === 0) return 0;
+    return Math.round((totalSevres / totalNes) * 100);
+  }
+
+  /**
+   * KPI 3 — Occupation des cages d'engraissement.
+   * Formule : sevrés en cours (non vendus) / capacité totale (cages * densité) * 100
+   */
+  private calcOccupationCages(
+    sevrages: any[],
+    ventes: any[],
+    config: any
+  ): { pourcentage: number; occupees: number; totales: number } {
+    const capaciteTotale = (config.nombreCagesTotal || 144) * (config.densiteParCage || 3);
+
+    // Total sevrés - total vendus = lapins en engraissement
+    const totalSevres = sevrages.reduce((sum: number, s: any) => sum + (s.sevres || 0), 0);
+    const totalVendus = ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
+    const occupees = Math.max(0, totalSevres - totalVendus);
+
+    const pourcentage = capaciteTotale > 0 ? Math.round((occupees / capaciteTotale) * 100) : 0;
+
+    return {
+      pourcentage: Math.min(pourcentage, 100),
+      occupees,
+      totales: capaciteTotale,
+    };
+  }
+
+  /**
+   * KPI 4 — Taux de fécondité (%).
+   * Formule : (mises-bas réalisées / saillies totales) * 100
+   */
+  private calcTauxFecondite(saillies: any[], misesBas: any[]): number {
+    if (saillies.length === 0) return 0;
+
+    // Chaque mise-bas est liée à une saillie via saillieId
+    const sailliesAvecMiseBas = new Set(misesBas.map((mb: any) => mb.saillieId).filter(Boolean));
+    const nbReussies = sailliesAvecMiseBas.size || misesBas.length;
+
+    return Math.round((nbReussies / saillies.length) * 100);
+  }
+
+  /**
+   * KPI 5 — Nombre de portées en cours (sevrages sans vente correspondante).
+   * Logique : on compte les sevrages dont les lapins n'ont pas été entièrement vendus.
+   */
+  private countPorteesEnCours(sevrages: any[], ventes: any[]): number {
+    const totalSevres = sevrages.reduce((sum: number, s: any) => sum + (s.sevres || 0), 0);
+    const totalVendus = ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
+
+    // Si des sevrés n'ont pas été vendus, il y a des portées en cours
+    if (totalSevres <= totalVendus) return 0;
+
+    // Compter les sevrages qui ont encore des lapins non vendus
+    // Approche simplifiée : nombre de sevrages récents non couverts par les ventes
+    let restant = totalSevres - totalVendus;
+    let porteesEnCours = 0;
+
+    // Parcourir les sevrages du plus récent au plus ancien
+    const sorted = [...sevrages].sort((a, b) => {
+      const da = new Date(a.dateSevrage || 0).getTime();
+      const db = new Date(b.dateSevrage || 0).getTime();
+      return db - da;
+    });
+
+    for (const sev of sorted) {
+      if (restant <= 0) break;
+      porteesEnCours++;
+      restant -= sev.sevres || 0;
+    }
+
+    return porteesEnCours;
+  }
+
+  /**
+   * KPI 6 — Phases actuelles des bandes (A, B, C).
+   * Logique basée sur les dates des événements les plus récents :
+   * - Si dernière saillie sans mise-bas → Gestation
+   * - Si mise-bas sans sevrage → Allaitement
+   * - Si sevrage enregistré → Repos
+   * - Sinon → Saillies (en attente)
+   */
+  private calcPhasesBandes(
+    saillies: any[],
+    misesBas: any[],
+    sevrages: any[]
+  ): { A: string; B: string; C: string } {
+    // Répartir les événements par index de bande (0=A, 1=B, 2=C)
+    // On trie par date et on distribue en round-robin sur 3 bandes
+    const allEvents = [
+      ...saillies.map((s: any) => ({ type: 'saillie', date: s.dateSaillie, id: s.id })),
+      ...misesBas.map((m: any) => ({ type: 'miseBas', date: m.dateMiseBas, saillieId: m.saillieId, id: m.id })),
+      ...sevrages.map((s: any) => ({ type: 'sevrage', date: s.dateSevrage, miseBasId: s.miseBasId, id: s.id })),
+    ].sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
+
+    // Déterminer la phase de chaque bande par les événements les plus récents
+    const dernieresSaillies = this.getLastN(saillies, 'dateSaillie', 3);
+    const phases: string[] = [];
+
+    for (let i = 0; i < 3; i++) {
+      const saillie = dernieresSaillies[i];
+      if (!saillie) {
+        phases.push('Saillies');
+        continue;
+      }
+
+      // Chercher si cette saillie a une mise-bas
+      const mb = misesBas.find((m: any) => m.saillieId === saillie.id);
+      if (!mb) {
+        phases.push('Gestation');
+        continue;
+      }
+
+      // Chercher si cette mise-bas a un sevrage
+      const sev = sevrages.find((s: any) => s.miseBasId === mb.id);
+      if (!sev) {
+        phases.push('Allaitement');
+        continue;
+      }
+
+      phases.push('Repos');
+    }
+
+    return {
+      A: phases[0] || 'Saillies',
+      B: phases[1] || 'Saillies',
+      C: phases[2] || 'Saillies',
+    };
+  }
+
+  /**
+   * Utilitaire : récupère les N derniers éléments triés par date décroissante.
+   */
+  private getLastN(items: any[], dateField: string, n: number): any[] {
+    return [...items]
+      .sort((a, b) => new Date(b[dateField] || 0).getTime() - new Date(a[dateField] || 0).getTime())
+      .slice(0, n);
+  }
+
+  // ══════════════════════════════════════════════
+  //  ACCESSEURS SYNCHRONES (snapshot de la valeur courante)
+  // ══════════════════════════════════════════════
+
+  get reproducteurs(): any[] {
+    return this._reproducteurs$.getValue();
+  }
+
+  get saillies(): any[] {
+    return this._saillies$.getValue();
+  }
+
+  get misesBas(): any[] {
+    return this._misesBas$.getValue();
+  }
+
+  get sevrages(): any[] {
+    return this._sevrages$.getValue();
+  }
+
+  get ventes(): any[] {
+    return this._ventes$.getValue();
+  }
+
+  get deces(): any[] {
+    return this._deces$.getValue();
+  }
+
+  get config(): any {
+    return this._config$.getValue();
+  }
+
+  get notifications(): any[] {
+    return this._notifications$.getValue();
+  }
+
+  // ══════════════════════════════════════════════
+  //  MUTATEURS (mise à jour état + persistance)
+  // ══════════════════════════════════════════════
+
+  setReproducteurs(data: any[]): void {
+    this._reproducteurs$.next(data);
+  }
+
+  setSaillies(data: any[]): void {
+    this._saillies$.next(data);
+  }
+
+  setMisesBas(data: any[]): void {
+    this._misesBas$.next(data);
+  }
+
+  setSevrages(data: any[]): void {
+    this._sevrages$.next(data);
+  }
+
+  setVentes(data: any[]): void {
+    this._ventes$.next(data);
+  }
+
+  setDeces(data: any[]): void {
+    this._deces$.next(data);
+  }
+
+  setConfig(data: any): void {
+    this._config$.next(data);
+  }
+
+  setNotifications(data: any[]): void {
+    this._notifications$.next(data);
+  }
+
+  addNotification(notification: any): void {
+    const current = this._notifications$.getValue();
+    this._notifications$.next([notification, ...current]);
+  }
+
+  addSaillie(saillie: any): void {
+    const dateSaillie = typeof saillie.dateSaillie === 'string' ? new Date(saillie.dateSaillie) : saillie.dateSaillie;
+    const dateMiseBasPrevue = new Date(dateSaillie);
+    dateMiseBasPrevue.setDate(dateMiseBasPrevue.getDate() + 31);
+
+    const saillieToSave = {
+      ...saillie,
+      dateSaillie,
+      dateMiseBasPrevue
+    };
+
+    const newSaillie = this.storageService.addSaillie(saillieToSave);
+    const currentSaillies = this._saillies$.getValue();
+    this._saillies$.next([...currentSaillies, newSaillie]);
+
+    // Mettre à jour l'état de la femelle en "En gestation"
+    const reproducteurs = this._reproducteurs$.getValue();
+    const updatedRepros = reproducteurs.map((r) => {
+      if (r.id === saillie.femelleId) {
+        const updated = { ...r, etat: 'En gestation' as const };
+        this.storageService.updateReproducteur(updated);
+        return updated;
+      }
+      return r;
+    });
+    this._reproducteurs$.next(updatedRepros);
+  }
+
+  addMiseBas(miseBas: any): void {
+    const nes = Number(miseBas.nes);
+    const vivants = Number(miseBas.vivants);
+    const mortsNes = Math.max(0, nes - vivants);
+    const viabiliteCalculee = nes > 0 ? Math.round((vivants / nes) * 100) : 0;
+
+    const newMiseBas = this.storageService.addMiseBas({
+      ...miseBas,
+      vivants,
+      mortsNes,
+      viabiliteCalculee
+    });
+
+    const currentMisesBas = this._misesBas$.getValue();
+    this._misesBas$.next([...currentMisesBas, newMiseBas]);
+
+    // Mettre à jour l'état de la femelle en "En allaitement"
+    const currentRepros = this._reproducteurs$.getValue();
+    const updatedRepros = currentRepros.map((r) => {
+      if (r.id === miseBas.femelleId) {
+        const updated = { ...r, etat: 'En allaitement' as const };
+        this.storageService.updateReproducteur(updated);
+        return updated;
+      }
+      return r;
+    });
+    this._reproducteurs$.next(updatedRepros);
+  }
+
+  updateReproducteur(updated: any): void {
+    this.storageService.updateReproducteur(updated);
+    const current = this._reproducteurs$.getValue();
+    this._reproducteurs$.next(current.map(r => r.id === updated.id ? { ...r, ...updated } : r));
+  }
+
+  deleteReproducteur(id: string): void {
+    this.storageService.deleteReproducteur(id);
+    const current = this._reproducteurs$.getValue();
+    this._reproducteurs$.next(current.filter(r => r.id !== id));
+  }
+
+  updateConfiguration(config: any): void {
+    this.storageService.updateConfiguration(config);
+    this._config$.next(this.storageService.getConfiguration());
+  }
+}
+

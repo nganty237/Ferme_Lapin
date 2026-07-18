@@ -1,65 +1,46 @@
-<mat-sidenav-container class="h-screen w-screen overflow-hidden">
-  <mat-sidenav mode="side" opened class="sidebar-container" style="width:240px; border:none;">
+<div class="h-screen w-screen overflow-hidden flex" style="background:var(--color-bg-main);">
+  <!-- Sidebar -->
+  <aside class="sidebar-container h-full shrink-0 z-20" [style.width.px]="sidebarCollapsed ? 80 : 240" style="transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 8px rgba(0,0,0,0.05);">
+    <app-sidebar [collapsed]="sidebarCollapsed" (toggle)="sidebarCollapsed = !sidebarCollapsed"></app-sidebar>
+  </aside>
 
-    <!-- Brand -->
-    <div class="sidebar-brand">
-      <div class="flex items-center gap-3">
-        <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
-          <mat-icon style="color:var(--color-primary-light);font-size:20px;width:20px;height:20px;">pets</mat-icon>
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col min-w-0 h-full relative" style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+    <!-- Modern, Professional Header -->
+    <header class="flex justify-between items-center px-6 h-16 sticky top-0 z-10 transition-all duration-300" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+      
+      <!-- Minimalist Title -->
+      <div class="flex items-center gap-4">
+        <span style="color: var(--color-text-main); font-size: 16px; font-weight: 600; letter-spacing: -0.01em;">
+          Espace de Gestion
+        </span>
+      </div>
+
+      <!-- Actions & Profile -->
+      <div class="flex items-center gap-5">
+        <!-- Status Indicator (Professional, pulsing) -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="background: var(--color-success-bg); border: 1px solid rgba(22, 163, 74, 0.2);">
+          <div class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background: var(--color-success);"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2" style="background: var(--color-success);"></span>
+          </div>
+          <span style="font-size: 11px; font-weight: 600; color: var(--color-success); text-transform: uppercase; letter-spacing: 0.05em;">
+            En ligne
+          </span>
         </div>
-        <div>
-          <h1>Saveurs du Lapin</h1>
-          <p>Gestion de l'elevage</p>
+
+        <!-- Profile / Notifications -->
+        <div class="flex items-center gap-4 border-l pl-5" style="border-color: var(--color-border);">
+          <div class="h-9 w-9 rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:shadow-md transition-shadow" style="background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark)); color: white; font-weight: 600; font-size: 14px;">
+            A
+          </div>
         </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Navigation -->
-    <nav style="padding:16px 0; flex:1;">
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
-        <mat-icon>space_dashboard</mat-icon>
-        Tableau de bord
-      </a>
-      <a routerLink="/bandes" routerLinkActive="active" class="nav-link">
-        <mat-icon>view_list</mat-icon>
-        Bandes
-      </a>
-      <a routerLink="/production" routerLinkActive="active" class="nav-link">
-        <mat-icon>science</mat-icon>
-        Production
-      </a>
-      <a routerLink="/ventes" routerLinkActive="active" class="nav-link">
-        <mat-icon>point_of_sale</mat-icon>
-        Ventes
-      </a>
-      <a routerLink="/rapports" routerLinkActive="active" class="nav-link">
-        <mat-icon>summarize</mat-icon>
-        Rapports
-      </a>
-      <a routerLink="/parametres" routerLinkActive="active" class="nav-link">
-        <mat-icon>tune</mat-icon>
-        Parametres
-      </a>
-    </nav>
-
-    <!-- Footer -->
-    <div style="padding:16px 20px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
-      <span style="font-size:11px; color:rgba(255,255,255,0.4);">Projet academique 2026</span>
-    </div>
-  </mat-sidenav>
-
-  <mat-sidenav-content style="background:var(--color-bg-main); display:flex; flex-direction:column;">
-    <!-- Toolbar -->
-    <mat-toolbar style="background:var(--color-surface); border-bottom:1px solid var(--color-border); height:56px; min-height:56px; padding:0 24px; font-size:14px; color:var(--color-text-muted); display:flex; justify-content:space-between; align-items:center;">
-      <span style="font-weight:500;">Pilotage technico-economique — conduite en bandes</span>
-      <div class="flex items-center gap-2">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--color-success);"></div>
-        <span style="font-size:12px; color:var(--color-text-light);">Hors-ligne</span>
-      </div>
-    </mat-toolbar>
-
-    <main style="flex:1; overflow-y:auto; overflow-x:hidden;">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-6">
       <router-outlet />
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    </div>
+  </main>
+  <app-toast-container></app-toast-container>
+</div>
