@@ -29,7 +29,7 @@ interface MaleRow {
       </app-page-header>
 
       <!-- Filtres -->
-      <div class="panel mb-6">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
         <div class="flex flex-wrap gap-4 items-end">
           <div>
             <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">État</label>
@@ -47,39 +47,39 @@ interface MaleRow {
       </div>
 
       <!-- Tableau -->
-      <div class="panel">
+      <div class="bg-white border border-slate-200 rounded-xl p-6">
         <div class="overflow-x-auto" style="max-height: 520px;">
-          <table class="data-table">
+          <table class="w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th class="cursor-pointer select-none" (click)="sortBy('id')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('id')">
                   ID <mat-icon *ngIf="sortCol === 'id'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('nom')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('nom')">
                   Nom <mat-icon *ngIf="sortCol === 'nom'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('saillies')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('saillies')">
                   Saillies <mat-icon *ngIf="sortCol === 'saillies'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('porteesProduites')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('porteesProduites')">
                   Portées produites <mat-icon *ngIf="sortCol === 'porteesProduites'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th>État</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">État</th>
               </tr>
             </thead>
             <tbody>
               @if (filteredMales().length === 0) {
-                <tr>
-                  <td colspan="5" class="text-center py-8 text-slate-400">Aucun mâle trouvé avec ces filtres.</td>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td colspan="5" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucun mâle trouvé avec ces filtres.</td>
                 </tr>
               } @else {
-                <tr *ngFor="let m of filteredMales()" class="cursor-pointer hover:bg-slate-50 transition-colors" (click)="goToDetail(m.id)">
-                  <td class="font-mono font-semibold text-slate-700">{{ m.id }}</td>
-                  <td class="font-semibold">{{ m.nom }}</td>
-                  <td class="text-center">{{ m.saillies }}</td>
-                  <td class="text-center">{{ m.porteesProduites }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="m.etat === 'Actif' ? 'badge--success' : m.etat === 'Mort' ? 'badge--danger' : 'badge--warning'">{{ m.etat }}</span>
+                <tr *ngFor="let m of filteredMales()" class="cursor-pointer hover:bg-slate-50/50 transition-colors" (click)="goToDetail(m.id)">
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">{{ m.id }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle font-semibold">{{ m.nom }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ m.saillies }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ m.porteesProduites }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                    <span [class]="getEtatClass(m.etat)">{{ m.etat }}</span>
                   </td>
                 </tr>
               }
@@ -102,10 +102,6 @@ interface MaleRow {
       transition: border-color 0.2s;
     }
     .form-select:focus { border-color: var(--color-primary); }
-    .badge--success { background: #ecfdf5; color: #059669; }
-    .badge--warning { background: #fffbeb; color: #d97706; }
-    .badge--danger { background: #fef2f2; color: #dc2626; }
-    .badge--neutral { background: #f1f5f9; color: #475569; }
   `]
 })
 export class ListeMalesComponent {
@@ -175,5 +171,14 @@ export class ListeMalesComponent {
 
   goToDetail(id: string): void {
     this.router.navigate(['/reproducteurs', id]);
+  }
+
+  getEtatClass(etat: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
+    switch (etat) {
+      case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Mort': return `${base} bg-red-100 text-red-800`;
+      default: return `${base} bg-amber-100 text-amber-800`; // Réformé
+    }
   }
 }

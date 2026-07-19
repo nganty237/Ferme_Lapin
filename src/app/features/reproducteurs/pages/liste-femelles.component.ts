@@ -32,7 +32,7 @@ interface FemelleRow {
       </app-page-header>
 
       <!-- Filtres -->
-      <div class="panel mb-6">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
         <div class="flex flex-wrap gap-4 items-end">
           <div>
             <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">Bande</label>
@@ -62,53 +62,53 @@ interface FemelleRow {
       </div>
 
       <!-- Tableau -->
-      <div class="panel">
+      <div class="bg-white border border-slate-200 rounded-xl p-6">
         <div class="overflow-x-auto" style="max-height: 520px;">
-          <table class="data-table">
+          <table class="w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th class="cursor-pointer select-none" (click)="sortBy('id')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('id')">
                   ID <mat-icon *ngIf="sortCol === 'id'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('nom')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('nom')">
                   Nom <mat-icon *ngIf="sortCol === 'nom'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('bandeId')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('bandeId')">
                   Bande <mat-icon *ngIf="sortCol === 'bandeId'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('portees')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('portees')">
                   Portées <mat-icon *ngIf="sortCol === 'portees'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('tailleMoyenne')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('tailleMoyenne')">
                   Taille moy. <mat-icon *ngIf="sortCol === 'tailleMoyenne'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('survie')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('survie')">
                   Survie % <mat-icon *ngIf="sortCol === 'survie'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th class="cursor-pointer select-none" (click)="sortBy('cages')">
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('cages')">
                   Cages occupées <mat-icon *ngIf="sortCol === 'cages'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
                 </th>
-                <th>État</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">État</th>
               </tr>
             </thead>
             <tbody>
               @if (filteredFemelles().length === 0) {
-                <tr>
-                  <td colspan="8" class="text-center py-8 text-slate-400">Aucune femelle trouvée avec ces filtres.</td>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td colspan="8" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucune femelle trouvée avec ces filtres.</td>
                 </tr>
               } @else {
-                <tr *ngFor="let f of filteredFemelles()" class="cursor-pointer hover:bg-slate-50 transition-colors" (click)="goToDetail(f.id)">
-                  <td class="font-mono font-semibold text-slate-700">{{ f.id }}</td>
-                  <td class="font-semibold">{{ f.nom }}</td>
-                  <td>{{ f.bandeId || '—' }}</td>
-                  <td class="text-center">{{ f.portees }}</td>
-                  <td class="text-center">{{ f.tailleMoyenne }}</td>
-                  <td class="text-center">
-                    <span class="badge" [ngClass]="f.survie >= 90 ? 'badge--success' : f.survie >= 75 ? 'badge--warning' : 'badge--danger'">{{ f.survie }}%</span>
+                <tr *ngFor="let f of filteredFemelles()" class="cursor-pointer hover:bg-slate-50/50 transition-colors" (click)="goToDetail(f.id)">
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">{{ f.id }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle font-semibold">{{ f.nom }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ f.bandeId || '—' }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ f.portees }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ f.tailleMoyenne }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
+                    <span [class]="getSurvieClass(f.survie)">{{ f.survie }}%</span>
                   </td>
-                  <td class="text-center font-mono font-semibold">{{ f.cages }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getEtatClass(f.etat)">{{ f.etat }}</span>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono font-semibold">{{ f.cages }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                    <span [class]="getEtatClass(f.etat)">{{ f.etat }}</span>
                   </td>
                 </tr>
               }
@@ -131,12 +131,6 @@ interface FemelleRow {
       transition: border-color 0.2s;
     }
     .form-select:focus { border-color: var(--color-primary); }
-    .badge--success { background: #ecfdf5; color: #059669; }
-    .badge--warning { background: #fffbeb; color: #d97706; }
-    .badge--danger { background: #fef2f2; color: #dc2626; }
-    .badge--neutral { background: #f1f5f9; color: #475569; }
-    .badge--gestation { background: #fdf4ff; color: #a855f7; }
-    .badge--allaitement { background: #eff6ff; color: #3b82f6; }
   `]
 })
 export class ListeFemellesComponent {
@@ -252,13 +246,21 @@ export class ListeFemellesComponent {
   }
 
   getEtatClass(etat: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (etat) {
-      case 'Actif': return 'badge--success';
-      case 'En gestation': return 'badge--gestation';
-      case 'En allaitement': return 'badge--allaitement';
-      case 'Réformé': return 'badge--warning';
-      case 'Mort': return 'badge--danger';
-      default: return 'badge--neutral';
+      case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'En gestation': return `${base} bg-purple-100 text-purple-800`;
+      case 'En allaitement': return `${base} bg-blue-100 text-blue-800`;
+      case 'Réformé': return `${base} bg-amber-100 text-amber-800`;
+      case 'Mort': return `${base} bg-red-100 text-red-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
+  }
+
+  getSurvieClass(survie: number): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
+    if (survie >= 90) return `${base} bg-emerald-100 text-emerald-800`;
+    if (survie >= 75) return `${base} bg-amber-100 text-amber-800`;
+    return `${base} bg-red-100 text-red-800`;
   }
 }

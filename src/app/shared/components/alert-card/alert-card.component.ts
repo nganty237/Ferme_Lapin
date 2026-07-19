@@ -7,14 +7,23 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatIconModule],
   template: `
-    <div class="alert-item"
-         [class.alert-item--danger]="type === 'danger'"
-         [class.alert-item--warning]="type === 'warning'"
-         [class.alert-item--info]="type === 'info'">
-      <mat-icon>{{ iconName }}</mat-icon>
+    <div class="p-3.5 rounded-xl flex items-start gap-3 border text-[13px] transition-all duration-150"
+         [ngClass]="{
+           'bg-red-50/50 border-red-200 text-red-800': type === 'danger',
+           'bg-amber-50/50 border-amber-200 text-amber-700': type === 'warning',
+           'bg-emerald-50/50 border-emerald-100 text-emerald-800': type === 'info'
+         }">
+      <mat-icon class="text-lg w-5.5 h-5.5 shrink-0 mt-0.5"
+                [ngClass]="{
+                  'text-red-600': type === 'danger',
+                  'text-amber-600': type === 'warning',
+                  'text-emerald-600': type === 'info'
+                }">
+        {{ iconName }}
+      </mat-icon>
       <div>
-        <div class="alert-item__text">{{ message }}</div>
-        <div *ngIf="tag" class="alert-item__tag">{{ tag }}</div>
+        <div class="font-medium leading-relaxed text-slate-800">{{ message }}</div>
+        <div *ngIf="tag" class="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1 block">{{ tag }}</div>
       </div>
     </div>
   `

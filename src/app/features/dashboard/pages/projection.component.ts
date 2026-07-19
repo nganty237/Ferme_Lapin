@@ -30,7 +30,7 @@ interface ProjectionWeek {
       </app-page-header>
 
       <!-- Alerte goulot d'étranglement détecté -->
-      <div class="panel border-amber-100 bg-amber-50/15 mb-6" *ngIf="goulotSemaine()">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 border-amber-100 bg-amber-50/15 mb-6" *ngIf="goulotSemaine()">
         <div class="flex items-start gap-3">
           <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
             <mat-icon>warning</mat-icon>
@@ -46,46 +46,46 @@ interface ProjectionWeek {
       </div>
 
       <!-- Tableau des projections -->
-      <div class="panel">
-        <p class="panel__title">
-          <mat-icon>timeline</mat-icon> Simulation Chronologique (12 Semaines)
+      <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+          <mat-icon class="text-emerald-700">timeline</mat-icon> Simulation Chronologique (12 Semaines)
         </p>
 
         <div class="overflow-x-auto mt-4">
-          <table class="data-table">
+          <table class="w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th>Semaine</th>
-                <th>Période</th>
-                <th class="text-center">Bande A</th>
-                <th class="text-center">Bande B</th>
-                <th class="text-center">Bande C</th>
-                <th class="text-center">Cages d'engraissement</th>
-                <th class="text-center">Statut</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Semaine</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Période</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Bande A</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Bande B</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Bande C</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Cages d'engraissement</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Statut</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let w of projections()" class="hover:bg-slate-50 transition-colors">
-                <td class="font-bold text-slate-700">Semaine {{ w.semaine }}</td>
-                <td class="text-xs text-slate-500 font-mono">{{ formatDate(w.dateDebut) }}</td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="getPhaseClass(w.phaseBandeA)">{{ w.phaseBandeA }}</span>
+              <tr *ngFor="let w of projections()" class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 border-b border-slate-100 align-middle font-bold text-slate-700">Semaine {{ w.semaine }}</td>
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-xs text-slate-500 font-mono">{{ formatDate(w.dateDebut) }}</td>
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                  <span [class]="getPhaseClass(w.phaseBandeA)">{{ w.phaseBandeA }}</span>
                 </td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="getPhaseClass(w.phaseBandeB)">{{ w.phaseBandeB }}</span>
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                  <span [class]="getPhaseClass(w.phaseBandeB)">{{ w.phaseBandeB }}</span>
                 </td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="getPhaseClass(w.phaseBandeC)">{{ w.phaseBandeC }}</span>
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                  <span [class]="getPhaseClass(w.phaseBandeC)">{{ w.phaseBandeC }}</span>
                 </td>
-                <td class="text-center font-mono">
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-mono">
                   <div class="flex items-center justify-center gap-2">
                     <strong class="text-slate-800">{{ w.cagesOccupees }}</strong>
                     <span class="text-slate-400">/ {{ w.totales }}</span>
                     <span class="text-xs text-slate-500 font-normal">({{ w.pourcentage }}%)</span>
                   </div>
                 </td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="getStatusClass(w.status)">{{ w.status }}</span>
+                <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                  <span [class]="getStatusClass(w.status)">{{ w.status }}</span>
                 </td>
               </tr>
             </tbody>
@@ -96,13 +96,6 @@ interface ProjectionWeek {
   `,
   styles: [`
     :host { display: block; }
-    .badge--success { background: #ecfdf5; color: #059669; }
-    .badge--warning { background: #fffbeb; color: #d97706; }
-    .badge--danger { background: #fef2f2; color: #dc2626; }
-    .badge--neutral { background: #f1f5f9; color: #475569; }
-    .badge--gestation { background: #fdf4ff; color: #a855f7; }
-    .badge--allaitement { background: #eff6ff; color: #3b82f6; }
-    .badge--engraissement { background: #fff7ed; color: #ea580c; }
   `]
 })
 export class ProjectionComponent {
@@ -196,20 +189,22 @@ export class ProjectionComponent {
   }
 
   getPhaseClass(phase: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (phase) {
-      case 'Gestation': return 'badge--gestation';
-      case 'Allaitement': return 'badge--allaitement';
-      case 'Engraissement': return 'badge--engraissement';
-      default: return 'badge--neutral';
+      case 'Gestation': return `${base} bg-purple-100 text-purple-800`;
+      case 'Allaitement': return `${base} bg-blue-100 text-blue-800`;
+      case 'Engraissement': return `${base} bg-orange-100 text-orange-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
   }
 
   getStatusClass(status: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (status) {
-      case 'OK': return 'badge--success';
-      case 'Limite': return 'badge--warning';
-      case 'Surcharge': return 'badge--danger';
-      default: return 'badge--neutral';
+      case 'OK': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Limite': return `${base} bg-amber-100 text-amber-800`;
+      case 'Surcharge': return `${base} bg-red-100 text-red-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
   }
 

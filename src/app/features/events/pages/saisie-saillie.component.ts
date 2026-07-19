@@ -34,9 +34,9 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Formulaire de saisie -->
-        <div class="panel lg:col-span-2">
-          <p class="panel__title">
-            <mat-icon>favorite</mat-icon> Informations de l'accouplement
+        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+            <mat-icon class="text-emerald-700">favorite</mat-icon> Informations de l'accouplement
           </p>
           
           <form [formGroup]="saillieForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-4">
@@ -108,9 +108,9 @@ import { provideNativeDateAdapter } from '@angular/material/core';
         </div>
 
         <!-- Section de calcul et prévisions -->
-        <div class="panel">
-          <p class="panel__title">
-            <mat-icon>query_builder</mat-icon>
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+            <mat-icon class="text-emerald-700">query_builder</mat-icon>
             Dates Prévisionnelles du Cycle
           </p>
 

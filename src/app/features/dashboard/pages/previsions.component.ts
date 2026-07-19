@@ -23,9 +23,9 @@ interface PrevisionItem {
         subtitle="Chronologie des futurs événements biologiques et commerciaux">
       </app-page-header>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Colonne 1: Mises-bas (🔴) -->
-        <div class="panel flex flex-col h-[520px]">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
           <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
             <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
               <mat-icon>favorite</mat-icon>
@@ -55,7 +55,7 @@ interface PrevisionItem {
         </div>
 
         <!-- Colonne 2: Sevrages (🟡) -->
-        <div class="panel flex flex-col h-[520px]">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
           <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
             <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500">
               <mat-icon>child_friendly</mat-icon>
@@ -85,7 +85,7 @@ interface PrevisionItem {
         </div>
 
         <!-- Colonne 3: Ventes (🟢) -->
-        <div class="panel flex flex-col h-[520px]">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
           <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
             <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">
               <mat-icon>point_of_sale</mat-icon>

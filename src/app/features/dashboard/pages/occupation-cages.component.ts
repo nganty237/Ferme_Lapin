@@ -45,10 +45,10 @@ interface SevrageEnCours {
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" *ngIf="kpis()">
         <!-- Graphique Barre Horizontale -->
-        <div class="panel lg:col-span-2 flex flex-col justify-between">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2 flex flex-col justify-between">
           <div>
-            <p class="panel__title">
-              <mat-icon>grid_view</mat-icon>
+            <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">grid_view</mat-icon>
               Occupation Cages Engraissement
             </p>
             <div class="my-6">
@@ -71,27 +71,27 @@ interface SevrageEnCours {
             </div>
           </div>
           
-          <div class="flex gap-6 border-t pt-4 border-slate-100 text-xs text-slate-500">
+          <div class="flex flex-wrap gap-x-4 gap-y-2 border-t pt-4 border-slate-100 text-xs text-slate-500">
             <div class="flex items-center gap-1.5">
-              <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+              <div class="w-3.5 h-1.5 rounded bg-emerald-500"></div>
               <span>Normal (&lt; 80%)</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+              <div class="w-3.5 h-1.5 rounded bg-amber-500"></div>
               <span>Élevé (80% - 90%)</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3.5 h-1.5 rounded bg-red-500"></div>
               <span>Critique (&gt; 90%)</span>
             </div>
           </div>
         </div>
 
         <!-- Légende/Infos -->
-        <div class="panel flex flex-col justify-between">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-between">
           <div>
-            <p class="panel__title">
-              <mat-icon>info</mat-icon>
+            <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">info</mat-icon>
               Métriques de Capacité
             </p>
             <div class="flex flex-col gap-4 my-4">
@@ -114,39 +114,39 @@ interface SevrageEnCours {
       </div>
 
       <!-- Tableau Sevrages en cours -->
-      <div class="panel">
-        <p class="panel__title">
-          <mat-icon>hourglass_bottom</mat-icon>
+      <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+          <mat-icon class="text-emerald-700">hourglass_bottom</mat-icon>
           Portées en Cours d'Engraissement (Détails)
         </p>
 
         <div class="overflow-x-auto mt-4" style="max-height: 400px;">
-          <table class="data-table">
+          <table class="w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th>Portée ID</th>
-                <th>Femelle</th>
-                <th>Lapereaux</th>
-                <th>Cages Estimées</th>
-                <th>Jours Restants</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Portée ID</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Femelle</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Lapereaux</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Cages Estimées</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Jours Restants</th>
               </tr>
             </thead>
             <tbody>
               @if (sevragesEnCours().length === 0) {
-                <tr>
-                  <td colspan="5" class="text-center py-8 text-slate-400">
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td colspan="5" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">
                     Aucune portée en cours d'engraissement actuellement.
                   </td>
                 </tr>
               } @else {
-                <tr *ngFor="let sev of sevragesEnCours()">
-                  <td class="font-semibold text-slate-700">#{{ sev.porteeId }}</td>
-                  <td>{{ sev.femelleId }}</td>
-                  <td>
-                    <span class="badge badge--info">{{ sev.lapereaux }} lapins</span>
+                <tr *ngFor="let sev of sevragesEnCours()" class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-semibold text-slate-700">#{{ sev.porteeId }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ sev.femelleId }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-blue-100 text-blue-800">{{ sev.lapereaux }} lapins</span>
                   </td>
-                  <td>{{ sev.cages }}</td>
-                  <td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ sev.cages }}</td>
+                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
                     <span class="font-mono font-medium" [ngClass]="sev.joursRestants <= 0 ? 'text-emerald-600 font-bold' : 'text-slate-600'">
                       {{ sev.joursRestants <= 0 ? 'Prêt pour vente' : sev.joursRestants + ' jours' }}
                     </span>

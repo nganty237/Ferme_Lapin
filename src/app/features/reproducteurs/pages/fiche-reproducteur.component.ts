@@ -37,7 +37,7 @@ import { MatButtonModule } from '@angular/material/button';
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ reproducteur()?.nom || reproducteur()?.id }}</h1>
-                <span class="badge" [ngClass]="getEtatClass(reproducteur()?.etat || '')">
+                <span [class]="getEtatClass(reproducteur()?.etat || '')">
                   {{ reproducteur()?.etat }}
                 </span>
               </div>
@@ -58,7 +58,7 @@ import { MatButtonModule } from '@angular/material/button';
         </div>
 
         <!-- Banner de Confirmation de Retrait -->
-        <div class="panel border-red-200 bg-red-50/50 mb-6 flex flex-wrap items-center justify-between gap-4" *ngIf="showDeleteConfirm">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 border-red-200 bg-red-50/50 mb-6 flex flex-wrap items-center justify-between gap-4" *ngIf="showDeleteConfirm">
           <div class="flex items-start gap-3">
             <mat-icon class="text-red-600" style="font-size: 24px; width: 24px; height: 24px; margin-top: 2px;">warning</mat-icon>
             <div>
@@ -85,9 +85,9 @@ import { MatButtonModule } from '@angular/material/button';
           <div class="space-y-6 lg:col-span-1">
             
             <!-- Fiche Details -->
-            <div class="panel">
-              <h2 class="section-title">
-                <mat-icon>info</mat-icon>
+            <div class="bg-white border border-slate-200 rounded-xl p-6">
+              <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <mat-icon class="text-emerald-700">info</mat-icon>
                 Informations Générales
               </h2>
 
@@ -101,7 +101,7 @@ import { MatButtonModule } from '@angular/material/button';
 
                   <span class="text-slate-500 font-medium">État actuel</span>
                   <span>
-                    <span class="badge" [ngClass]="getEtatClass(reproducteur()?.etat || '')">
+                    <span [class]="getEtatClass(reproducteur()?.etat || '')">
                       {{ reproducteur()?.etat }}
                     </span>
                   </span>
@@ -148,9 +148,9 @@ import { MatButtonModule } from '@angular/material/button';
             </div>
 
             <!-- Performances Calculées -->
-            <div class="panel">
-              <h2 class="section-title">
-                <mat-icon>analytics</mat-icon>
+            <div class="bg-white border border-slate-200 rounded-xl p-6">
+              <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <mat-icon class="text-emerald-700">analytics</mat-icon>
                 Performances
               </h2>
 
@@ -208,37 +208,37 @@ import { MatButtonModule } from '@angular/material/button';
           <div class="space-y-6 lg:col-span-2">
             
             <!-- FEMELLE : Historique Saillies -->
-            <div class="panel" *ngIf="reproducteur()?.sexe === 'F'">
-              <h2 class="section-title">
-                <mat-icon style="color: #ec4899;">favorite</mat-icon>
+            <div class="bg-white border border-slate-200 rounded-xl p-6" *ngIf="reproducteur()?.sexe === 'F'">
+              <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <mat-icon class="text-emerald-700" style="color: #ec4899;">favorite</mat-icon>
                 Historique des Saillies
               </h2>
 
               <div class="overflow-x-auto">
-                <table class="data-table">
+                <table class="w-full border-separate border-spacing-0 text-sm">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Mâle Partenaire</th>
-                      <th>Date M.B. Prévue</th>
-                      <th class="text-center">Statut / Résultat</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Date</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Mâle Partenaire</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Date M.B. Prévue</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Statut / Résultat</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngIf="femaleSaillies().length === 0">
-                      <td colspan="4" class="text-center py-6 text-slate-400">Aucune saillie enregistrée.</td>
+                    <tr *ngIf="femaleSaillies().length === 0" class="hover:bg-slate-50/50 transition-colors">
+                      <td colspan="4" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-6 text-slate-400">Aucune saillie enregistrée.</td>
                     </tr>
-                    <tr *ngFor="let s of femaleSaillies()">
-                      <td class="font-semibold text-slate-700">{{ s.dateSaillie | date:'dd/MM/yyyy' }}</td>
-                      <td>
+                    <tr *ngFor="let s of femaleSaillies()" class="hover:bg-slate-50/50 transition-colors">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle font-semibold text-slate-700">{{ s.dateSaillie | date:'dd/MM/yyyy' }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
                         <a [routerLink]="['/reproducteurs', s.maleId]" class="partner-link font-semibold">
                           <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:2px;">link</mat-icon>
                           {{ s.maleName || s.maleId }}
                         </a>
                       </td>
-                      <td class="font-mono text-slate-500">{{ s.dateMiseBasPrevue | date:'dd/MM/yyyy' }}</td>
-                      <td class="text-center">
-                        <span class="badge" [ngClass]="s.reussie === true ? 'badge--success' : s.reussie === false ? 'badge--danger' : 'badge--warning'">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono text-slate-500">{{ s.dateMiseBasPrevue | date:'dd/MM/yyyy' }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
+                        <span [class]="getSaillieResultClass(s.reussie)">
                           {{ s.reussie === true ? 'Réussie' : s.reussie === false ? 'Échouée' : 'En attente' }}
                         </span>
                       </td>
@@ -249,47 +249,47 @@ import { MatButtonModule } from '@angular/material/button';
             </div>
 
             <!-- FEMELLE : Historique Portées -->
-            <div class="panel" *ngIf="reproducteur()?.sexe === 'F'">
-              <h2 class="section-title">
-                <mat-icon style="color: #a855f7;">child_care</mat-icon>
+            <div class="bg-white border border-slate-200 rounded-xl p-6" *ngIf="reproducteur()?.sexe === 'F'">
+              <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <mat-icon class="text-emerald-700" style="color: #a855f7;">child_care</mat-icon>
                 Historique des Portées & Sevrages
               </h2>
 
               <div class="overflow-x-auto">
-                <table class="data-table">
+                <table class="w-full border-separate border-spacing-0 text-sm">
                   <thead>
                     <tr>
-                      <th>Date M.B.</th>
-                      <th class="text-center">Nés Vivants</th>
-                      <th class="text-center">Mort-nés</th>
-                      <th class="text-center">Viabilité</th>
-                      <th>Sevrage (Date)</th>
-                      <th class="text-center">Sevrés</th>
-                      <th class="text-center">Survie Sevrage</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Date M.B.</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Nés Vivants</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Mort-nés</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Viabilité</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Sevrage (Date)</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Sevrés</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Survie Sevrage</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngIf="femalePortees().length === 0">
-                      <td colspan="7" class="text-center py-6 text-slate-400">Aucune portée enregistrée.</td>
+                    <tr *ngIf="femalePortees().length === 0" class="hover:bg-slate-50/50 transition-colors">
+                      <td colspan="7" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-6 text-slate-400">Aucune portée enregistrée.</td>
                     </tr>
-                    <tr *ngFor="let p of femalePortees()">
-                      <td class="font-semibold text-slate-700">{{ p.dateMiseBas | date:'dd/MM/yyyy' }}</td>
-                      <td class="text-center font-mono">{{ p.vivants }}</td>
-                      <td class="text-center font-mono text-slate-400">{{ p.mortsNes }}</td>
-                      <td class="text-center">
-                        <span class="badge" [ngClass]="p.viabiliteCalculee >= 90 ? 'badge--success' : p.viabiliteCalculee >= 75 ? 'badge--warning' : 'badge--danger'">
+                    <tr *ngFor="let p of femalePortees()" class="hover:bg-slate-50/50 transition-colors">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle font-semibold text-slate-700">{{ p.dateMiseBas | date:'dd/MM/yyyy' }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono">{{ p.vivants }}</td>
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-mono text-slate-400">{{ p.mortsNes }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
+                        <span [class]="getPercentBadgeClass(p.viabiliteCalculee)">
                           {{ p.viabiliteCalculee }}%
                         </span>
                       </td>
-                      <td>
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle">
                         <span class="text-slate-600" *ngIf="p.sevrageDate">{{ p.sevrageDate | date:'dd/MM/yyyy' }}</span>
                         <span class="text-slate-400 italic" *ngIf="!p.sevrageDate">En cours</span>
                       </td>
-                      <td class="text-center font-mono text-slate-700">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-mono text-slate-700">
                         {{ p.sevrageSevres !== null ? p.sevrageSevres : '—' }}
                       </td>
-                      <td class="text-center">
-                        <span class="badge" *ngIf="p.sevrageSevres !== null" [ngClass]="round((p.sevrageSevres / p.vivants) * 100) >= 90 ? 'badge--success' : round((p.sevrageSevres / p.vivants) * 100) >= 75 ? 'badge--warning' : 'badge--danger'">
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
+                        <span *ngIf="p.sevrageSevres !== null" [class]="getPercentBadgeClass(round((p.sevrageSevres / p.vivants) * 100))">
                           {{ round((p.sevrageSevres / p.vivants) * 100) }}%
                         </span>
                         <span class="text-slate-400" *ngIf="p.sevrageSevres === null">—</span>
@@ -301,37 +301,37 @@ import { MatButtonModule } from '@angular/material/button';
             </div>
 
             <!-- MÂLE : Historique Couvertures -->
-            <div class="panel" *ngIf="reproducteur()?.sexe === 'M'">
-              <h2 class="section-title">
-                <mat-icon style="color: #3b82f6;">favorite</mat-icon>
+            <div class="bg-white border border-slate-200 rounded-xl p-6" *ngIf="reproducteur()?.sexe === 'M'">
+              <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <mat-icon class="text-emerald-700" style="color: #3b82f6;">favorite</mat-icon>
                 Historique des Couvertures
               </h2>
 
               <div class="overflow-x-auto">
-                <table class="data-table">
+                <table class="w-full border-separate border-spacing-0 text-sm">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Femelle Partenaire</th>
-                      <th>Date M.B. Prévue</th>
-                      <th class="text-center">Statut / Résultat</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Date</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Femelle Partenaire</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Date M.B. Prévue</th>
+                      <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Statut / Résultat</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngIf="maleSaillies().length === 0">
-                      <td colspan="4" class="text-center py-6 text-slate-400">Aucune couverture enregistrée.</td>
+                    <tr *ngIf="maleSaillies().length === 0" class="hover:bg-slate-50/50 transition-colors">
+                      <td colspan="4" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-6 text-slate-400">Aucune couverture enregistrée.</td>
                     </tr>
-                    <tr *ngFor="let s of maleSaillies()">
-                      <td class="font-semibold text-slate-700">{{ s.dateSaillie | date:'dd/MM/yyyy' }}</td>
-                      <td>
+                    <tr *ngFor="let s of maleSaillies()" class="hover:bg-slate-50/50 transition-colors">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle font-semibold text-slate-700">{{ s.dateSaillie | date:'dd/MM/yyyy' }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
                         <a [routerLink]="['/reproducteurs', s.femelleId]" class="partner-link font-semibold">
                           <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:2px;">link</mat-icon>
                           {{ s.femaleName || s.femelleId }}
                         </a>
                       </td>
-                      <td class="font-mono text-slate-500">{{ s.dateMiseBasPrevue | date:'dd/MM/yyyy' }}</td>
-                      <td class="text-center">
-                        <span class="badge" [ngClass]="s.reussie === true ? 'badge--success' : s.reussie === false ? 'badge--danger' : 'badge--warning'">
+                      <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono text-slate-500">{{ s.dateMiseBasPrevue | date:'dd/MM/yyyy' }}</td>
+                      <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
+                        <span [class]="getSaillieResultClass(s.reussie)">
                           {{ s.reussie === true ? 'Réussie' : s.reussie === false ? 'Échouée' : 'En attente' }}
                         </span>
                       </td>
@@ -346,7 +346,7 @@ import { MatButtonModule } from '@angular/material/button';
         </div>
       } @else {
         <!-- État d'erreur / Non trouvé -->
-        <div class="panel text-center py-16">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 text-center py-16">
           <mat-icon class="text-slate-300" style="font-size: 64px; width: 64px; height: 64px;">error_outline</mat-icon>
           <h2 class="text-xl font-bold text-slate-700 mt-4">Reproducteur non trouvé</h2>
           <p class="text-slate-500 mt-2">L'ID demandé n'existe pas ou a été supprimé.</p>
@@ -403,12 +403,7 @@ import { MatButtonModule } from '@angular/material/button';
       background: linear-gradient(135deg, #60a5fa, #2563eb);
     }
 
-    .badge--success { background: #ecfdf5; color: #059669; }
-    .badge--warning { background: #fffbeb; color: #d97706; }
-    .badge--danger { background: #fef2f2; color: #dc2626; }
-    .badge--neutral { background: #f1f5f9; color: #475569; }
-    .badge--gestation { background: #fdf4ff; color: #a855f7; }
-    .badge--allaitement { background: #eff6ff; color: #3b82f6; }
+
 
     .form-input {
       padding: 10px 14px;
@@ -679,14 +674,29 @@ export class FicheReproducteurComponent {
   }
 
   getEtatClass(etat: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (etat) {
-      case 'Actif': return 'badge--success';
-      case 'En gestation': return 'badge--gestation';
-      case 'En allaitement': return 'badge--allaitement';
-      case 'Réformé': return 'badge--warning';
-      case 'Mort': return 'badge--danger';
-      default: return 'badge--neutral';
+      case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'En gestation': return `${base} bg-purple-100 text-purple-800`;
+      case 'En allaitement': return `${base} bg-blue-100 text-blue-800`;
+      case 'Réformé': return `${base} bg-amber-100 text-amber-800`;
+      case 'Mort': return `${base} bg-red-100 text-red-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
+  }
+
+  getSaillieResultClass(reussie: boolean | null): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
+    if (reussie === true) return `${base} bg-emerald-100 text-emerald-800`;
+    if (reussie === false) return `${base} bg-red-100 text-red-800`;
+    return `${base} bg-amber-100 text-amber-800`;
+  }
+
+  getPercentBadgeClass(pct: number): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
+    if (pct >= 90) return `${base} bg-emerald-100 text-emerald-800`;
+    if (pct >= 75) return `${base} bg-amber-100 text-amber-800`;
+    return `${base} bg-red-100 text-red-800`;
   }
 
   startEdit(): void {

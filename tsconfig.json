@@ -16,8 +16,12 @@
     "module": "preserve",
     "baseUrl": "./",
     "paths": {
+      "@core/*": ["src/app/core/*"],
       "@core/models": ["src/app/core/models/index.ts"],
       "@core/services": ["src/app/core/services/index.ts"],
+      "@features/*": ["src/app/features/*"],
+      "@layout/*": ["src/app/layout/*"],
+      "@shared/*": ["src/app/shared/*"],
       "@shared/components": ["src/app/shared/components/index.ts"]
     }
   },

@@ -19,12 +19,12 @@ import { MatButtonModule } from '@angular/material/button';
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" *ngIf="kpis() && config()">
         <!-- Panel 1: Diagnostic Goulot Principal -->
-        <div class="panel lg:col-span-2">
-          <p class="panel__title">
-            <mat-icon class="text-amber-500">grid_view</mat-icon> Diagnostic de Capacité
+        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+            <mat-icon class="text-emerald-700">grid_view</mat-icon> Diagnostic de Capacité
           </p>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             <!-- Capacité Reproductrices -->
             <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl flex flex-col justify-between">
               <div>
@@ -32,7 +32,7 @@ import { MatButtonModule } from '@angular/material/button';
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ nbFemelles() }} femelles</strong>
                 <span class="text-[11px] text-slate-500 block mt-1">Capacité: {{ capacityFemelles() }} lapereaux / mois</span>
               </div>
-              <span class="badge badge--success mt-4 self-start">SATURÉE (100%)</span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-emerald-100 text-emerald-800 mt-4 self-start">SATURÉE (100%)</span>
             </div>
 
             <!-- Capacité Mâles -->
@@ -42,7 +42,7 @@ import { MatButtonModule } from '@angular/material/button';
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ nbMales() }} mâles</strong>
                 <span class="text-[11px] text-slate-500 block mt-1">Rapport: {{ femalesPerMale() | number:'1.0-1' }} femelles/mâle</span>
               </div>
-              <span class="badge badge--neutral mt-4 self-start">Marge OK (75% utilisé)</span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-slate-100 text-slate-700 mt-4 self-start">Marge OK (75% utilisé)</span>
             </div>
 
             <!-- Capacité Cages Engraissement -->
@@ -52,7 +52,7 @@ import { MatButtonModule } from '@angular/material/button';
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ capacityEngraissement() }} cages</strong>
                 <span class="text-[11px] text-slate-500 block mt-1">Capacité max: {{ capacityTheorique() }} lapereaux</span>
               </div>
-              <span class="badge badge--warning mt-4 self-start">Utilisation: {{ kpis()!.tauxUtilisationCages }}%</span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-amber-100 text-amber-800 mt-4 self-start">Utilisation: {{ kpis()!.tauxUtilisationCages }}%</span>
             </div>
           </div>
 
@@ -72,9 +72,9 @@ import { MatButtonModule } from '@angular/material/button';
         </div>
 
         <!-- Panel 2: ROI & Simulations d'extension -->
-        <div class="panel">
-          <p class="panel__title">
-            <mat-icon class="text-emerald-600">show_chart</mat-icon> ROI : Ajouter 50 Cages
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+            <mat-icon class="text-emerald-700">show_chart</mat-icon> ROI : Ajouter 50 Cages
           </p>
 
           <div class="mt-4 flex flex-col gap-4">
@@ -117,10 +117,6 @@ import { MatButtonModule } from '@angular/material/button';
   `,
   styles: [`
     :host { display: block; }
-    .badge--success { background: #ecfdf5; color: #059669; }
-    .badge--warning { background: #fffbeb; color: #d97706; }
-    .badge--danger { background: #fef2f2; color: #dc2626; }
-    .badge--neutral { background: #f1f5f9; color: #475569; }
   `]
 })
 export class OptimisationComponent {

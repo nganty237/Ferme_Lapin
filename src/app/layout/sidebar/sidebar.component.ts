@@ -9,24 +9,24 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule, MatButtonModule],
   template: `
-    <div class="sidebar-inner" [class.collapsed]="collapsed">
+    <div class="sidebar-inner flex flex-col h-full" [class.collapsed]="collapsed">
       <!-- Brand -->
-      <div class="sidebar-brand" [style.padding]="collapsed ? '0 12px' : '0 20px'" style="height: 64px; box-sizing: border-box; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); width: 100%; flex-shrink: 0;">
+      <div class="sidebar-brand flex items-center h-16 w-full shrink-0" [style.padding]="collapsed ? '0 12px' : '0 20px'">
         <div class="flex items-center w-full" [ngClass]="collapsed ? 'justify-center' : 'gap-3'">
-          <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
-            <mat-icon style="color:var(--color-primary-contrast);font-size:20px;width:20px;height:20px;">pets</mat-icon>
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/10">
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">agriculture</mat-icon>
           </div>
           @if (!collapsed) {
             <div>
-              <h1 style="font-size: 17px; font-weight: 700; color: var(--color-primary-contrast); margin: 0; line-height: 1.3;">Saveurs du Lapin</h1>
-              <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.05em;">Gestion de l'elevage</p>
+              <h1 class="text-sm font-semibold text-white tracking-tight leading-tight">Saveurs du Lapin</h1>
+              <p class="text-[10px] text-white/50 uppercase tracking-wider font-semibold mt-0.5">Gestion de l'élevage</p>
             </div>
           }
         </div>
       </div>
 
       <!-- Navigation -->
-      <nav style="padding:16px 0; display: flex; flex-direction: column; overflow-y: auto;">
+      <nav class="flex flex-col py-4 overflow-y-auto flex-1">
 
         <!-- Section: Dashboards -->
         @if (!collapsed) {
@@ -59,9 +59,9 @@ import { MatButtonModule } from '@angular/material/button';
 
         <!-- Section: Élevage -->
         @if (!collapsed) {
-          <span class="nav-section-label" style="margin-top:16px;">Élevage</span>
+          <span class="nav-section-label mt-4">Élevage</span>
         } @else {
-          <div style="margin:8px 24px; border-top:1px solid rgba(255,255,255,0.1);"></div>
+          <div class="my-2"></div>
         }
         <a routerLink="/reproducteurs/femelles" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
           <mat-icon>female</mat-icon>
@@ -74,9 +74,9 @@ import { MatButtonModule } from '@angular/material/button';
 
         <!-- Section: Événements -->
         @if (!collapsed) {
-          <span class="nav-section-label" style="margin-top:16px;">Événements</span>
+          <span class="nav-section-label mt-4">Événements</span>
         } @else {
-          <div style="margin:8px 24px; border-top:1px solid rgba(255,255,255,0.1);"></div>
+          <div class="my-2"></div>
         }
         <a routerLink="/saillies" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
           <mat-icon>favorite</mat-icon>
@@ -101,38 +101,36 @@ import { MatButtonModule } from '@angular/material/button';
 
         <!-- Section: Système -->
         @if (!collapsed) {
-          <span class="nav-section-label" style="margin-top:16px;">Système</span>
+          <span class="nav-section-label mt-4">Système</span>
         } @else {
-          <div style="margin:8px 24px; border-top:1px solid rgba(255,255,255,0.1);"></div>
+          <div class="my-2"></div>
         }
         <a routerLink="/parametres" routerLinkActive="active" class="nav-link" [class.collapsed-link]="collapsed">
           <mat-icon>tune</mat-icon>
           @if (!collapsed) { <span>Paramètres</span> }
         </a>
       </nav>
-      
-      <!-- Spacer -->
-      <div style="flex:1;"></div>
 
       <!-- Collapse Toggle -->
-      <div style="padding:16px; border-bottom: none; display: flex; justify-content: center;">
+      <div class="p-4 flex justify-center">
         <button mat-button (click)="toggleCollapse()" 
-                style="color:rgba(255,255,255,0.7); display:flex; align-items:center; border-radius: 8px; height: auto; min-width: 40px; transition: all 0.3s ease;" 
-                [style.width]="collapsed ? '48px' : '100%'"
-                [style.padding]="collapsed ? '12px 0' : '12px'"
+                class="hover:bg-white/5 flex items-center rounded-lg transition-all duration-200" 
+                style="color: #ffffff !important;"
+                [style.width]="collapsed ? '40px' : '100%'"
+                [style.padding]="collapsed ? '8px 0' : '8px 12px'"
                 [style.justify-content]="collapsed ? 'center' : 'flex-start'" 
                 [style.gap.px]="collapsed ? 0 : 8">
-          <mat-icon style="margin: 0;">{{ collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}</mat-icon>
-          @if (!collapsed) { <span style="font-weight: 500;">Réduire</span> }
+          <mat-icon class="m-0" style="color: #ffffff !important;">{{ collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}</mat-icon>
+          @if (!collapsed) { <span class="text-xs font-medium">Réduire</span> }
         </button>
       </div>
 
       <!-- Footer -->
-      <div style="padding:16px; text-align:center;">
+      <div class="p-3 text-center bg-black/10">
         @if (!collapsed) {
-          <span style="font-size:11px; color:rgba(255,255,255,0.4);">Projet academique 2026</span>
+          <span class="text-[9px] text-white/30 font-medium tracking-wide uppercase">PROJET ACADÉMIQUE © 2026</span>
         } @else {
-          <mat-icon style="color:rgba(255,255,255,0.4); font-size:16px;">school</mat-icon>
+          <mat-icon style="color:rgba(255,255,255,0.3); font-size:16px; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;">school</mat-icon>
         }
       </div>
     </div>
@@ -164,7 +162,7 @@ import { MatButtonModule } from '@angular/material/button';
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: rgba(255, 255, 255, 0.35);
-      padding: 8px 28px 4px;
+      padding: 8px 24px 4px;
     }
   `]
 })

@@ -78,7 +78,7 @@ Chart.register(...registerables);
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Alerts -->
         <div>
-          <div class="section-title">
+          <div class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <mat-icon>notifications_none</mat-icon>
             Alertes de l'élevage
           </div>
@@ -99,14 +99,14 @@ Chart.register(...registerables);
 
         <!-- Charts -->
         <div class="lg:col-span-2">
-          <div class="section-title">
+          <div class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <mat-icon>insert_chart_outlined</mat-icon>
             Suivi graphique
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="panel">
-              <p class="panel__title">
+            <div class="bg-white border border-slate-200/80 rounded-xl p-6">
+              <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
                 <mat-icon>timeline</mat-icon>
                 Naissance et sevrage récents
               </p>
@@ -115,8 +115,8 @@ Chart.register(...registerables);
               </div>
             </div>
 
-            <div class="panel">
-              <p class="panel__title">
+            <div class="bg-white border border-slate-200/80 rounded-xl p-6">
+              <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
                 <mat-icon>bar_chart</mat-icon>
                 Ventes par mois
               </p>
@@ -131,8 +131,8 @@ Chart.register(...registerables);
       <!-- Section Cages & Décision (Maintenant affichée après les graphiques) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" *ngIf="kpis() && config()">
         <!-- Cages Reproductrices et Engraissement -->
-        <div class="panel lg:col-span-2">
-          <p class="panel__title">
+        <div class="bg-white border border-slate-200/80 rounded-xl p-6 lg:col-span-2">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
             <mat-icon>grid_view</mat-icon> État Cages (Temps Réel)
           </p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -174,8 +174,8 @@ Chart.register(...registerables);
         </div>
 
         <!-- Décision & Alertes de Capacité -->
-        <div class="panel" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'border-red-100 bg-red-50/10' : 'border-emerald-100 bg-emerald-50/10'">
-          <p class="panel__title" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'text-red-800' : 'text-emerald-800'">
+        <div class="bg-white border border-slate-200/80 rounded-xl p-6" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'border-red-100 bg-red-50/10' : 'border-emerald-100 bg-emerald-50/10'">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2" [ngClass]="kpis()!.occupationCages.pourcentage > 80 ? 'text-red-800' : 'text-emerald-800'">
             <mat-icon>{{ kpis()!.occupationCages.pourcentage > 80 ? 'warning' : 'assistant' }}</mat-icon> Aide à la Décision
           </p>
           <div class="mt-4 flex flex-col gap-4">

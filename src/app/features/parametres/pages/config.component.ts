@@ -27,18 +27,18 @@ import { MatIconModule } from '@angular/material/icon';
       </app-page-header>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         <!-- Colonne Gauche : Configuration technique -->
         <div class="space-y-6">
           <!-- Formulaire configuration -->
-          <div class="panel">
-            <h2 class="panel__title">
-              <mat-icon>settings</mat-icon>
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">settings</mat-icon>
               Configuration Technique
             </h2>
-            
+
             <form [formGroup]="configForm" (ngSubmit)="saveConfig()" class="space-y-4">
-              
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="form-label">Nombre total de cages</label>
@@ -101,14 +101,14 @@ import { MatIconModule } from '@angular/material/icon';
           </div>
 
           <!-- Durées physiologiques (lecture seule) -->
-          <div class="panel">
-            <h2 class="panel__title">
-              <mat-icon>hourglass_empty</mat-icon>
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">hourglass_empty</mat-icon>
               Durées Cycles Biologiques
             </h2>
-            
+
             <div class="space-y-4">
-              <div class="grid grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="readonly-box">
                   <span class="readonly-box__val">31</span>
                   <span class="readonly-box__lbl">Gestation (Jours)</span>
@@ -128,7 +128,7 @@ import { MatIconModule } from '@angular/material/icon';
                 <mat-icon class="banner-icon">info</mat-icon>
                 <div class="banner-content">
                   <p class="banner-text">
-                    Les durées biologiques et physiologiques de gestation, d'allaitement et d'engraissement sont fixes 
+                    Les durées biologiques et physiologiques de gestation, d'allaitement et d'engraissement sont fixes
                     conformément aux standards physiologiques du lapin de chair et ne sont pas modifiables.
                   </p>
                 </div>
@@ -139,14 +139,14 @@ import { MatIconModule } from '@angular/material/icon';
 
         <!-- Colonne Droite : Import/Export et Reset -->
         <div class="space-y-6">
-          
+
           <!-- Sauvegarde et Transfert -->
-          <div class="panel">
-            <h2 class="panel__title">
-              <mat-icon>backup</mat-icon>
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">backup</mat-icon>
               Sauvegarde et Restauration
             </h2>
-            
+
             <p class="text-sm text-slate-500 mb-6 leading-relaxed">
               Téléchargez une sauvegarde de vos données locales sous format JSON ou importez un fichier de sauvegarde existant.
               Toutes les données de la ferme (reproducteurs, portées, ventes, cages) sont incluses.
@@ -167,9 +167,9 @@ import { MatIconModule } from '@angular/material/icon';
           </div>
 
           <!-- Réinitialisation et Danger -->
-          <div class="panel border-red-100">
-            <h2 class="panel__title text-red-700">
-              <mat-icon class="text-red-600">warning</mat-icon>
+          <div class="bg-white border border-slate-200 rounded-xl p-6 border-red-100">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2 text-red-700">
+              <mat-icon class="text-emerald-700">warning</mat-icon>
               Zone de Danger
             </h2>
 
@@ -194,7 +194,7 @@ import { MatIconModule } from '@angular/material/icon';
               <mat-icon class="banner-icon">error_outline</mat-icon>
               <div class="banner-content">
                 <p class="banner-text">
-                  Vider les données supprime définitivement toutes les fiches, bandes, reproductions, saillies, mises-bas et ventes. 
+                  Vider les données supprime définitivement toutes les fiches, bandes, reproductions, saillies, mises-bas et ventes.
                   Prenez soin d'exporter une sauvegarde JSON avant d'effectuer cette opération.
                 </p>
               </div>
@@ -431,11 +431,11 @@ export class ConfigComponent implements OnInit {
     reader.onload = (e: any) => {
       try {
         const json = JSON.parse(e.target.result);
-        
+
         // Simple validation check: we expect some database keys in the backup JSON
         const keys = Object.keys(json);
         const hasRequiredKeys = keys.some(key => key.includes('REPRODUCTEURS') || key.includes('SAILLIES') || key.includes('BANDS'));
-        
+
         if (!hasRequiredKeys) {
           this.notifier.error('Le fichier importé n\'est pas une sauvegarde valide.');
           return;
@@ -467,7 +467,7 @@ export class ConfigComponent implements OnInit {
   }
 
   clearDatabase(): void {
-    if (confirm('⚠️ DANGER : Supprimer définitivement toutes vos données locales ? Cette action est irréversible.')) {
+    if (confirm(' DANGER : Supprimer définitivement toutes vos données locales ? Cette action est irréversible.')) {
       this.storageService.clearAll();
       this.calcService.loadAllData();
       this.ngOnInit();
