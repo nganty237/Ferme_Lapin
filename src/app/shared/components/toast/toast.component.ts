@@ -55,9 +55,7 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
       gap: 12px;
       padding: 14px 16px;
       border-radius: 12px;
-      background: white;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--color-border, #e8eaed);
+      box-shadow: none;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       animation: toastFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -79,16 +77,16 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
     }
 
     .toast-success {
-      border-left: 4px solid var(--color-success, #16a34a);
+      background: var(--color-success, #16a34a);
     }
     .toast-warning {
-      border-left: 4px solid var(--color-warning, #f59e0b);
+      background: var(--color-warning, #f59e0b);
     }
     .toast-error {
-      border-left: 4px solid var(--color-danger, #ef4444);
+      background: var(--color-danger, #ef4444);
     }
     .toast-info {
-      border-left: 4px solid var(--color-info, #3b82f6);
+      background: var(--color-info, #3b82f6);
     }
 
     .toast-icon {
@@ -96,17 +94,14 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
       font-size: 20px;
       width: 20px;
       height: 20px;
+      color: #ffffff;
     }
-    .icon-success { color: var(--color-success, #16a34a); }
-    .icon-warning { color: var(--color-warning, #f59e0b); }
-    .icon-error { color: var(--color-danger, #ef4444); }
-    .icon-info { color: var(--color-info, #3b82f6); }
 
     .toast-message {
       flex: 1;
       font-size: 13px;
       font-weight: 500;
-      color: var(--color-text-main, #1e293b);
+      color: #ffffff;
       line-height: 1.45;
       padding-top: 1px;
     }
@@ -115,7 +110,7 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
       background: transparent;
       border: none;
       cursor: pointer;
-      color: var(--color-text-light, #94a3b8);
+      color: rgba(255, 255, 255, 0.85);
       padding: 2px;
       display: flex;
       align-items: center;
@@ -125,8 +120,8 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
       margin-top: -2px;
     }
     .toast-close:hover {
-      color: var(--color-text-main, #1e293b);
-      background: var(--color-border-light, #f1f5f9);
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
     }
     .toast-close .mat-icon {
       font-size: 16px;

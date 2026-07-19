@@ -182,7 +182,6 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-surface);
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  border-left: 4px solid var(--color-primary);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .kpi-card:hover {
@@ -229,7 +228,6 @@ h1, h2, h3, h4, h5, h6 {
 .alert-item {
   padding: 14px 16px;
   border-radius: 10px;
-  border-left: 4px solid;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -238,15 +236,15 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--color-border);
 }
 .alert-item--danger {
-  border-left-color: var(--color-danger);
+  border-color: var(--color-danger);
   background: var(--color-danger-bg);
 }
 .alert-item--warning {
-  border-left-color: var(--color-warning);
+  border-color: var(--color-warning);
   background: var(--color-warning-bg);
 }
 .alert-item--info {
-  border-left-color: var(--color-primary);
+  border-color: var(--color-primary);
   background: var(--color-primary-alpha);
 }
 .alert-item .mat-icon {
