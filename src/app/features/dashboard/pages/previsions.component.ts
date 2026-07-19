@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
@@ -119,7 +119,8 @@ interface PrevisionItem {
   styles: [`
     :host { display: block; }
     ::-webkit-scrollbar { width: 4px; }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrevisionsComponent {
   private calcService = inject(CalculationService);

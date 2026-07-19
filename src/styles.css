@@ -40,7 +40,7 @@
 
 /* --- Typography --- */
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-main);
@@ -49,8 +49,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', system-ui, sans-serif;
-  letter-spacing: -0.01em;
+  font-family: inherit;
+  letter-spacing: 0;
 }
 
 /* --- Angular Material Overrides --- */
@@ -62,7 +62,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mat-mdc-form-field {
-  font-family: 'Inter', sans-serif !important;
+  font-family: inherit !important;
 }
 
 .mat-mdc-button.mat-primary, 

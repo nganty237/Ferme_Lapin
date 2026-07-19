@@ -5,6 +5,7 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import compression from 'compression';
 import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -12,17 +13,41 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+app.use(compression());
+app.use(express.json());
+
+// Proxy requests to /api to the json-server on port 3000
+app.all('/api/{*splat}', (req, res) => {
+  const targetPath = req.originalUrl.replace(/^\/api/, '');
+  const targetUrl = `http://localhost:3000${targetPath}`;
+
+  const options: RequestInit = {
+    method: req.method,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  };
+
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    options.body = JSON.stringify(req.body);
+  }
+
+  fetch(targetUrl, options)
+    .then(async (response) => {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        res.status(response.status).json(data);
+      } else {
+        const text = await response.text();
+        res.status(response.status).send(text);
+      }
+    })
+    .catch((err) => {
+      console.error('[SSR API Proxy Error]:', err);
+      res.status(502).json({ error: 'Bad Gateway', message: 'Local API server (json-server) is not running on port 3000.' });
+    });
+});
 
 /**
  * Serve static files from /browser

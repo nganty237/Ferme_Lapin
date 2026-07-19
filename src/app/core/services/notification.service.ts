@@ -4,14 +4,8 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { CalculationService, KPIs } from './calculation.service';
 import { ToastService } from './toast.service';
 
-/**
- * Types de notification : CRITIQUE (rouge), WARNING (orange), INFO (vert).
- */
 export type NotifType = 'CRITIQUE' | 'WARNING' | 'INFO';
 
-/**
- * Structure d'une notification applicative.
- */
 export interface AppNotification {
   id: string;
   type: NotifType;
@@ -21,15 +15,6 @@ export interface AppNotification {
   lue: boolean;
 }
 
-/**
- * NotificationService — Génération automatique de notifications + toasts.
- *
- * Responsabilités :
- * - Toasts visuels (success/error) via MatSnackBar (existant)
- * - Génération automatique de notifications basées sur les KPIs
- * - Observable notifications$ pour affichage dans le UI
- * - Pas de duplicates (ID unique par type de notification)
- */
 @Injectable({
   providedIn: 'root',
 })
@@ -43,42 +28,68 @@ export class NotificationService implements OnDestroy {
 
   private kpiSub: Subscription;
 
+  
+  /**
+   * Initialise le service.
+   * Logique : prepare les dependances et lance les traitements de demarrage.
+   */
   constructor() {
-    // S'abonner aux KPIs pour générer automatiquement les notifications
     this.kpiSub = this.calcService.kpis$.subscribe((kpis) => {
       this.generateFromKPIs(kpis);
     });
   }
 
+  
+  /**
+   * Nettoie les abonnements du service.
+   * Logique : libere la souscription aux KPI.
+   */
   ngOnDestroy(): void {
     this.kpiSub?.unsubscribe();
   }
 
-  // ══════════════════════════════════════════════
-  //  TOASTS (compatibilité existante)
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Affiche un toast de succes.
+   * Logique : delegue l affichage au service de toast.
+   */
   success(message: string): void {
     this.toastService.success(message);
   }
 
+  
+  /**
+   * Affiche un toast d erreur.
+   * Logique : delegue l affichage au service de toast.
+   */
   error(message: string): void {
     this.toastService.error(message);
   }
 
+  
+  /**
+   * Affiche un toast d avertissement.
+   * Logique : delegue l affichage au service de toast.
+   */
   warning(message: string): void {
     this.toastService.warning(message);
   }
 
+  
+  /**
+   * Affiche un toast d information.
+   * Logique : delegue l affichage au service de toast.
+   */
   info(message: string): void {
     this.toastService.info(message);
   }
 
-  // ══════════════════════════════════════════════
-  //  GESTION NOTIFICATIONS
-  // ══════════════════════════════════════════════
-
-  /** Ajoute une notification (remplace si même ID existe) */
+  
+  
+  /**
+   * Ajoute une notification applicative.
+   * Logique : remplace une notification existante de meme id puis remet la liste a jour.
+   */
   addNotification(type: NotifType, message: string, icon: string, id?: string): void {
     const notifId = id || `${type}_${Date.now()}`;
     const notif: AppNotification = {
@@ -90,12 +101,16 @@ export class NotificationService implements OnDestroy {
       lue: false,
     };
 
-    // Supprime l'ancienne notification du même ID (pas de duplicates)
     const current = this._notifications$.getValue().filter((n) => n.id !== notifId);
     this._notifications$.next([notif, ...current]);
   }
 
-  /** Marque une notification comme lue */
+  
+  
+  /**
+   * Marque une notification comme lue.
+   * Logique : met a jour l element correspondant dans le flux local.
+   */
   markAsRead(id: string): void {
     const updated = this._notifications$.getValue().map((n) =>
       n.id === id ? { ...n, lue: true } : n
@@ -103,41 +118,57 @@ export class NotificationService implements OnDestroy {
     this._notifications$.next(updated);
   }
 
-  /** Marque toutes les notifications comme lues */
+  
+  
+  /**
+   * Marque toutes les notifications comme lues.
+   * Logique : applique l etat lu a toute la liste.
+   */
   markAllAsRead(): void {
     const updated = this._notifications$.getValue().map((n) => ({ ...n, lue: true }));
     this._notifications$.next(updated);
   }
 
-  /** Supprime une notification */
+  
+  
+  /**
+   * Supprime un element affiche.
+   * Logique : retire la notification ou le toast correspondant a l id.
+   */
   dismiss(id: string): void {
     const updated = this._notifications$.getValue().filter((n) => n.id !== id);
     this._notifications$.next(updated);
   }
 
-  /** Vide toutes les notifications */
+  
+  
+  /**
+   * Vide la liste ou les donnees courantes.
+   * Logique : supprime les cles connues ou remet le flux local a zero.
+   */
   clearAll(): void {
     this._notifications$.next([]);
   }
 
-  /** Nombre de notifications non lues */
+  
+  
+  /**
+   * Retourne le nombre de notifications non lues.
+   * Logique : filtre la liste courante sur les notifications non lues.
+   */
   get unreadCount(): number {
     return this._notifications$.getValue().filter((n) => !n.lue).length;
   }
 
-  // ══════════════════════════════════════════════
-  //  GÉNÉRATION AUTOMATIQUE DEPUIS KPIs
-  // ══════════════════════════════════════════════
-
+  
+  
   /**
-   * Génère les notifications basées sur les KPIs calculés.
-   * Appelé automatiquement à chaque changement de données.
-   * Remplace les notifications du même type (pas de duplicates).
+   * Genere les notifications a partir des KPI.
+   * Logique : transforme les seuils metier en notifications automatiques.
    */
   private generateFromKPIs(kpis: KPIs): void {
     const notifs: AppNotification[] = [];
 
-    // ── CAGES : CRITIQUE si > 95% ──
     if (kpis.occupationCages.pourcentage > 95) {
       notifs.push(this.createNotif(
         'CRITIQUE',
@@ -146,7 +177,6 @@ export class NotificationService implements OnDestroy {
         'cages_critique'
       ));
     }
-    // ── CAGES : WARNING si 80-95% ──
     else if (kpis.occupationCages.pourcentage >= 80) {
       notifs.push(this.createNotif(
         'WARNING',
@@ -155,7 +185,6 @@ export class NotificationService implements OnDestroy {
         'cages_warning'
       ));
     }
-    // ── CAGES : INFO si <= 80% ──
     else {
       notifs.push(this.createNotif(
         'INFO',
@@ -165,7 +194,6 @@ export class NotificationService implements OnDestroy {
       ));
     }
 
-    // ── FÉCONDITÉ : WARNING si basse ──
     if (kpis.tauxFecondite > 0 && kpis.tauxFecondite < 70) {
       notifs.push(this.createNotif(
         'WARNING',
@@ -175,7 +203,6 @@ export class NotificationService implements OnDestroy {
       ));
     }
 
-    // ── SURVIE ALLAITEMENT : CRITIQUE si < 70% ──
     if (kpis.tauxSurvieAllaitement > 0 && kpis.tauxSurvieAllaitement < 70) {
       notifs.push(this.createNotif(
         'CRITIQUE',
@@ -192,7 +219,6 @@ export class NotificationService implements OnDestroy {
       ));
     }
 
-    // ── PORTÉES EN COURS : INFO ──
     if (kpis.nombrePorteesEnCours > 0) {
       notifs.push(this.createNotif(
         'INFO',
@@ -202,7 +228,6 @@ export class NotificationService implements OnDestroy {
       ));
     }
 
-    // ── PHASES BANDES : INFO ──
     notifs.push(this.createNotif(
       'INFO',
       `Bandes : A:${kpis.phasesBandes.A} | B:${kpis.phasesBandes.B} | C:${kpis.phasesBandes.C}`,
@@ -210,18 +235,19 @@ export class NotificationService implements OnDestroy {
       'phases_info'
     ));
 
-    // Générer les notifications liées aux événements temporels
     this.generateTimeBasedNotifs(notifs);
 
-    // Remplacer toutes les notifications auto-générées (conserver les manuelles)
     const manualNotifs = this._notifications$.getValue().filter(
       (n) => !n.id.includes('_critique') && !n.id.includes('_warning') && !n.id.includes('_info')
     );
     this._notifications$.next([...notifs, ...manualNotifs]);
   }
 
+  
+  
   /**
-   * Génère les notifications basées sur les dates (mise-bas prévue, sevrage demain, etc.)
+   * Genere les notifications basees sur les dates.
+   * Logique : inspecte les evenements proches pour creer les alertes temporelles.
    */
   private generateTimeBasedNotifs(notifs: AppNotification[]): void {
     const today = new Date();
@@ -234,13 +260,11 @@ export class NotificationService implements OnDestroy {
     const sevrages = this.calcService.sevrages;
     const deces = this.calcService.deces;
 
-    // ── CRITIQUE : Mise-bas prévue aujourd'hui ──
     for (const saillie of saillies) {
       if (saillie.dateMiseBasPrevue) {
         const datePrevue = new Date(saillie.dateMiseBasPrevue);
         datePrevue.setHours(0, 0, 0, 0);
         if (datePrevue.getTime() === today.getTime()) {
-          // Vérifier qu'aucune mise-bas n'a été enregistrée pour cette saillie
           const mbExiste = misesBas.some((mb: any) => mb.saillieId === saillie.id);
           if (!mbExiste) {
             notifs.push(this.createNotif(
@@ -254,9 +278,7 @@ export class NotificationService implements OnDestroy {
       }
     }
 
-    // ── WARNING : Sevrage demain ──
     for (const mb of misesBas) {
-      // Sevrage attendu ~31 jours après mise-bas
       const config = this.calcService.config;
       const dateSevragePrevue = new Date(mb.dateMiseBas);
       dateSevragePrevue.setDate(dateSevragePrevue.getDate() + (config.dureeAllaitementJours || 31));
@@ -275,7 +297,6 @@ export class NotificationService implements OnDestroy {
       }
     }
 
-    // ── CRITIQUE : Mâle décédé ──
     const reproducteurs = this.calcService.reproducteurs;
     for (const dec of deces) {
       const repro = reproducteurs.find(r => r.id === dec.reproducteurId);
@@ -289,7 +310,6 @@ export class NotificationService implements OnDestroy {
       }
     }
 
-    // ── INFO : Saillies confirmées ──
     const sailliesRecentes = saillies.filter((s: any) => {
       const dateSaillie = new Date(s.dateSaillie);
       dateSaillie.setHours(0, 0, 0, 0);
@@ -307,16 +327,22 @@ export class NotificationService implements OnDestroy {
     }
   }
 
-  // ══════════════════════════════════════════════
-  //  UTILITAIRES
-  // ══════════════════════════════════════════════
-
-  /** Crée un objet notification */
+  
+  
+  /**
+   * Construit une notification.
+   * Logique : normalise les champs necessaires a l affichage.
+   */
   private createNotif(type: NotifType, message: string, icon: string, id: string): AppNotification {
     return { id, type, message, icon, timestamp: new Date(), lue: false };
   }
 
-  /** Formate une date en string lisible */
+  
+  
+  /**
+   * Formate une date pour l affichage.
+   * Logique : utilise le format francais et prevoit un fallback texte.
+   */
   private formatDate(date: any): string {
     try {
       return new Date(date).toLocaleDateString('fr-FR', {

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -131,7 +131,8 @@ interface FemelleRow {
       transition: border-color 0.2s;
     }
     .form-select:focus { border-color: var(--color-primary); }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListeFemellesComponent {
   private calcService = inject(CalculationService);

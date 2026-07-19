@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -26,7 +26,8 @@ import { MatIconModule } from '@angular/material/icon';
         <div *ngIf="tag" class="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1 block">{{ tag }}</div>
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AlertCardComponent {
   @Input() type: 'danger' | 'warning' | 'info' = 'info';
@@ -40,4 +41,4 @@ export class AlertCardComponent {
       default: return 'info_outline';
     }
   }
-}
+}

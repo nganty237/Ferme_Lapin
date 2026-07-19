@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
@@ -96,7 +96,8 @@ interface ProjectionWeek {
   `,
   styles: [`
     :host { display: block; }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectionComponent {
   private calcService = inject(CalculationService);

@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
@@ -117,7 +117,8 @@ import { MatButtonModule } from '@angular/material/button';
   `,
   styles: [`
     :host { display: block; }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OptimisationComponent {
   private calcService = inject(CalculationService);

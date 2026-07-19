@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -22,7 +22,8 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
       <p *ngIf="hint" class="text-[11px] text-slate-400 mt-1.5">{{ hint }}</p>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricCardComponent {
   @Input() label = '';
@@ -31,4 +32,4 @@ export class MetricCardComponent {
   @Input() icon = 'bar_chart';
   @Input() iconBg = '#f0fdf4';
   @Input() iconColor = '#166534';
-}
+}

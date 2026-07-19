@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StorageService, CalculationService, NotificationService } from '@core/services';
@@ -357,7 +357,8 @@ import { MatIconModule } from '@angular/material/icon';
       color: #991b1b;
     }
     .danger-banner .banner-icon { color: var(--color-danger); }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConfigComponent implements OnInit {
   private storageService = inject(StorageService);

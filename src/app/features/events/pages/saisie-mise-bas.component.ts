@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -164,7 +164,8 @@ import { provideNativeDateAdapter } from '@angular/material/core';
       </div>
     </div>
   `,
-  styles: [`:host { display: block; }`]
+  styles: [`:host { display: block; }`],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SaisieMiseBasComponent {
   private calcService = inject(CalculationService);

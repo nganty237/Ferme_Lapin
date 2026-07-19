@@ -1,13 +1,11 @@
-import { Component, inject, computed, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
 import { MetricCardComponent, PageHeaderComponent, AlertCardComponent, EmptyStateComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Chart, registerables } from 'chart.js';
-
-Chart.register(...registerables);
+import type { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-accueil-dashboard',
@@ -204,11 +202,13 @@ Chart.register(...registerables);
       </div>
     </div>
   `,
-  styles: [`:host { display: block; }`]
+  styles: [`:host { display: block; }`],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AccueilComponent implements AfterViewInit {
+export class AccueilComponent {
   private calcService = inject(CalculationService);
   private notifService = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('barChartCanvas') barChartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -220,14 +220,36 @@ export class AccueilComponent implements AfterViewInit {
   config = toSignal(this.calcService.config$);
   notifications = toSignal(this.notifService.notifications$);
 
-  ngAfterViewInit(): void {
-    setTimeout(() => this.renderCharts(), 100);
+  constructor() {
+    afterNextRender(() => {
+      this.scheduleChartRender();
+    });
   }
 
-  renderCharts(): void {
+  private scheduleChartRender(): void {
+    if (typeof window === 'undefined') return;
+
+    const render = () => {
+      void this.renderCharts();
+    };
+
+    if ('requestIdleCallback' in window) {
+      const handle = window.requestIdleCallback(render, { timeout: 1800 });
+      this.destroyRef.onDestroy(() => window.cancelIdleCallback(handle));
+      return;
+    }
+
+    const timeout = globalThis.setTimeout(render, 1200);
+    this.destroyRef.onDestroy(() => globalThis.clearTimeout(timeout));
+  }
+
+  async renderCharts(): Promise<void> {
     if (typeof window === 'undefined' || !this.lineChartCanvas) return;
     if (this.lineChart) this.lineChart.destroy();
     if (this.barChart) this.barChart.destroy();
+
+    const { Chart, registerables } = await import('chart.js');
+    Chart.register(...registerables);
 
     const misesBas = this.calcService.misesBas;
     const sevrages = this.calcService.sevrages;
@@ -300,7 +322,7 @@ export class AccueilComponent implements AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' }, padding: 16 } }
+          legend: { position: 'bottom', labels: { font: { size: 11, family: 'system-ui' }, padding: 16 } }
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 10 } } },
@@ -359,7 +381,7 @@ export class AccueilComponent implements AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 11, family: 'Inter' }, padding: 16 } }
+          legend: { position: 'bottom', labels: { font: { size: 11, family: 'system-ui' }, padding: 16 } }
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 10 } } },

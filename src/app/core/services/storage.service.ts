@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Reproducteur, Saillie, MiseBas, Sevrage, Vente, Deces, Configuration } from '../models';
 
-/** Préfixe localStorage pour éviter les collisions */
 const PREFIX = 'cunicole_';
 
-/** Clés de stockage avec préfixe */
 const STORAGE_KEYS = {
   REPRODUCTEURS: `${PREFIX}reproducteurs`,
   SAILLIES: `${PREFIX}saillies`,
@@ -16,38 +14,34 @@ const STORAGE_KEYS = {
   NOTIFICATIONS: `${PREFIX}notifications`,
 } as const;
 
-/**
- * StorageService — Wrapper centralisé pour toutes les opérations CRUD localStorage.
- *
- * Responsabilités :
- * - CRUD complet pour chaque entité métier
- * - Sérialisation/désérialisation JSON avec gestion d'erreurs
- * - Export/Import de toutes les données
- * - Seed data de démonstration
- */
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
 
+  
+  /**
+   * Initialise le service.
+   * Logique : prepare les dependances et lance les traitements de demarrage.
+   */
   constructor() {
     if (this.isBrowser()) {
       this.initSeedData();
     }
   }
 
-  // ══════════════════════════════════════════════
-  //  UTILITAIRES INTERNES
-  // ══════════════════════════════════════════════
-
-  /** Vérifie si on est dans un contexte navigateur (pas SSR) */
+  
+  /**
+   * Verifie si le code s execute dans le navigateur.
+   * Logique : protege localStorage pendant le rendu serveur.
+   */
   private isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
   /**
-   * Lecture générique avec gestion d'erreurs de désérialisation.
-   * Retourne un tableau vide en cas de données corrompues.
+   * Lit une collection depuis le localStorage.
+   * Logique : deserialise le JSON et retourne une liste sure.
    */
   private getItems<T>(key: string): T[] {
     if (!this.isBrowser()) return [];
@@ -62,7 +56,10 @@ export class StorageService {
     }
   }
 
-  /** Écriture générique avec gestion d'erreurs de sérialisation */
+  /**
+   * Ecrit une collection dans le localStorage.
+   * Logique : serialise la liste et capture les erreurs d ecriture.
+   */
   private setItems<T>(key: string, items: T[]): void {
     if (!this.isBrowser()) return;
     try {
@@ -73,8 +70,8 @@ export class StorageService {
   }
 
   /**
-   * Lecture générique d'un objet unique (ex: configuration).
-   * Retourne la valeur par défaut si absent ou corrompu.
+   * Lit un objet depuis le localStorage.
+   * Logique : retourne une valeur par defaut si la cle est absente ou invalide.
    */
   private getObject<T>(key: string, defaultValue: T): T {
     if (!this.isBrowser()) return defaultValue;
@@ -88,7 +85,10 @@ export class StorageService {
     }
   }
 
-  /** Écriture générique d'un objet unique */
+  /**
+   * Ecrit un objet dans le localStorage.
+   * Logique : serialise la valeur et capture les erreurs d ecriture.
+   */
   private setObject<T>(key: string, value: T): void {
     if (!this.isBrowser()) return;
     try {
@@ -98,19 +98,29 @@ export class StorageService {
     }
   }
 
-  /** Génère un ID unique préfixé */
+  
+  /**
+   * Genere un identifiant unique.
+   * Logique : combine un prefixe, le timestamp et une chaine aleatoire.
+   */
   private generateId(prefix: string): string {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD REPRODUCTEURS
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne tous les reproducteurs.
+   * Logique : lit la collection reproducteurs depuis le stockage.
+   */
   getAllReproducteurs(): Reproducteur[] {
     return this.getItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS);
   }
 
+  
+  /**
+   * Ajoute un reproducteur.
+   * Logique : genere un id si necessaire, persiste la liste et retourne l entree creee.
+   */
   addReproducteur(item: Reproducteur): Reproducteur {
     const entry = { ...item, id: item.id || this.generateId('rep') };
     const all = this.getAllReproducteurs();
@@ -119,24 +129,40 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour un reproducteur.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateReproducteur(updated: Reproducteur): void {
     const all = this.getAllReproducteurs().map(r => r.id === updated.id ? { ...r, ...updated } : r);
     this.setItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS, all);
   }
 
+  
+  /**
+   * Supprime un reproducteur.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteReproducteur(id: string): void {
     const all = this.getAllReproducteurs().filter(r => r.id !== id);
     this.setItems<Reproducteur>(STORAGE_KEYS.REPRODUCTEURS, all);
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD SAILLIES
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne toutes les saillies.
+   * Logique : lit la collection saillies depuis le stockage.
+   */
   getAllSaillies(): Saillie[] {
     return this.getItems<Saillie>(STORAGE_KEYS.SAILLIES);
   }
 
+  
+  /**
+   * Ajoute une saillie.
+   * Logique : genere un id si necessaire, persiste la liste et retourne l entree creee.
+   */
   addSaillie(item: Saillie): Saillie {
     const entry = { ...item, id: item.id || this.generateId('sal') };
     const all = this.getAllSaillies();
@@ -145,24 +171,40 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour une saillie.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateSaillie(updated: Saillie): void {
     const all = this.getAllSaillies().map(s => s.id === updated.id ? { ...s, ...updated } : s);
     this.setItems<Saillie>(STORAGE_KEYS.SAILLIES, all);
   }
 
+  
+  /**
+   * Supprime une saillie.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteSaillie(id: string): void {
     const all = this.getAllSaillies().filter(s => s.id !== id);
     this.setItems<Saillie>(STORAGE_KEYS.SAILLIES, all);
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD MISES BAS
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne toutes les mises-bas.
+   * Logique : lit la collection mises-bas depuis le stockage.
+   */
   getAllMisesBas(): MiseBas[] {
     return this.getItems<MiseBas>(STORAGE_KEYS.MISES_BAS);
   }
 
+  
+  /**
+   * Ajoute une mise-bas.
+   * Logique : calcule les valeurs derivees, persiste l evenement et met a jour l etat femelle.
+   */
   addMiseBas(item: MiseBas): MiseBas {
     const entry = { ...item, id: item.id || this.generateId('mb') };
     const all = this.getAllMisesBas();
@@ -171,24 +213,40 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour une mise-bas.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateMiseBas(updated: MiseBas): void {
     const all = this.getAllMisesBas().map(m => m.id === updated.id ? { ...m, ...updated } : m);
     this.setItems<MiseBas>(STORAGE_KEYS.MISES_BAS, all);
   }
 
+  
+  /**
+   * Supprime une mise-bas.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteMiseBas(id: string): void {
     const all = this.getAllMisesBas().filter(m => m.id !== id);
     this.setItems<MiseBas>(STORAGE_KEYS.MISES_BAS, all);
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD SEVRAGES
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne tous les sevrages.
+   * Logique : lit la collection sevrages depuis le stockage.
+   */
   getAllSevrages(): Sevrage[] {
     return this.getItems<Sevrage>(STORAGE_KEYS.SEVRAGES);
   }
 
+  
+  /**
+   * Ajoute un sevrage.
+   * Logique : calcule les cages occupees, persiste l evenement et remet la femelle au repos.
+   */
   addSevrage(item: Sevrage): Sevrage {
     const entry = { ...item, id: item.id || this.generateId('sev') };
     const all = this.getAllSevrages();
@@ -197,24 +255,40 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour un sevrage.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateSevrage(updated: Sevrage): void {
     const all = this.getAllSevrages().map(s => s.id === updated.id ? { ...s, ...updated } : s);
     this.setItems<Sevrage>(STORAGE_KEYS.SEVRAGES, all);
   }
 
+  
+  /**
+   * Supprime un sevrage.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteSevrage(id: string): void {
     const all = this.getAllSevrages().filter(s => s.id !== id);
     this.setItems<Sevrage>(STORAGE_KEYS.SEVRAGES, all);
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD VENTES
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne toutes les ventes.
+   * Logique : lit la collection ventes depuis le stockage.
+   */
   getAllVentes(): Vente[] {
     return this.getItems<Vente>(STORAGE_KEYS.VENTES);
   }
 
+  
+  /**
+   * Ajoute une vente.
+   * Logique : normalise les montants puis persiste la vente et le flux reactif.
+   */
   addVente(item: Vente): Vente {
     const entry = { ...item, id: item.id || this.generateId('ven') };
     const all = this.getAllVentes();
@@ -223,24 +297,40 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour une vente.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateVente(updated: Vente): void {
     const all = this.getAllVentes().map(v => v.id === updated.id ? { ...v, ...updated } : v);
     this.setItems<Vente>(STORAGE_KEYS.VENTES, all);
   }
 
+  
+  /**
+   * Supprime une vente.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteVente(id: string): void {
     const all = this.getAllVentes().filter(v => v.id !== id);
     this.setItems<Vente>(STORAGE_KEYS.VENTES, all);
   }
 
-  // ══════════════════════════════════════════════
-  //  CRUD DÉCÈS
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Retourne tous les deces.
+   * Logique : lit la collection deces depuis le stockage.
+   */
   getAllDeces(): Deces[] {
     return this.getItems<Deces>(STORAGE_KEYS.DECES);
   }
 
+  
+  /**
+   * Ajoute un deces.
+   * Logique : genere un id si necessaire, persiste la liste et retourne l entree creee.
+   */
   addDeces(item: Deces): Deces {
     const entry = { ...item, id: item.id || this.generateId('dec') };
     const all = this.getAllDeces();
@@ -249,19 +339,25 @@ export class StorageService {
     return entry;
   }
 
+  
+  /**
+   * Met a jour un deces.
+   * Logique : remplace l entree correspondante puis persiste la liste.
+   */
   updateDeces(updated: Deces): void {
     const all = this.getAllDeces().map(d => d.id === updated.id ? { ...d, ...updated } : d);
     this.setItems<Deces>(STORAGE_KEYS.DECES, all);
   }
 
+  
+  /**
+   * Supprime un deces.
+   * Logique : filtre l entree par id puis persiste la liste.
+   */
   deleteDeces(id: string): void {
     const all = this.getAllDeces().filter(d => d.id !== id);
     this.setItems<Deces>(STORAGE_KEYS.DECES, all);
   }
-
-  // ══════════════════════════════════════════════
-  //  CONFIGURATION
-  // ══════════════════════════════════════════════
 
   private readonly DEFAULT_CONFIG = {
     nombreCagesTotal: 180,
@@ -274,21 +370,28 @@ export class StorageService {
     prixVenteDefaut: 3000,
   };
 
+  
+  /**
+   * Retourne la configuration courante.
+   * Logique : lit la configuration ou applique les valeurs par defaut.
+   */
   getConfiguration(): Configuration {
     return this.getObject<Configuration>(STORAGE_KEYS.CONFIGURATION, this.DEFAULT_CONFIG);
   }
 
+  
+  /**
+   * Met a jour la configuration.
+   * Logique : fusionne les valeurs recues avec la configuration par defaut puis persiste.
+   */
   updateConfiguration(config: Partial<Configuration>): void {
     this.setObject<Configuration>(STORAGE_KEYS.CONFIGURATION, { ...this.DEFAULT_CONFIG, ...config });
   }
 
-  // ══════════════════════════════════════════════
-  //  EXPORT / IMPORT / CLEAR
-  // ══════════════════════════════════════════════
-
+  
   /**
-   * Exporte toutes les données cunicole_ en un seul objet JSON.
-   * Utile pour backup ou transfert.
+   * Exporte toutes les donnees applicatives.
+   * Logique : agrege chaque cle de stockage dans un objet JSON.
    */
   exportData(): Record<string, any> {
     if (!this.isBrowser()) return {};
@@ -304,9 +407,10 @@ export class StorageService {
     return data;
   }
 
+  
   /**
-   * Importe des données JSON et restaure le localStorage.
-   * Écrase les données existantes pour les clés présentes dans le JSON.
+   * Importe des donnees applicatives.
+   * Logique : restaure les cles presentes dans le JSON fourni.
    */
   importData(json: Record<string, any>): void {
     if (!this.isBrowser()) return;
@@ -321,9 +425,10 @@ export class StorageService {
     }
   }
 
+  
   /**
-   * Vide toutes les données cunicole_ du localStorage.
-   * Utile pour dev/test ou réinitialisation utilisateur.
+   * Vide la liste ou les donnees courantes.
+   * Logique : supprime les cles connues ou remet le flux local a zero.
    */
   clearAll(): void {
     if (!this.isBrowser()) return;
@@ -332,14 +437,15 @@ export class StorageService {
     }
   }
 
-  // ══════════════════════════════════════════════
-  //  SEED DATA (données de démonstration)
-  // ══════════════════════════════════════════════
-
+  
+  /**
+   * Initialise les donnees de demonstration.
+   * Logique : injecte un jeu de donnees si le stockage n est pas deja initialise.
+   */
   initSeedData(force = false): void {
     if (!this.isBrowser()) return;
     if (!force && localStorage.getItem(STORAGE_KEYS.REPRODUCTEURS)) {
-      return; // Déjà initialisé
+      return;
     }
 
     const seedReproducteurs = [

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -501,7 +501,8 @@ import { MatButtonModule } from '@angular/material/button';
       font-size: 11px;
       color: var(--color-text-light);
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FicheReproducteurComponent {
   private route = inject(ActivatedRoute);
