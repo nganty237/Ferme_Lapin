@@ -1,7 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SaisieSaillieComponent } from './saisie-saillie.component';
-import { StorageService, CalculationService, NotificationService } from '@core/services';
+import { StorageService, CalculationService, NotificationService, BandeService, DataStoreService } from '@core/services';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 describe('SaisieSaillieComponent', () => {
@@ -14,7 +14,9 @@ describe('SaisieSaillieComponent', () => {
       providers: [
         provideAnimationsAsync(),
         StorageService,
+        DataStoreService,
         CalculationService,
+        BandeService,
         NotificationService
       ]
     }).compileComponents();
@@ -24,25 +26,19 @@ describe('SaisieSaillieComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should initialize the form and keep female field disabled by default', () => {
+  it('should create the component and initialize forms', () => {
     expect(component).toBeTruthy();
     expect(component.saillieForm).toBeDefined();
-    expect(component.saillieForm.get('femelle')?.disabled).toBe(true);
+    expect(component.saillieIndivForm).toBeDefined();
   });
 
-  it('should enable female control when bande is selected', () => {
-    component.saillieForm.get('bande')?.setValue('b1');
-    expect(component.saillieForm.get('femelle')?.disabled).toBe(false);
+  it('should initialize modeSaisie to bande by default', () => {
+    expect(component.modeSaisie()).toBe('bande');
   });
 
-  it('should disable female control and clear value when reset is clicked', () => {
-    component.saillieForm.get('bande')?.setValue('b1');
-    component.saillieForm.get('femelle')?.setValue('F001');
-    expect(component.saillieForm.get('femelle')?.disabled).toBe(false);
-
+  it('should reset form when onReset is called', () => {
+    component.formBande.get('notes')?.setValue('Test note');
     component.onReset();
-    expect(component.saillieForm.get('bande')?.value).toBe('');
-    expect(component.saillieForm.get('femelle')?.value).toBe('');
-    expect(component.saillieForm.get('femelle')?.disabled).toBe(true);
+    expect(component.formBande.get('notes')?.value).toBe('');
   });
 });

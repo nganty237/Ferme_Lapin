@@ -1,0 +1,152 @@
+<div class="page-container">
+      <app-page-header
+        title="Paramètres & Sauvegardes"
+        subtitle="Configuration technique de l'élevage et gestion des bases de données locales">
+      </app-page-header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Colonne Gauche : Configuration technique -->
+        <div class="space-y-6">
+          <!-- Formulaire configuration -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">settings</mat-icon>
+              Configuration Technique
+            </h2>
+
+            <form [formGroup]="configForm" (ngSubmit)="saveConfig()" class="flex flex-col gap-4">
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Nombre total de cages</mat-label>
+                  <input matInput type="number" formControlName="nombreCagesTotal" />
+                  <mat-hint>Capacité maximale de la ferme</mat-hint>
+                  @if (configForm.get('nombreCagesTotal')?.invalid) {
+                    <mat-error>Requis (min. 1)</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Cages repro. réservées</mat-label>
+                  <input matInput type="number" formControlName="nombreCagesReproductrices" />
+                  <mat-hint>Cages allouées aux reproducteurs</mat-hint>
+                  @if (configForm.get('nombreCagesReproductrices')?.invalid) {
+                    <mat-error>Requis (min. 0)</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Densité en engraissement (lapins/cage)</mat-label>
+                <input matInput type="number" formControlName="densiteParCage" />
+                <mat-hint>Nombre de lapereaux par cage d'engraissement</mat-hint>
+                @if (configForm.get('densiteParCage')?.invalid) {
+                  <mat-error>Requis (min. 1)</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Prix aliment (CFA / Kg)</mat-label>
+                  <input matInput type="number" formControlName="prixAlimentKg" />
+                  <mat-hint>Utilisé pour estimer les coûts alimentaires</mat-hint>
+                  @if (configForm.get('prixAlimentKg')?.invalid) {
+                    <mat-error>Requis (min. 0)</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Prix de vente standard (CFA / lapin)</mat-label>
+                  <input matInput type="number" formControlName="prixVenteDefaut" />
+                  <mat-hint>Prix par défaut des ventes directes</mat-hint>
+                  @if (configForm.get('prixVenteDefaut')?.invalid) {
+                    <mat-error>Requis (min. 0)</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                <button type="button" mat-stroked-button (click)="resetForm()" class="h-[42px] px-6">
+                  Annuler
+                </button>
+                <button type="submit" mat-flat-button color="primary" [disabled]="configForm.invalid" class="h-[42px] px-6 flex-1">
+                  <mat-icon>save</mat-icon>
+                  Enregistrer les paramètres
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Durées physiologiques (lecture seule) -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">hourglass_empty</mat-icon>
+              Durées Cycles Biologiques
+            </h2>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
+                  <span class="text-2xl font-extrabold text-slate-800">30</span>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Gestation (Jours)</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
+                  <span class="text-2xl font-extrabold text-slate-800">30-35</span>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Allaitement (Jours)</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
+                  <span class="text-2xl font-extrabold text-slate-800">30</span>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Sexage (Jours)</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
+                  <span class="text-2xl font-extrabold text-slate-800">60</span>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Engraissement (Jours)</span>
+                </div>
+              </div>
+
+              <!-- Message de rappel lecture seule -->
+              <div class="flex gap-3 p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 mt-4">
+                <mat-icon class="text-amber-600 mt-0.5">info</mat-icon>
+                <p class="text-xs font-medium m-0 leading-relaxed">
+                  Les durées biologiques et physiologiques de gestation, d'allaitement, sexage et d'engraissement sont fixes
+                  conformément aux standards physiologiques du lapin de chair et ne sont pas modifiables.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne Droite : Import/Export et Reset -->
+        <div class="space-y-6">
+
+          <!-- Sauvegarde et Transfert -->
+          <div class="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">backup</mat-icon>
+              Sauvegarde et Restauration
+            </h2>
+
+            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+              Téléchargez une sauvegarde de vos données locales sous format JSON ou importez un fichier de sauvegarde existant.
+              Toutes les données de la ferme (reproducteurs, portées, ventes, cages) sont incluses.
+            </p>
+
+            <div class="space-y-3 flex flex-col">
+              <button mat-flat-button color="primary" class="w-full h-[42px]" (click)="exportData()">
+                <mat-icon>cloud_download</mat-icon>
+                Exporter la base de données (JSON)
+              </button>
+
+              <button mat-stroked-button class="w-full h-[42px]" (click)="fileInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                Importer une sauvegarde (JSON)
+              </button>
+              <input #fileInput type="file" accept=".json" class="hidden" (change)="onFileSelected($event)" />
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>

@@ -10,16 +10,20 @@ export interface Toast {
   fadingOut?: boolean;
 }
 
+/**
+ * Service de gestion des notifications Toast temporaires de l'application.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ToastService {
   toasts = signal<Toast[]>([]);
 
-  
   /**
-   * Affiche un toast.
-   * Logique : ajoute le toast, limite la pile visible et planifie sa fermeture.
+   * Affiche une notification toast temporaire.
+   * @param message Contenu textuel du toast.
+   * @param type Catégorie de notification.
+   * @param duration Durée de présence à l'écran en ms.
    */
   show(message: string, type: ToastType = 'info', duration = 4000): void {
     const id = Math.random().toString(36).substring(2, 9);
@@ -38,46 +42,36 @@ export class ToastService {
     }, duration);
   }
 
-  
   /**
-   * Affiche un toast de succes.
-   * Logique : delegue l affichage au service de toast.
+   * Affiche un toast de succès.
    */
   success(message: string, duration = 4000): void {
     this.show(message, 'success', duration);
   }
 
-  
   /**
-   * Affiche un toast d erreur.
-   * Logique : delegue l affichage au service de toast.
+   * Affiche un toast d'erreur.
    */
   error(message: string, duration = 4000): void {
     this.show(message, 'error', duration);
   }
 
-  
   /**
-   * Affiche un toast d avertissement.
-   * Logique : delegue l affichage au service de toast.
+   * Affiche un toast d'avertissement.
    */
   warning(message: string, duration = 4000): void {
     this.show(message, 'warning', duration);
   }
 
-  
   /**
-   * Affiche un toast d information.
-   * Logique : delegue l affichage au service de toast.
+   * Affiche un toast d'information.
    */
   info(message: string, duration = 4000): void {
     this.show(message, 'info', duration);
   }
 
-  
   /**
-   * Supprime un element affiche.
-   * Logique : retire la notification ou le toast correspondant a l id.
+   * Ferme et retire un toast actif par son identifiant.
    */
   dismiss(id: string): void {
     this.toasts.update(current =>

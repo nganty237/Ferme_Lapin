@@ -27,8 +27,9 @@ export const routes: Routes = [
             (m) => m.reproducteursRoutes
           ),
       },
+
       {
-        path: '',
+        path: 'evenements',
         loadChildren: () =>
           import('@features/events/events.routes').then((m) => m.eventsRoutes),
       },

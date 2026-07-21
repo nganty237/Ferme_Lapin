@@ -1,0 +1,28 @@
+:host {
+      display: block;
+      height: 100%;
+    }
+    .sidebar-inner {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .collapsed-link {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      width: 48px;
+      height: 48px;
+      margin: 4px auto !important;
+    }
+    .collapsed-link mat-icon {
+      margin: 0 !important;
+    }
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.35);
+      padding: 8px 24px 4px;
+    }

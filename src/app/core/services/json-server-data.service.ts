@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Configuration, Deces, MiseBas, Reproducteur, Saillie, Sevrage, Vente } from '../models';
+import { Configuration, Deces, MiseBas, Reproducteur, Saillie, Sevrage, Vente, Bande, Clapier, SessionSaillie, Palpation, Sexage } from '../models';
 
-type CollectionName = 'reproducteurs' | 'saillies' | 'misesBas' | 'sevrages' | 'ventes' | 'deces';
+type CollectionName = 'reproducteurs' | 'saillies' | 'misesBas' | 'sevrages' | 'ventes' | 'deces' | 'bandes' | 'clapiers' | 'sessions_saillie' | 'palpations' | 'sexages';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,26 @@ type CollectionName = 'reproducteurs' | 'saillies' | 'misesBas' | 'sevrages' | '
 export class JsonServerDataService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = '/api';
+
+  getBandes(): Observable<Bande[]> {
+    return this.list<Bande>('bandes');
+  }
+
+  getClapiers(): Observable<Clapier[]> {
+    return this.list<Clapier>('clapiers');
+  }
+
+  getSessionsSaillie(): Observable<SessionSaillie[]> {
+    return this.list<SessionSaillie>('sessions_saillie');
+  }
+
+  getPalpations(): Observable<Palpation[]> {
+    return this.list<Palpation>('palpations');
+  }
+
+  getSexages(): Observable<Sexage[]> {
+    return this.list<Sexage>('sexages');
+  }
 
   getReproducteurs(): Observable<Reproducteur[]> {
     return this.list<Reproducteur>('reproducteurs');

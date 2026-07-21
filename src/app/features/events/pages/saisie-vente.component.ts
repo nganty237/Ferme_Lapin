@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, computed, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -13,10 +14,9 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-saisie-vente',
-  standalone: true,
   providers: [provideNativeDateAdapter()],
   imports: [
-    CommonModule,
+    DecimalPipe,
     ReactiveFormsModule,
     PageHeaderComponent,
     MatButtonModule,
@@ -25,236 +25,100 @@ import { provideNativeDateAdapter } from '@angular/material/core';
     MatDatepickerModule,
     MatIconModule
   ],
-  template: `
-    <div class="page-container">
-      <app-page-header
-        title="Saisie de Vente"
-        subtitle="Enregistrer une vente pour libérer des cages d'engraissement et calculer la rentabilité">
-      </app-page-header>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Formulaire de saisie -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2">
-          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">point_of_sale</mat-icon> Informations de vente
-          </p>
-
-          <form [formGroup]="venteForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Nombre de lapins vendus -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Lapins vendus</mat-label>
-                <input matInput type="number" formControlName="vendus" placeholder="Ex: 10">
-                <mat-error *ngIf="venteForm.get('vendus')?.hasError('required')">Le nombre de lapins vendus est obligatoire.</mat-error>
-                <mat-error *ngIf="venteForm.get('vendus')?.hasError('min')">Le nombre de lapins vendus doit être supérieur à 0.</mat-error>
-              </mat-form-field>
-
-              <!-- Date de vente -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Date de vente</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="date" placeholder="JJ/MM/AAAA">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-error *ngIf="venteForm.get('date')?.hasError('required')">La date est obligatoire.</mat-error>
-                <mat-error *ngIf="venteForm.get('date')?.hasError('futureDate')">La date ne peut pas être dans le futur.</mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Prix de vente unitaire -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Prix unitaire (FCFA / lapin)</mat-label>
-                <input matInput type="number" formControlName="prixUnitaire" placeholder="Ex: 3000">
-                <mat-error *ngIf="venteForm.get('prixUnitaire')?.hasError('required')">Le prix unitaire est obligatoire.</mat-error>
-                <mat-error *ngIf="venteForm.get('prixUnitaire')?.hasError('min')">Le prix unitaire doit être positif.</mat-error>
-              </mat-form-field>
-
-              <!-- Client -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Client</mat-label>
-                <mat-select formControlName="client" placeholder="Sélectionner le client">
-                  <mat-option value="Centragel">Centragel</mat-option>
-                  <mat-option value="Marché Local">Marché Local</mat-option>
-                  <mat-option value="Autre">Autre</mat-option>
-                </mat-select>
-                <mat-error *ngIf="venteForm.get('client')?.hasError('required')">Le client est obligatoire.</mat-error>
-              </mat-form-field>
-            </div>
-
-            <!-- Observations -->
-            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-              <mat-label>Observations (Optionnel)</mat-label>
-              <textarea matInput formControlName="observations" rows="3" placeholder="Notes de vente..."></textarea>
-            </mat-form-field>
-
-            <!-- Boutons actions -->
-            <div class="flex justify-end gap-3 mt-2">
-              <button mat-stroked-button type="button" (click)="onReset()" style="border-radius: 8px; height: 42px;">
-                Annuler
-              </button>
-              <button mat-flat-button color="primary" type="submit" [disabled]="venteForm.invalid" style="border-radius: 8px; height: 42px; padding: 0 24px;">
-                <mat-icon style="font-size:18px;width:18px;height:18px;margin-right:4px;">check</mat-icon>
-                Enregistrer la Vente
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Section de calcul et prévisions -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">calculate</mat-icon>
-            Calculs de rentabilité & Cages
-          </p>
-
-          <div class="mt-4 flex flex-col gap-4">
-            <!-- Revenu total calculé -->
-            <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                <mat-icon>attach_money</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">Revenu Total</span>
-                <span class="text-sm font-bold text-slate-800">{{ totalRevenu() | number:'1.0-0' }} FCFA</span>
-              </div>
-            </div>
-
-            <!-- Cages libérées -->
-            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                <mat-icon>lock_open</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-emerald-700 font-bold block">Cages libérées</span>
-                <span class="text-sm font-bold text-slate-800">{{ cagesLiberees() }} cages</span>
-              </div>
-            </div>
-
-            <!-- Marge brute estimée -->
-            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                <mat-icon>trending_up</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-emerald-700 font-bold block">Marge brute estimée</span>
-                <span class="text-sm font-bold text-emerald-800">{{ margeEstimee() | number:'1.0-0' }} FCFA</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500 leading-normal">
-            <h5 class="font-bold text-slate-700 mb-1">Détails :</h5>
-            <ul class="list-disc pl-4 flex flex-col gap-1">
-              <li><strong>Cages libérées</strong> : Lapins vendus divisés par la densité cible (3), libérés immédiatement.</li>
-              <li><strong>Marge brute</strong> : Revenu total moins coût de production estimé ({{ coutProductionParLapin() | number:'1.0-0' }} FCFA par lapin).</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`:host { display: block; }`],
+  templateUrl: './saisie-vente.component.html',
+  styleUrl: './saisie-vente.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SaisieVenteComponent {
   private calcService = inject(CalculationService);
   private notifier = inject(NotificationService);
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
 
   config = toSignal(this.calcService.config$);
   kpis = toSignal(this.calcService.kpis$);
+  ventes = toSignal(this.calcService.ventes$);
 
-  venteForm: FormGroup = this.fb.group({
-    date: [new Date(), [Validators.required, this.dateVenteValidator.bind(this)]],
-    vendus: [10, [Validators.required, Validators.min(1)]],
-    prixUnitaire: [3000, [Validators.required, Validators.min(0)]],
-    client: ['Centragel', [Validators.required]],
-    observations: ['']
-  });
+  formVente: FormGroup;
+  get venteForm(): FormGroup { return this.formVente; }
 
-  private vendusSelectionne = signal<number>(10);
-  private prixUnitaireSelectionne = signal<number>(3000);
+  prixVenteDefaut = computed(() => this.config()?.prixVenteDefaut || 3000);
+  coutProductionParLapin = computed(() => this.kpis()?.coutProductionParLapin || 2100);
 
-  constructor() {
-    // Écouter la config pour le prix par défaut
-    const currentConfig = this.calcService.config;
-    if (currentConfig && currentConfig.prixVenteDefaut) {
-      this.venteForm.get('prixUnitaire')?.setValue(currentConfig.prixVenteDefaut);
-      this.prixUnitaireSelectionne.set(currentConfig.prixVenteDefaut);
-    }
-
-    this.venteForm.get('vendus')?.valueChanges.subscribe(val => {
-      this.vendusSelectionne.set(Number(val) || 0);
-    });
-    this.venteForm.get('prixUnitaire')?.valueChanges.subscribe(val => {
-      this.prixUnitaireSelectionne.set(Number(val) || 0);
-    });
-  }
+  nbVendusInput = signal<number>(0);
+  prixUnitaireInput = signal<number>(3000);
 
   totalRevenu = computed(() => {
-    return this.vendusSelectionne() * this.prixUnitaireSelectionne();
-  });
-
-  cagesLiberees = computed(() => {
-    const configVal = this.config();
-    const density = configVal?.densiteParCage || 3;
-    return Math.ceil(this.vendusSelectionne() / density);
-  });
-
-  coutProductionParLapin = computed(() => {
-    const kpiVal = this.kpis();
-    return kpiVal ? kpiVal.coutProductionParLapin : 2250; // default standard cost
+    return (this.nbVendusInput() || 0) * (this.prixUnitaireInput() || 0);
   });
 
   margeEstimee = computed(() => {
-    const revenue = this.totalRevenu();
-    const costs = this.vendusSelectionne() * this.coutProductionParLapin();
-    return Math.max(0, revenue - costs);
+    const revenu = this.totalRevenu();
+    const coutTotal = (this.nbVendusInput() || 0) * this.coutProductionParLapin();
+    return Math.max(0, revenu - coutTotal);
   });
 
-  private dateVenteValidator(control: FormControl) {
-    const val = control.value;
-    if (!val) return null;
-    const dateVal = new Date(val);
+  cagesLiberees = computed(() => {
+    return Math.ceil((this.nbVendusInput() || 0) / 3);
+  });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (dateVal > today) {
-      return { futureDate: true };
-    }
-    return null;
+  recentVentes = computed(() => {
+    const list = this.ventes() || [];
+    return [...list].reverse().slice(0, 5);
+  });
+
+  constructor() {
+    this.formVente = this.fb.group({
+      date: [new Date(), Validators.required],
+      vendus: [10, [Validators.required, Validators.min(1)]],
+      prixUnitaire: [3000, [Validators.required, Validators.min(0)]],
+      client: [''],
+      observations: ['']
+    });
+
+    this.nbVendusInput.set(10);
+    this.prixUnitaireInput.set(3000);
+
+    this.formVente.get('vendus')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(v => this.nbVendusInput.set(Number(v) || 0));
+
+    this.formVente.get('prixUnitaire')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(p => this.prixUnitaireInput.set(Number(p) || 0));
   }
 
   onSubmit(): void {
-    if (this.venteForm.valid) {
-      const formValue = this.venteForm.value;
-      const total = formValue.vendus * formValue.prixUnitaire;
-
-      this.calcService.addVente({
-        dateVente: formValue.date,
-        vendus: formValue.vendus,
-        prixKg: 0,
-        prixTotal: total,
-        client: formValue.client,
-        notes: formValue.observations
-      });
-
-      this.notifier.success(`Vente enregistrée : ${formValue.vendus} lapins vendus pour un total de ${total} FCFA. Cages d'engraissement libérées.`);
-      this.onReset();
+    if (this.formVente.invalid) {
+      this.notifier.error('Veuillez remplir correctement les champs du formulaire.');
+      return;
     }
+
+    const formValue = this.formVente.value;
+    const vendus = Number(formValue.vendus);
+    const prixUnitaire = Number(formValue.prixUnitaire);
+    const prixTotal = vendus * prixUnitaire;
+
+    this.calcService.addVente({
+      id: `vnt_${Date.now()}`,
+      dateVente: formValue.date,
+      vendus,
+      prixTotal,
+      client: formValue.client || 'Client direct',
+      notes: formValue.observations
+    });
+
+    this.notifier.success(`Vente de ${vendus} lapins enregistrée (${prixTotal} FCFA).`);
+    this.onReset();
   }
 
   onReset(): void {
-    const currentConfig = this.calcService.config;
-    const defaultPrice = currentConfig ? currentConfig.prixVenteDefaut : 3000;
-    this.venteForm.reset({
+    this.formVente.reset({
       date: new Date(),
       vendus: 10,
-      prixUnitaire: defaultPrice,
-      client: 'Centragel',
+      prixUnitaire: this.prixVenteDefaut(),
+      client: '',
       observations: ''
     });
-    this.vendusSelectionne.set(10);
-    this.prixUnitaireSelectionne.set(defaultPrice);
   }
 }

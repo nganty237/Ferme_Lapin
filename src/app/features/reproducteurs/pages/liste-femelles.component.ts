@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -22,117 +21,10 @@ interface FemelleRow {
 
 @Component({
   selector: 'app-liste-femelles',
-  standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule, MatSelectModule],
-  template: `
-    <div class="page-container">
-      <app-page-header
-        title="Femelles Reproductrices"
-        subtitle="Liste et performance des lapines de l'élevage">
-      </app-page-header>
-
-      <!-- Filtres -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-        <div class="flex flex-wrap gap-4 items-end">
-          <div>
-            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">Bande</label>
-            <select class="form-select" [(ngModel)]="filtreBande" (ngModelChange)="onFilterChange()">
-              <option value="">Toutes les bandes</option>
-              <option value="b1">Bande A</option>
-              <option value="b2">Bande B</option>
-              <option value="b3">Bande C</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">État</label>
-            <select class="form-select" [(ngModel)]="filtreEtat" (ngModelChange)="onFilterChange()">
-              <option value="">Tous les états</option>
-              <option value="Actif">Actif</option>
-              <option value="En gestation">En gestation</option>
-              <option value="En allaitement">En allaitement</option>
-              <option value="Au repos">Au repos</option>
-              <option value="Réformé">Réformé</option>
-              <option value="Mort">Décédé</option>
-            </select>
-          </div>
-          <div class="ml-auto text-sm text-slate-500">
-            {{ filteredFemelles().length }} femelle(s) trouvée(s)
-          </div>
-        </div>
-      </div>
-
-      <!-- Tableau -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6">
-        <div class="overflow-x-auto" style="max-height: 520px;">
-          <table class="w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('id')">
-                  ID <mat-icon *ngIf="sortCol === 'id'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('nom')">
-                  Nom <mat-icon *ngIf="sortCol === 'nom'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('bandeId')">
-                  Bande <mat-icon *ngIf="sortCol === 'bandeId'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('portees')">
-                  Portées <mat-icon *ngIf="sortCol === 'portees'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('tailleMoyenne')">
-                  Taille moy. <mat-icon *ngIf="sortCol === 'tailleMoyenne'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('survie')">
-                  Survie % <mat-icon *ngIf="sortCol === 'survie'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('cages')">
-                  Cages occupées <mat-icon *ngIf="sortCol === 'cages'" style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">État</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (filteredFemelles().length === 0) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td colspan="8" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucune femelle trouvée avec ces filtres.</td>
-                </tr>
-              } @else {
-                <tr *ngFor="let f of filteredFemelles()" class="cursor-pointer hover:bg-slate-50/50 transition-colors" (click)="goToDetail(f.id)">
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">{{ f.id }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle font-semibold">{{ f.nom }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ f.bandeId || '—' }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ f.portees }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ f.tailleMoyenne }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">
-                    <span [class]="getSurvieClass(f.survie)">{{ f.survie }}%</span>
-                  </td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono font-semibold">{{ f.cages }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
-                    <span [class]="getEtatClass(f.etat)">{{ f.etat }}</span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    :host { display: block; }
-    .form-select {
-      padding: 8px 12px;
-      border: 1px solid var(--color-border, #e2e8f0);
-      border-radius: 8px;
-      font-size: 13px;
-      background: white;
-      min-width: 160px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-select:focus { border-color: var(--color-primary); }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule, MatSelectModule],
+  templateUrl: './liste-femelles.component.html',
+  styleUrl: './liste-femelles.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListeFemellesComponent {
   private calcService = inject(CalculationService);

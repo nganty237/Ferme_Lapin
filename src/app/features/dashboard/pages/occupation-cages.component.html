@@ -1,0 +1,147 @@
+<div class="page-container">
+      <app-page-header
+        title="Occupation des Cages"
+        subtitle="Suivi de la capacité d'engraissement en temps réel">
+      </app-page-header>
+
+      <!-- Alerte de Saturation -->
+      @if (kpis() && kpis()!.occupationCages.pourcentage > 90) {
+        <div class="mb-6 p-4 rounded-xl border flex items-start gap-3 bg-red-50 border-red-200 text-red-800">
+          <mat-icon class="text-red-600">error</mat-icon>
+          <div>
+            <h4 class="font-bold text-sm">Alerte : Saturation Critique</h4>
+            <p class="text-xs mt-1">L'occupation des cages dépasse 90% ({{ kpis()!.occupationCages.pourcentage }}%). Risque de surpopulation. Veuillez planifier des ventes ou libérer des cages.</p>
+          </div>
+        </div>
+      } @else if (kpis() && kpis()!.occupationCages.pourcentage >= 80) {
+        <div class="mb-6 p-4 rounded-xl border flex items-start gap-3 bg-amber-50 border-amber-200 text-amber-800">
+          <mat-icon class="text-amber-600">warning</mat-icon>
+          <div>
+            <h4 class="font-bold text-sm">Alerte : Occupation Élevée</h4>
+            <p class="text-xs mt-1">L'occupation approche du seuil critique ({{ kpis()!.occupationCages.pourcentage }}%). Surveillez le stock disponible pour la commercialisation.</p>
+          </div>
+        </div>
+      }
+
+      @if (kpis()) {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Graphique Barre Horizontale -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">grid_view</mat-icon>
+              Occupation Cages Engraissement
+            </p>
+            <div class="my-6">
+              <div class="flex justify-between items-end mb-2">
+                <span class="text-2xl font-bold text-slate-800">
+                  {{ kpis()!.occupationCages.occupees }} <span class="text-sm font-normal text-slate-500">/ {{ kpis()!.occupationCages.totales }} lapins</span>
+                </span>
+                <span class="text-lg font-bold" [class]="getProgressTextColor(kpis()!.occupationCages.pourcentage)">
+                  {{ kpis()!.occupationCages.pourcentage }}%
+                </span>
+              </div>
+              
+              <!-- Barre de progression personnalisée -->
+              <div class="w-full h-8 bg-slate-100 rounded-full overflow-hidden border border-slate-200 relative">
+                <div class="h-full rounded-full transition-all duration-500 ease-out"
+                     [style.width.%]="kpis()!.occupationCages.pourcentage"
+                     [class]="getProgressBarClass(kpis()!.occupationCages.pourcentage)">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-x-4 gap-y-2 border-t pt-4 border-slate-100 text-xs text-slate-500">
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-1.5 rounded bg-emerald-500"></div>
+              <span>Normal (&lt; 80%)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-1.5 rounded bg-amber-500"></div>
+              <span>Élevé (80% - 90%)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-1.5 rounded bg-red-500"></div>
+              <span>Critique (&gt; 90%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Légende/Infos -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">info</mat-icon>
+              Métriques de Capacité
+            </p>
+            <div class="flex flex-col gap-4 my-4">
+              <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                <span class="text-slate-500 text-sm">Cages Totales</span>
+                <span class="font-bold text-slate-800">{{ config()?.nombreCagesTotal || 144 }}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                <span class="text-slate-500 text-sm">Densité cible / cage</span>
+                <span class="font-bold text-slate-800">{{ config()?.densiteParCage || 3 }} lapins</span>
+              </div>
+              <div class="flex justify-between items-center py-2">
+                <span class="text-slate-500 text-sm">Capacité maximale</span>
+                <span class="font-bold text-slate-800">{{ (config()?.nombreCagesTotal || 144) * (config()?.densiteParCage || 3) }} lapins</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-normal">La capacité est calculée à partir des paramètres du système. La densité recommandée assure le bien-être animal et une croissance optimale.</p>
+        </div>
+        </div>
+      }
+
+      <!-- Tableau Sevrages en cours -->
+      <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+          <mat-icon class="text-emerald-700">hourglass_bottom</mat-icon>
+          Portées en Cours d'Engraissement (Détails)
+        </p>
+
+        <div class="overflow-x-auto mt-4" style="max-height: 400px;">
+          <table class="w-full border-separate border-spacing-0 text-sm">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Portée ID</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Femelle</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Lapereaux</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Cages Estimées</th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Jours Restants</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (sevragesEnCours().length === 0) {
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td colspan="5" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">
+                    Aucune portée en cours d'engraissement actuellement.
+                  </td>
+                </tr>
+              } @else {
+                @for (sev of sevragesEnCours(); track sev.porteeId) {
+                  <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle font-semibold text-slate-700">#{{ sev.porteeId }}</td>
+                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ sev.femelleId }}</td>
+                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-blue-100 text-blue-800">{{ sev.lapereaux }} lapins</span>
+                    </td>
+                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">{{ sev.cages }}</td>
+                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                      <span class="font-mono font-medium"
+                            [class.text-emerald-600]="sev.joursRestants <= 0"
+                            [class.font-bold]="sev.joursRestants <= 0"
+                            [class.text-slate-600]="sev.joursRestants > 0">
+                        {{ sev.joursRestants <= 0 ? 'Prêt pour vente' : sev.joursRestants + ' jours' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>

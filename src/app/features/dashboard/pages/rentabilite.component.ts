@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -18,94 +18,10 @@ interface RentabiliteRow {
 
 @Component({
   selector: 'app-rentabilite',
-  standalone: true,
-  imports: [CommonModule, PageHeaderComponent, MatIconModule, MatButtonModule],
-  template: `
-    <div class="page-container">
-      <app-page-header
-        title="Rentabilité par Portée"
-        subtitle="Suivi de la marge financière générée par chaque mise-bas et engraissement">
-      </app-page-header>
-
-      <!-- Résumé économique global -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6" *ngIf="kpis()">
-        <!-- Marge Brute Totale -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-emerald-100 bg-emerald-50/10 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Marge Brute Totale</span>
-            <strong class="text-2xl font-bold text-emerald-800 block mt-1">{{ kpis()!.margeBruteTotale | number:'1.0-0' }} FCFA</strong>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">trending_up</mat-icon>
-          </div>
-        </div>
-
-        <!-- Revenu Moyen / Portée -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-slate-100 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Revenu Moyen / Portée</span>
-            <strong class="text-2xl font-bold text-slate-700 block mt-1">{{ kpis()!.revenuMoyenPortee | number:'1.0-0' }} FCFA</strong>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">monetization_on</mat-icon>
-          </div>
-        </div>
-
-        <!-- Rentabilité / Femelle / An -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-slate-100 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Rentabilité / Femelle / An</span>
-            <strong class="text-2xl font-bold text-slate-700 block mt-1">{{ kpis()!.rentabiliteFemelleAn | number:'1.0-0' }} FCFA</strong>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600 border border-pink-100">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">female</mat-icon>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tableau détaillé -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6">
-        <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-          <mat-icon class="text-emerald-700">attach_money</mat-icon> Liste des Portées & Marges
-        </p>
-
-        <div class="overflow-x-auto mt-4">
-          <table class="w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Portée</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Femelle Mère</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Lapereaux Vivants</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Cages d'engraissement</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Revenu Brut</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Coût Alimentaire</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Marge Nette</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (rows().length === 0) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td colspan="7" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucune donnée économique disponible. Enregistrez des sevrages et ventes.</td>
-                </tr>
-              } @else {
-                <tr *ngFor="let r of rows()" class="hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-bold text-slate-700">Portée #{{ r.id }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono font-semibold">{{ r.femelleId }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ r.vivants }}</td>
-                  <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono">{{ r.cages }}</td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-slate-700 font-semibold">{{ r.revenu | number:'1.0-0' }} FCFA</td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-slate-500">{{ r.coutAliment | number:'1.0-0' }} FCFA</td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-emerald-700 font-bold">{{ r.marge | number:'1.0-0' }} FCFA</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`:host { display: block; }`],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [DecimalPipe, PageHeaderComponent, MatIconModule, MatButtonModule],
+  templateUrl: './rentabilite.component.html',
+  styleUrl: './rentabilite.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RentabiliteComponent {
   private calcService = inject(CalculationService);

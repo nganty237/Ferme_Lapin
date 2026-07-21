@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -14,113 +13,10 @@ interface PrevisionItem {
 
 @Component({
   selector: 'app-previsions-dashboard',
-  standalone: true,
-  imports: [CommonModule, PageHeaderComponent, MatIconModule],
-  template: `
-    <div class="page-container">
-      <app-page-header
-        title="Prévisions de l'Élevage"
-        subtitle="Chronologie des futurs événements biologiques et commerciaux">
-      </app-page-header>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Colonne 1: Mises-bas (🔴) -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
-          <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-            <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500">
-              <mat-icon>favorite</mat-icon>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-800 text-sm">Prochaines Mises-bas</h3>
-              <p class="text-[11px] text-rose-600 font-medium">Naissances attendues (Gestation)</p>
-            </div>
-          </div>
-
-          <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
-            @if (upcomingMisesBas().length === 0) {
-              <div class="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                <mat-icon style="font-size:32px; width:32px; height:32px; margin-bottom:8px;">check_circle_outline</mat-icon>
-                <p class="text-xs">Aucune mise-bas prévue dans l'immédiat.</p>
-              </div>
-            } @else {
-              <div *ngFor="let item of upcomingMisesBas()" class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
-                <div>
-                  <span class="text-xs font-bold text-slate-700 block">{{ item.cle }}</span>
-                  <span class="text-[11px] text-slate-500">{{ item.details }}</span>
-                </div>
-                <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full whitespace-nowrap">{{ formatDate(item.date) }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Colonne 2: Sevrages (🟡) -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
-          <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500">
-              <mat-icon>child_friendly</mat-icon>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-800 text-sm">Prochains Sevrages</h3>
-              <p class="text-[11px] text-amber-600 font-medium">Séparation & passage en cage</p>
-            </div>
-          </div>
-
-          <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
-            @if (upcomingSevrages().length === 0) {
-              <div class="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                <mat-icon style="font-size:32px; width:32px; height:32px; margin-bottom:8px;">check_circle_outline</mat-icon>
-                <p class="text-xs">Aucun sevrage prévu dans l'immédiat.</p>
-              </div>
-            } @else {
-              <div *ngFor="let item of upcomingSevrages()" class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
-                <div>
-                  <span class="text-xs font-bold text-slate-700 block">{{ item.cle }}</span>
-                  <span class="text-[11px] text-slate-500">{{ item.details }}</span>
-                </div>
-                <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full whitespace-nowrap">{{ formatDate(item.date) }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Colonne 3: Ventes (🟢) -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col h-[520px]">
-          <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">
-              <mat-icon>point_of_sale</mat-icon>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-800 text-sm">Prochaines Ventes</h3>
-              <p class="text-[11px] text-emerald-600 font-medium">Sorties d'engraissement</p>
-            </div>
-          </div>
-
-          <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
-            @if (upcomingVentes().length === 0) {
-              <div class="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                <mat-icon style="font-size:32px; width:32px; height:32px; margin-bottom:8px;">check_circle_outline</mat-icon>
-                <p class="text-xs">Aucune vente programmée dans l'immédiat.</p>
-              </div>
-            } @else {
-              <div *ngFor="let item of upcomingVentes()" class="p-3 bg-white border border-slate-200 rounded-xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
-                <div>
-                  <span class="text-xs font-bold text-slate-700 block">{{ item.cle }}</span>
-                  <span class="text-[11px] text-slate-500">{{ item.details }}</span>
-                </div>
-                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full whitespace-nowrap">{{ formatDate(item.date) }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    :host { display: block; }
-    ::-webkit-scrollbar { width: 4px; }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [PageHeaderComponent, MatIconModule],
+  templateUrl: './previsions.component.html',
+  styleUrl: './previsions.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrevisionsComponent {
   private calcService = inject(CalculationService);

@@ -1,0 +1,69 @@
+<div class="page-container">
+      <app-page-header
+        title="Diagnostic de Gestation (Palpation)"
+        subtitle="Enregistrer le diagnostic des lapines saillies à J+15">
+      </app-page-header>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-6 mt-6">
+        <form [formGroup]="palpationForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+              <mat-label>Bande à palper</mat-label>
+              <mat-select formControlName="bande" placeholder="Sélectionner la bande">
+                @for (b of bandesDisponibles(); track b.id) {
+                  <mat-option [value]="b.id">
+                    {{ b.nom }} — {{ b.femellesIds?.length }} lapines
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (bandeSelectionnee() && sessionsBande().length > 0) {
+            <div>
+              <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Liste des femelles à palper</h3>
+              
+              <div formArrayName="femelles" class="flex flex-col gap-3">
+                @for (ctrl of femellesFormArray.controls; track $index) {
+                  <div [formGroupName]="$index" class="p-4 border rounded-xl bg-slate-50 flex flex-col md:flex-row gap-4 items-center">
+                    <div class="flex-1">
+                      <p class="font-bold text-slate-800">{{ getFemelleName(ctrl.value.femelleId) }}</p>
+                      <p class="text-xs text-slate-500">Saillie le : {{ ctrl.value.dateSaillie | date:'dd MMM yyyy' }}</p>
+                    </div>
+
+                    <div class="flex-2">
+                      <mat-radio-group formControlName="resultat" class="flex gap-4">
+                        <mat-radio-button value="Positive" class="text-emerald-700">Gestation Confirmée</mat-radio-button>
+                        <mat-radio-button value="Negative" class="text-rose-700">Vide (Négatif)</mat-radio-button>
+                        <mat-radio-button value="Incertaine" class="text-amber-600">Incertaine</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                    
+                    <div class="flex-1 w-full md:w-auto">
+                      <mat-form-field appearance="outline" class="w-full mt-2 md:mt-0 -mb-5">
+                        <mat-label>Observations</mat-label>
+                        <input matInput formControlName="observations" placeholder="Ex: Avortement, problème santé...">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                }
+              </div>
+              
+              <div class="flex justify-end gap-3 mt-6">
+                <button mat-flat-button color="primary" type="submit" [disabled]="palpationForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
+                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">save</mat-icon>
+                  {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer le diagnostic' }}
+                </button>
+              </div>
+            </div>
+          }
+          
+          @if (bandeSelectionnee() && sessionsBande().length === 0) {
+            <div class="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
+              <mat-icon class="text-slate-400 mb-2">info</mat-icon>
+              <p class="text-slate-600">Aucune saillie récente trouvée pour cette bande.</p>
+            </div>
+          }
+        </form>
+      </div>
+    </div>

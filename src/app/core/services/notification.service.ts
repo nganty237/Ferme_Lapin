@@ -1,8 +1,10 @@
-import { Injectable, inject, OnDestroy } from '@angular/core';
+import { Injectable, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CalculationService, KPIs } from './calculation.service';
 import { ToastService } from './toast.service';
+import { Saillie, MiseBas, Sevrage, Deces, Reproducteur } from '../models';
 
 export type NotifType = 'CRITIQUE' | 'WARNING' | 'INFO';
 
@@ -15,81 +17,45 @@ export interface AppNotification {
   lue: boolean;
 }
 
+/**
+ * Service centralisé de gestion des notifications applicatives et alertes d'élevage.
+ */
 @Injectable({
   providedIn: 'root',
 })
-export class NotificationService implements OnDestroy {
+export class NotificationService {
   private snackBar = inject(MatSnackBar);
   private calcService = inject(CalculationService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   private readonly _notifications$ = new BehaviorSubject<AppNotification[]>([]);
   readonly notifications$ = this._notifications$.asObservable();
 
-  private kpiSub: Subscription;
-
-  
-  /**
-   * Initialise le service.
-   * Logique : prepare les dependances et lance les traitements de demarrage.
-   */
   constructor() {
-    this.kpiSub = this.calcService.kpis$.subscribe((kpis) => {
-      this.generateFromKPIs(kpis);
-    });
+    this.calcService.kpis$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((kpis: KPIs) => {
+        this.generateFromKPIs(kpis);
+      });
   }
 
-  
-  /**
-   * Nettoie les abonnements du service.
-   * Logique : libere la souscription aux KPI.
-   */
-  ngOnDestroy(): void {
-    this.kpiSub?.unsubscribe();
-  }
-
-  
-  /**
-   * Affiche un toast de succes.
-   * Logique : delegue l affichage au service de toast.
-   */
   success(message: string): void {
     this.toastService.success(message);
   }
 
-  
-  /**
-   * Affiche un toast d erreur.
-   * Logique : delegue l affichage au service de toast.
-   */
   error(message: string): void {
     this.toastService.error(message);
   }
 
-  
-  /**
-   * Affiche un toast d avertissement.
-   * Logique : delegue l affichage au service de toast.
-   */
   warning(message: string): void {
     this.toastService.warning(message);
   }
 
-  
-  /**
-   * Affiche un toast d information.
-   * Logique : delegue l affichage au service de toast.
-   */
   info(message: string): void {
     this.toastService.info(message);
   }
 
-  
-  
-  /**
-   * Ajoute une notification applicative.
-   * Logique : remplace une notification existante de meme id puis remet la liste a jour.
-   */
   addNotification(type: NotifType, message: string, icon: string, id?: string): void {
     const notifId = id || `${type}_${Date.now()}`;
     const notif: AppNotification = {
@@ -105,12 +71,6 @@ export class NotificationService implements OnDestroy {
     this._notifications$.next([notif, ...current]);
   }
 
-  
-  
-  /**
-   * Marque une notification comme lue.
-   * Logique : met a jour l element correspondant dans le flux local.
-   */
   markAsRead(id: string): void {
     const updated = this._notifications$.getValue().map((n) =>
       n.id === id ? { ...n, lue: true } : n
@@ -118,54 +78,24 @@ export class NotificationService implements OnDestroy {
     this._notifications$.next(updated);
   }
 
-  
-  
-  /**
-   * Marque toutes les notifications comme lues.
-   * Logique : applique l etat lu a toute la liste.
-   */
   markAllAsRead(): void {
     const updated = this._notifications$.getValue().map((n) => ({ ...n, lue: true }));
     this._notifications$.next(updated);
   }
 
-  
-  
-  /**
-   * Supprime un element affiche.
-   * Logique : retire la notification ou le toast correspondant a l id.
-   */
   dismiss(id: string): void {
     const updated = this._notifications$.getValue().filter((n) => n.id !== id);
     this._notifications$.next(updated);
   }
 
-  
-  
-  /**
-   * Vide la liste ou les donnees courantes.
-   * Logique : supprime les cles connues ou remet le flux local a zero.
-   */
   clearAll(): void {
     this._notifications$.next([]);
   }
 
-  
-  
-  /**
-   * Retourne le nombre de notifications non lues.
-   * Logique : filtre la liste courante sur les notifications non lues.
-   */
   get unreadCount(): number {
     return this._notifications$.getValue().filter((n) => !n.lue).length;
   }
 
-  
-  
-  /**
-   * Genere les notifications a partir des KPI.
-   * Logique : transforme les seuils metier en notifications automatiques.
-   */
   private generateFromKPIs(kpis: KPIs): void {
     const notifs: AppNotification[] = [];
 
@@ -228,6 +158,30 @@ export class NotificationService implements OnDestroy {
       ));
     }
 
+    if (kpis.alertesPalpation && kpis.alertesPalpation.length > 0) {
+      const imminentes = kpis.alertesPalpation.filter(a => a.joursRestants <= 2);
+      if (imminentes.length > 0) {
+        notifs.push(this.createNotif(
+          'WARNING',
+          `${imminentes.length} palpation(s) à réaliser très prochainement (J+15).`,
+          'event_note',
+          'palpations_warning'
+        ));
+      }
+    }
+
+    if (kpis.alertesMiseBas && kpis.alertesMiseBas.length > 0) {
+      const imminentes = kpis.alertesMiseBas.filter(a => a.urgence === 'imminente');
+      if (imminentes.length > 0) {
+        notifs.push(this.createNotif(
+          'CRITIQUE',
+          `${imminentes.length} mise(s)-bas imminente(s) ! Préparer les nids.`,
+          'warning',
+          'misesbas_critique'
+        ));
+      }
+    }
+
     notifs.push(this.createNotif(
       'INFO',
       `Bandes : A:${kpis.phasesBandes.A} | B:${kpis.phasesBandes.B} | C:${kpis.phasesBandes.C}`,
@@ -243,29 +197,23 @@ export class NotificationService implements OnDestroy {
     this._notifications$.next([...notifs, ...manualNotifs]);
   }
 
-  
-  
-  /**
-   * Genere les notifications basees sur les dates.
-   * Logique : inspecte les evenements proches pour creer les alertes temporelles.
-   */
   private generateTimeBasedNotifs(notifs: AppNotification[]): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const saillies = this.calcService.saillies;
-    const misesBas = this.calcService.misesBas;
-    const sevrages = this.calcService.sevrages;
-    const deces = this.calcService.deces;
+    const saillies: Saillie[] = this.calcService.saillies;
+    const misesBas: MiseBas[] = this.calcService.misesBas;
+    const sevrages: Sevrage[] = this.calcService.sevrages;
+    const deces: Deces[] = this.calcService.deces;
 
     for (const saillie of saillies) {
       if (saillie.dateMiseBasPrevue) {
         const datePrevue = new Date(saillie.dateMiseBasPrevue);
         datePrevue.setHours(0, 0, 0, 0);
         if (datePrevue.getTime() === today.getTime()) {
-          const mbExiste = misesBas.some((mb: any) => mb.saillieId === saillie.id);
+          const mbExiste = misesBas.some((mb: MiseBas) => mb.saillieId === saillie.id);
           if (!mbExiste) {
             notifs.push(this.createNotif(
               'CRITIQUE',
@@ -285,7 +233,7 @@ export class NotificationService implements OnDestroy {
       dateSevragePrevue.setHours(0, 0, 0, 0);
 
       if (dateSevragePrevue.getTime() === tomorrow.getTime()) {
-        const sevExiste = sevrages.some((s: any) => s.miseBasId === mb.id);
+        const sevExiste = sevrages.some((s: Sevrage) => s.miseBasId === mb.id);
         if (!sevExiste) {
           notifs.push(this.createNotif(
             'WARNING',
@@ -297,7 +245,7 @@ export class NotificationService implements OnDestroy {
       }
     }
 
-    const reproducteurs = this.calcService.reproducteurs;
+    const reproducteurs: Reproducteur[] = this.calcService.reproducteurs;
     for (const dec of deces) {
       const repro = reproducteurs.find(r => r.id === dec.reproducteurId);
       if (repro && repro.sexe === 'M') {
@@ -310,7 +258,7 @@ export class NotificationService implements OnDestroy {
       }
     }
 
-    const sailliesRecentes = saillies.filter((s: any) => {
+    const sailliesRecentes = saillies.filter((s: Saillie) => {
       const dateSaillie = new Date(s.dateSaillie);
       dateSaillie.setHours(0, 0, 0, 0);
       const diffDays = (today.getTime() - dateSaillie.getTime()) / (1000 * 60 * 60 * 24);
@@ -327,23 +275,11 @@ export class NotificationService implements OnDestroy {
     }
   }
 
-  
-  
-  /**
-   * Construit une notification.
-   * Logique : normalise les champs necessaires a l affichage.
-   */
   private createNotif(type: NotifType, message: string, icon: string, id: string): AppNotification {
     return { id, type, message, icon, timestamp: new Date(), lue: false };
   }
 
-  
-  
-  /**
-   * Formate une date pour l affichage.
-   * Logique : utilise le format francais et prevoit un fallback texte.
-   */
-  private formatDate(date: any): string {
+  private formatDate(date: Date | string): string {
     try {
       return new Date(date).toLocaleDateString('fr-FR', {
         day: '2-digit',

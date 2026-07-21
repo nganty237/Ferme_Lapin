@@ -11,11 +11,13 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
     "baseUrl": "./",
     "paths": {
+      "@core": ["src/app/core/core.ts"],
       "@core/*": ["src/app/core/*"],
       "@core/models": ["src/app/core/models/index.ts"],
       "@core/services": ["src/app/core/services/index.ts"],

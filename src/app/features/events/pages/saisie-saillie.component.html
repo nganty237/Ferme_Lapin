@@ -1,0 +1,183 @@
+<div class="page-container">
+      <app-page-header
+        title="Assistant de Saillie par Bande"
+        subtitle="Démarrer un nouveau cycle de reproduction pour toute une bande">
+      </app-page-header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Formulaire de saisie -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2">
+          <div class="flex justify-between items-center mb-5">
+            <p class="text-base font-semibold text-slate-800 flex items-center gap-2 m-0">
+              <mat-icon class="text-emerald-700">favorite</mat-icon> Démarrage du Cycle
+            </p>
+            <mat-button-toggle-group [value]="modeSaisie()" (change)="modeSaisie.set($event.value)" class="h-9">
+              <mat-button-toggle value="bande" class="text-xs">Par Bande</mat-button-toggle>
+              <mat-button-toggle value="individuelle" class="text-xs">Individuelle</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+          
+          @if (modeSaisie() === 'bande') {
+            <form [formGroup]="saillieForm" (ngSubmit)="onSubmitBande()" class="flex flex-col gap-4 mt-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Bande -->
+              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                <mat-label>Bande à accoupler</mat-label>
+                <mat-select formControlName="bande" placeholder="Sélectionner la bande">
+                  @for (b of bandesDisponibles(); track b.id) {
+                    <mat-option [value]="b.id">
+                      {{ b.nom }} — {{ b.femellesIds?.length }} lapines
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (saillieForm.get('bande')?.hasError('required')) {
+                  <mat-error>La bande est obligatoire.</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Date de la saillie -->
+              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                <mat-label>Date de début des accouplements</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="date" placeholder="JJ/MM/AAAA">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                @if (saillieForm.get('date')?.hasError('required')) {
+                  <mat-error>La date est obligatoire.</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Observations -->
+            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+              <mat-label>Observations (Optionnel)</mat-label>
+              <textarea matInput formControlName="observations" rows="3" placeholder="Notes additionnelles..."></textarea>
+            </mat-form-field>
+
+            <!-- Boutons actions -->
+            <div class="flex justify-end gap-3 mt-2">
+              <button mat-stroked-button type="button" (click)="onReset()" class="rounded-lg h-[42px]">
+                Annuler
+              </button>
+              <button mat-flat-button color="primary" type="submit" [disabled]="saillieForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
+                <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">check</mat-icon>
+                {{ isSubmitting() ? 'Création en cours...' : 'Générer le Calendrier de Saillie' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Calendrier Preview -->
+          @if (calendrierPreview().length > 0) {
+            <div class="mt-6">
+              <p class="font-semibold text-slate-800 mb-3 text-sm">Aperçu du Calendrier d'Accouplement</p>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                @for (session of calendrierPreview(); track session.id) {
+                  <div class="p-2 border border-slate-200 rounded-md bg-slate-50 text-[11px] flex flex-col gap-1">
+                    <div class="flex justify-between items-center">
+                      <span class="font-bold text-slate-700">Femelle {{ session.femelleId }}</span>
+                      <span class="text-indigo-600 font-medium">Mâle {{ session.maleId }}</span>
+                    </div>
+                    <div class="text-slate-500">
+                      Jour {{ session.jour }} - {{ session.moment }}
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          } @else {
+            <form [formGroup]="saillieIndivForm" (ngSubmit)="onSubmitIndiv()" class="flex flex-col gap-4 mt-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                  <mat-label>Femelle</mat-label>
+                  <mat-select formControlName="femelle" placeholder="Sélectionner la femelle">
+                    @for (f of femellesActives(); track f.id) {
+                      <mat-option [value]="f.id">
+                        {{ f.nom }} ({{ f.bandeId || 'Sans bande' }})
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                  <mat-label>Mâle</mat-label>
+                  <mat-select formControlName="male" placeholder="Sélectionner le mâle">
+                    @for (m of malesActifs(); track m.id) {
+                      <mat-option [value]="m.id">
+                        {{ m.nom }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                  <mat-label>Date de saillie</mat-label>
+                  <input matInput [matDatepicker]="pickerIndiv" formControlName="date" placeholder="JJ/MM/AAAA">
+                  <mat-datepicker-toggle matSuffix [for]="pickerIndiv"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerIndiv></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+                <mat-label>Observations (Optionnel)</mat-label>
+                <textarea matInput formControlName="observations" rows="2" placeholder="Notes additionnelles..."></textarea>
+              </mat-form-field>
+
+              <div class="flex justify-end gap-3 mt-2">
+                <button mat-stroked-button type="button" (click)="saillieIndivForm.reset({date: dateActuelle()})" class="rounded-lg h-[42px]">
+                  Annuler
+                </button>
+                <button mat-flat-button color="primary" type="submit" [disabled]="saillieIndivForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
+                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">check</mat-icon>
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          }
+        </div>
+
+        <!-- Section de prévisions -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6">
+          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
+            <mat-icon class="text-emerald-700">query_builder</mat-icon>
+            Dates Prévisionnelles
+          </p>
+
+          <div class="mt-4 flex flex-col gap-4">
+            @if (previsions()) {
+              <div class="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <mat-icon class="text-[16px] w-[16px] h-[16px]">search</mat-icon>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase font-bold text-indigo-500 tracking-wider">Palpation (J+15)</p>
+                  <p class="text-sm font-semibold text-indigo-900">{{ previsions()?.datePalpation | date:'dd MMM yyyy' }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <mat-icon class="text-[16px] w-[16px] h-[16px]">child_care</mat-icon>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase font-bold text-emerald-500 tracking-wider">Mise-bas (J+31)</p>
+                  <p class="text-sm font-semibold text-emerald-900">{{ previsions()?.dateMiseBas | date:'dd MMM yyyy' }}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+                  <mat-icon class="text-[16px] w-[16px] h-[16px]">pets</mat-icon>
+                </div>
+                <div>
+                  <p class="text-[10px] uppercase font-bold text-amber-500 tracking-wider">Sevrage (J+62)</p>
+                  <p class="text-sm font-semibold text-amber-900">{{ previsions()?.dateSevrage | date:'dd MMM yyyy' }}</p>
+                </div>
+              </div>
+            } @else {
+              <div class="flex flex-col items-center justify-center text-center p-8 text-slate-400 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
+                <mat-icon class="text-[32px] w-[32px] h-[32px] mb-2">date_range</mat-icon>
+                <p class="text-xs">Sélectionnez une date pour estimer les étapes biologiques de la bande.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>

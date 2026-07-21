@@ -9,6 +9,13 @@ export const eventsRoutes: Routes = [
       ),
   },
   {
+    path: 'palpations',
+    loadComponent: () =>
+      import('./pages/saisie-palpation.component').then(
+        (m) => m.SaisiePalpationComponent
+      ),
+  },
+  {
     path: 'mises-bas',
     loadComponent: () =>
       import('./pages/saisie-mise-bas.component').then(
@@ -20,6 +27,13 @@ export const eventsRoutes: Routes = [
     loadComponent: () =>
       import('./pages/saisie-sevrage.component').then(
         (m) => m.SaisieSevrageComponent
+      ),
+  },
+  {
+    path: 'sexages',
+    loadComponent: () =>
+      import('./pages/saisie-sexage.component').then(
+        (m) => m.SaisieSexageComponent
       ),
   },
   {
