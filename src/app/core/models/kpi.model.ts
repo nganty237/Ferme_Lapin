@@ -9,3 +9,13 @@ export interface KPI {
   phaseBandeB?: string;
   phaseBandeC?: string;
 }
+
+export interface BandeKPI {
+  bandeId: string;
+  nom: string;
+  phase: string;
+  nombreFemelles: number;
+  porteesEnCours: number;
+  dateProchainEvenement?: string | Date;
+  typeProchainEvenement?: string;
+}

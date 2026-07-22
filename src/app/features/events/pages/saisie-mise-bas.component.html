@@ -1,0 +1,84 @@
+<div class="page-container">
+      <app-page-header
+        title="Mise-Bas par Bande"
+        subtitle="Enregistrer les naissances pour toute une bande en gestation">
+      </app-page-header>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-6 mt-6">
+        <form [formGroup]="miseBasForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
+              <mat-label>Bande en gestation</mat-label>
+              <mat-select formControlName="bande" placeholder="Sélectionner la bande">
+                @for (b of bandesDisponibles(); track b.id) {
+                  <mat-option [value]="b.id">
+                    {{ b.nom }} — {{ b.femellesIds?.length }} lapines
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (bandeSelectionnee() && sessionsGestation().length > 0) {
+            <div>
+              <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-slate-800">Liste des mises-bas (Lapines gestantes)</h3>
+                <mat-form-field appearance="outline" class="w-[200px] -mb-5">
+                  <mat-label>Date de Mise-bas</mat-label>
+                  <input matInput [matDatepicker]="picker" formControlName="dateCommune" placeholder="JJ/MM/AAAA">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              
+              <div formArrayName="femelles" class="flex flex-col gap-3">
+                @for (ctrl of femellesFormArray.controls; track $index) {
+                  <div [formGroupName]="$index" class="p-4 border rounded-xl bg-emerald-50 border-emerald-100 flex flex-col md:flex-row gap-4 items-center">
+                    <div class="w-48">
+                      <p class="font-bold text-emerald-900">{{ getFemelleName(ctrl.value.femelleId) }}</p>
+                      <p class="text-xs text-emerald-700">Saillie le : {{ ctrl.value.dateSaillie | date:'dd MMM yyyy' }}</p>
+                    </div>
+
+                    <div class="flex-1 flex gap-3">
+                      <mat-form-field appearance="outline" class="w-24 -mb-5">
+                        <mat-label>Total nés</mat-label>
+                        <input matInput type="number" formControlName="nes" min="0">
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="w-24 -mb-5">
+                        <mat-label>Vivants</mat-label>
+                        <input matInput type="number" formControlName="vivants" min="0">
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="w-24 -mb-5">
+                        <mat-label>Morts-nés</mat-label>
+                        <input matInput type="number" formControlName="mortsNes" readonly>
+                      </mat-form-field>
+                    </div>
+                    
+                    <div class="flex-1 w-full md:w-auto">
+                      <mat-form-field appearance="outline" class="w-full mt-2 md:mt-0 -mb-5">
+                        <mat-label>Observations</mat-label>
+                        <input matInput formControlName="observations" placeholder="Optionnel...">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                }
+              </div>
+              
+              <div class="flex justify-end gap-3 mt-6">
+                <button mat-flat-button color="primary" type="submit" [disabled]="miseBasForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
+                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">save</mat-icon>
+                  {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer les naissances' }}
+                </button>
+              </div>
+            </div>
+          }
+          
+          @if (bandeSelectionnee() && sessionsGestation().length === 0) {
+            <div class="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
+              <mat-icon class="text-slate-400 mb-2">info</mat-icon>
+              <p class="text-slate-600">Aucune femelle gestante trouvée pour cette bande.</p>
+            </div>
+          }
+        </form>
+      </div>
+    </div>

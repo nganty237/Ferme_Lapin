@@ -1,0 +1,17 @@
+<div class="toast-container">
+      @for (toast of toastService.toasts(); track toast.id) {
+        <div class="toast-item"
+             [class.fade-out]="toast.fadingOut"
+             [class]="'toast-item ' + (toast.fadingOut ? 'fade-out ' : '') + getToastClass(toast.type)">
+          <mat-icon class="toast-icon" [class]="getIconClass(toast.type)">
+            {{ getToastIcon(toast.type) }}
+          </mat-icon>
+          <div class="toast-message">
+            {{ toast.message }}
+          </div>
+          <button class="toast-close" (click)="dismiss(toast.id)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>

@@ -1,4 +1,4 @@
-export type Sexe = 'F' | 'M';
+﻿export type Sexe = 'F' | 'M';
 export type EtatReproducteur = 'Actif' | 'En gestation' | 'En allaitement' | 'Au repos' | 'Réformé' | 'Mort';
 
 export interface Reproducteur {
@@ -11,12 +11,27 @@ export interface Reproducteur {
   notes?: string;
 }
 
-export type PhaseBande = 'A:Allaite' | 'B:Gesta' | 'C:Saillies' | 'Vide';
+export interface MaleReproducteur extends Reproducteur {
+  sexe: 'M';
+  femellesIds: string[];      // F001-F011 pour M01
+  nombreSailliesJour: number; // max 2 par jour
+}
+
+export type EtatBande = 
+  | 'Repos'
+  | 'Saillie'
+  | 'Gestation'
+  | 'Palpation'
+  | 'Allaitement'
+  | 'Sevrage'
+  | 'Sexage'
+  | 'Engraissement';
 
 export interface Bande {
-  id: string;
-  nom: string;
-  phase: PhaseBande;
-  dateCreation: Date;
-  active: boolean;
+  id: string;              // 'bande-a' | 'bande-b' | 'bande-c'
+  nom: string;             // 'Bande A'
+  phase: EtatBande;
+  dateDemarragePhase?: string;
+  femellesIds?: string[];
+  couleur?: string;
 }
