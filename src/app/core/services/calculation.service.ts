@@ -5,19 +5,20 @@ import { DataStoreService } from './data-store.service';
 import { KpiCapacityService, CapacityKPIs } from './kpi-capacity.service';
 import { KpiReproductionService, ReproductionKPIs } from './kpi-reproduction.service';
 import { KpiFinanceService, FinanceKPIs } from './kpi-finance.service';
-import { 
-  Reproducteur, 
-  Saillie, 
-  MiseBas, 
-  Sevrage, 
-  Vente, 
-  Deces, 
-  Configuration, 
-  Bande, 
-  Clapier, 
-  SessionSaillie, 
-  Palpation, 
-  Sexage 
+import {
+  Reproducteur,
+  Saillie,
+  MiseBas,
+  Sevrage,
+  Vente,
+  Deces,
+  Configuration,
+  Bande,
+  Clapier,
+  SessionSaillie,
+  Palpation,
+  Sexage,
+  CycleBande
 } from '../models';
 import { AppNotification } from './notification.service';
 
@@ -44,6 +45,7 @@ export class CalculationService {
   readonly ventes$: Observable<Vente[]> = this.dataStore.ventes$;
   readonly deces$: Observable<Deces[]> = this.dataStore.deces$;
   readonly bandes$: Observable<Bande[]> = this.dataStore.bandes$;
+  readonly cyclesBande$: Observable<CycleBande[]> = this.dataStore.cyclesBande$;
   readonly clapiers$: Observable<Clapier[]> = this.dataStore.clapiers$;
   readonly sessionsSaillie$: Observable<SessionSaillie[]> = this.dataStore.sessionsSaillie$;
   readonly palpations$: Observable<Palpation[]> = this.dataStore.palpations$;

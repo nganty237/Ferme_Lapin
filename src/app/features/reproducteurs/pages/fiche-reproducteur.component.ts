@@ -73,10 +73,12 @@ export class FicheReproducteurComponent {
 
   bandName = computed(() => {
     const r = this.reproducteur();
-    if (!r || !r.bandeId) return '';
+    if (!r) return '';
+    const bandeId = 'bandeId' in r ? (r as any).bandeId : '';
+    if (!bandeId) return '';
     const bList = this.bandes();
-    const band = bList.find((b: any) => b.id === r.bandeId);
-    return band ? band.name : r.bandeId;
+    const band = bList.find((b: any) => b.id === bandeId);
+    return band ? band.name : bandeId;
   });
 
   breederDeces = computed(() => {
@@ -250,11 +252,11 @@ export class FicheReproducteurComponent {
   performDelete(): void {
     const r = this.reproducteur();
     if (r) {
-      const updated = {
-        ...r,
-        etat: 'Réformé' as const
-      };
-      this.calcService.updateReproducteur(updated);
+      if (r.sexe === 'F') {
+        this.calcService.updateReproducteur({ ...r, etat: 'Réformée' });
+      } else {
+        this.calcService.updateReproducteur({ ...r, etat: 'Réformé' });
+      }
       this.showDeleteConfirm = false;
       this.goBack();
     }

@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, DestroyRef } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, BandeService, NotificationService } from '@core/services';
+import { BandeId } from '@core/models';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +18,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   providers: [provideNativeDateAdapter()],
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -44,6 +47,7 @@ export class SaisieSexageComponent {
   isSubmitting = signal<boolean>(false);
 
   bandesDisponibles = computed(() => this.bandes() || []);
+  selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
 
   sevragesBande = computed(() => {
     const bandeId = this.bandeSelectionnee();
@@ -51,14 +55,14 @@ export class SaisieSexageComponent {
     const allSexages = this.sexages() || [];
     if (!bandeId) return [];
 
-    return allSevrages.filter(s => {
-      const hasSexage = allSexages.some(sx => sx.sevrageId === s.id);
-      return !hasSexage;
-    }).filter(s => {
-      if (!s.femelleId) return false;
-      const b = this.bandes()?.find(b => b.id === bandeId);
-      return b ? b.femellesIds?.includes(s.femelleId) : false;
+    const list = allSevrages.filter(s => {
+      if (s.bandeId !== bandeId) return false;
+      const dejaSexe = allSexages.some(sex => sex.bandeId === bandeId);
+      if (dejaSexe) return false;
+      return true;
     });
+
+    return list.slice(0, 11);
   });
 
   get porteesFormArray() {
@@ -66,9 +70,10 @@ export class SaisieSexageComponent {
   }
 
   constructor() {
+    const todayStr = new Date().toISOString().substring(0, 10);
     this.sexageForm = this.fb.group({
-      bande: ['', Validators.required],
-      dateCommune: [new Date(), Validators.required],
+      bande: ['bande-a', Validators.required],
+      dateCommune: [todayStr, Validators.required],
       portees: this.fb.array([])
     });
 
@@ -76,14 +81,42 @@ export class SaisieSexageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(bandeId => {
         this.bandeSelectionnee.set(bandeId || null);
-        this.initPorteesArray();
       });
+
+    // Auto-sélection initiale de la bande sevrée prête pour le sexage
+    effect(() => {
+      const allBandes = this.bandes() || [];
+      const allSevrages = this.sevrages() || [];
+      if (allBandes.length > 0) {
+        const activeBande = allBandes.find(b => {
+          const sevs = allSevrages.filter(s => s.bandeId === b.id);
+          return sevs.length > 0 || b.phase === 'Sexage';
+        }) || allBandes[0];
+
+        if (activeBande && this.bandeSelectionnee() !== activeBande.id) {
+          this.bandeSelectionnee.set(activeBande.id);
+          this.sexageForm.patchValue({ bande: activeBande.id }, { emitEvent: false });
+        }
+      }
+    }, { allowSignalWrites: true });
+
+    // Synchronisation réactive auto du tableau des portées à sexer
+    effect(() => {
+      const sevs = this.sevragesBande();
+      this.updatePorteesArray(sevs);
+    });
   }
 
-  initPorteesArray() {
-    this.porteesFormArray.clear();
-    const sevs = this.sevragesBande();
+  private lastSevragesHash = '';
 
+  private updatePorteesArray(sevs: any[]) {
+    const hash = sevs.map(s => `${s.id}_${s.femelleId}`).join(',');
+    if (this.lastSevragesHash === hash && this.porteesFormArray.length === sevs.length) {
+      return;
+    }
+    this.lastSevragesHash = hash;
+
+    this.porteesFormArray.clear();
     sevs.forEach(sev => {
       const group = this.fb.group({
         sevrageId: [sev.id],
@@ -102,6 +135,10 @@ export class SaisieSexageComponent {
     return repro ? repro.nom : id;
   }
 
+  getTotalSexes(males: any, femelles: any): number {
+    return (Number(males) || 0) + (Number(femelles) || 0);
+  }
+
   onSubmit() {
     if (this.sexageForm.invalid) {
       this.sexageForm.markAllAsTouched();
@@ -116,15 +153,18 @@ export class SaisieSexageComponent {
       formValue.portees.forEach((p: any) => {
         this.bandeService.enregistrerSexage({
           id: `sex-${Date.now()}-${p.femelleId}`,
-          sevrageId: p.sevrageId,
+          cycleId: `cycle-${formValue.bande}-1`,
           bandeId: formValue.bande,
           dateSexage,
           nombreMales: Number(p.males) || 0,
           nombreFemelles: Number(p.femelles) || 0,
           totalSexes: (Number(p.males) || 0) + (Number(p.femelles) || 0),
-          clapierDestination: 'clapier-4'
+          clapierSexageId: 'clap-s1'
         });
       });
+
+      // Fix P0 #4 : déclenchement immédiat du transfert en engraissement après sexage.
+      this.bandeService.transfererEngraissement(formValue.bande as BandeId, new Date(dateSexage));
 
       this.notifier.success('Sexage enregistré avec succès.');
       this.sexageForm.reset({ dateCommune: new Date() });

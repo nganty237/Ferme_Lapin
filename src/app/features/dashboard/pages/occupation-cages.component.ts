@@ -48,7 +48,7 @@ export class OccupationCagesComponent {
       const joursRestants = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
       // Estimate cages based on current rabbit count / target density
-      const cagesEstimées = Math.ceil((sev.sevres || 0) / (config.densiteParCage || 3));
+      const cagesEstimées = Math.ceil((sev.sevres || 0) / (config.densiteParCase || 3));
 
       // Consider it in fattening if it's not yet completed or sold out
       // (simplification : date de fin d'engraissement non dépassée de plus de 15 jours)

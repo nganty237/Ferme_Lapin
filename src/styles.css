@@ -25,7 +25,16 @@
     --color-border-light: #f1f5f9;
 
     --color-success: #16a34a;
+    --color-success-bg: #dcfce7;
+
+    --color-warning: #d97706;
+    --color-warning-bg: #fef3c7;
+
+    --color-info: #0284c7;
+    --color-info-bg: #f0f9ff;
+
     --color-danger: #ef4444;
+    --color-danger-bg: #fef2f2;
   }
 
   body {
@@ -63,6 +72,30 @@
   .nav-link.active .mat-icon,
   .nav-link:hover .mat-icon {
     @apply opacity-100;
+  }
+
+  .form-select {
+    @apply bg-white text-slate-800 text-xs md:text-sm font-medium border border-slate-200 rounded-lg px-3 py-2 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 min-w-[160px];
+  }
+
+  .form-input {
+    @apply bg-white text-slate-800 text-xs md:text-sm font-medium border border-slate-200 rounded-lg px-3 py-2 outline-none transition-all focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600;
+  }
+
+  .status-pill-radio {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer border border-slate-200 bg-slate-50 text-slate-600 transition-all select-none hover:bg-slate-100;
+  }
+
+  .status-pill-radio.active-positive {
+    @apply bg-emerald-700 text-white border-emerald-700 shadow-xs scale-[1.02];
+  }
+
+  .status-pill-radio.active-negative {
+    @apply bg-rose-600 text-white border-rose-600 shadow-xs scale-[1.02];
+  }
+
+  .status-pill-radio.active-incertaine {
+    @apply bg-amber-600 text-white border-amber-600 shadow-xs scale-[1.02];
   }
 }
 

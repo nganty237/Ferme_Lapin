@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -15,6 +15,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   providers: [provideNativeDateAdapter()],
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -52,9 +53,10 @@ export class SaisieDecesComponent {
   ];
 
   constructor() {
+    const todayStr = new Date().toISOString().substring(0, 10);
     this.decesForm = this.fb.group({
       reproducteurId: ['', Validators.required],
-      date: [new Date(), [Validators.required, this.dateNotFutureValidator]],
+      date: [todayStr, [Validators.required, this.dateNotFutureValidator]],
       cause: ['', Validators.required],
       observations: ['']
     });
@@ -82,6 +84,7 @@ export class SaisieDecesComponent {
       this.calcService.addDeces({
         id: `dec_${Date.now()}_${formValue.reproducteurId}`,
         reproducteurId: formValue.reproducteurId,
+        typeAnimal: rep ? (rep.sexe === 'F' ? 'Femelle' : 'Male') : 'Lapereau',
         dateDeces: formValue.date,
         cause: formValue.cause,
         observations: formValue.observations

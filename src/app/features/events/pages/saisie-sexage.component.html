@@ -1,80 +1,191 @@
 <div class="page-container">
-      <app-page-header
-        title="Sexage des Lapereaux"
-        subtitle="Enregistrer la séparation mâles/femelles après sevrage (Engraissement ou Renouvellement)">
-      </app-page-header>
+  <app-page-header
+    title="Sexage des Lapereaux"
+    subtitle="Enregistrer la séparation mâles/femelles après sevrage (Engraissement ou Renouvellement)">
+  </app-page-header>
 
-      <div class="bg-white border border-slate-200 rounded-xl p-6 mt-6">
-        <form [formGroup]="sexageForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-              <mat-label>Bande de provenance (Sevrée)</mat-label>
-              <mat-select formControlName="bande" placeholder="Sélectionner la bande">
-                @for (b of bandesDisponibles(); track b.id) {
-                  <mat-option [value]="b.id">
-                    {{ b.nom }} — {{ b.femellesIds?.length }} lapines
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
+  <!-- Filtres / En-tête -->
+  <div class="bg-white border border-slate-200 rounded-xl p-5 mb-6 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Bande de provenance (Sevrée)
+          </label>
+          <select 
+            class="form-select"
+            [ngModel]="bandeSelectionnee()"
+            (ngModelChange)="sexageForm.get('bande')?.setValue($event)">
+            <option [value]="null" disabled>Sélectionner la bande</option>
+            @for (b of bandesDisponibles(); track b.id) {
+              <option [value]="b.id">
+                {{ b.nom }} — Phase : {{ b.phase || 'Sexage' }}
+              </option>
+            }
+          </select>
+        </div>
 
-          @if (bandeSelectionnee() && sevragesBande().length > 0) {
-            <div>
-              <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-bold text-slate-800">Détail des portées sevrées</h3>
-                <mat-form-field appearance="outline" class="w-[200px] -mb-5">
-                  <mat-label>Date de Sexage</mat-label>
-                  <input matInput [matDatepicker]="picker" formControlName="dateCommune" placeholder="JJ/MM/AAAA">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
-              </div>
-              
-              <div formArrayName="portees" class="flex flex-col gap-3">
-                @for (ctrl of porteesFormArray.controls; track $index) {
-                  <div [formGroupName]="$index" class="p-4 border rounded-xl bg-amber-50 border-amber-100 flex flex-col md:flex-row gap-4 items-center">
-                    <div class="w-48">
-                      <p class="font-bold text-amber-900">Mère : {{ getFemelleName(ctrl.value.femelleId) }}</p>
-                      <p class="text-xs text-amber-700">Sevrés : {{ ctrl.value.totalSevres }} lapereaux</p>
-                    </div>
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Date de Sexage
+          </label>
+          <input 
+            type="date"
+            class="form-input"
+            [formControl]="$any(sexageForm.get('dateCommune'))" />
+        </div>
+      </div>
 
-                    <div class="flex-1 flex gap-3">
-                      <mat-form-field appearance="outline" class="w-32 -mb-5">
-                        <mat-label>Males</mat-label>
-                        <input matInput type="number" formControlName="males" min="0">
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="w-32 -mb-5">
-                        <mat-label>Femelles</mat-label>
-                        <input matInput type="number" formControlName="femelles" min="0">
-                      </mat-form-field>
-                    </div>
-                    
-                    <div class="flex-1 w-full md:w-auto">
-                      <mat-form-field appearance="outline" class="w-full mt-2 md:mt-0 -mb-5">
-                        <mat-label>Retenus pour Renouvellement</mat-label>
-                        <input matInput type="number" formControlName="retenus" min="0" placeholder="Ex: 2">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                }
-              </div>
-              
-              <div class="flex justify-end gap-3 mt-6">
-                <button mat-flat-button color="primary" type="submit" [disabled]="sexageForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
-                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">save</mat-icon>
-                  {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer le sexage' }}
-                </button>
-              </div>
-            </div>
-          }
-          
-          @if (bandeSelectionnee() && sevragesBande().length === 0) {
-            <div class="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-              <mat-icon class="text-slate-400 mb-2">info</mat-icon>
-              <p class="text-slate-600">Aucun sevrage trouvé pour cette bande (ou sexage déjà effectué).</p>
-            </div>
-          }
-        </form>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+          Phase : {{ selectedBande()?.phase || 'Sexage' }}
+        </span>
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60">
+          <mat-icon class="text-amber-600 text-[16px] w-[16px] h-[16px] mr-1.5">wc</mat-icon>
+          {{ sevragesBande().length }} / 11 portée(s) à sexer
+        </span>
       </div>
     </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+    <form [formGroup]="sexageForm" (ngSubmit)="onSubmit()">
+      @if (bandeSelectionnee() && sevragesBande().length > 0) {
+        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Détail des portées sevrées</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Saisissez le nombre de mâles et de femelles identifiés pour chaque portée</p>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-separate border-spacing-0 text-sm">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tl-lg">
+                  Lapine Mère
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Total Sevrés
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Mâles ♂
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Femelles ♀
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Contrôle Total
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tr-lg">
+                  Renouvellement (Retenus)
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="portees">
+              @for (ctrl of porteesFormArray.controls; track $index) {
+                <tr [formGroupName]="$index" class="hover:bg-slate-50/60 transition-colors border-b border-slate-100">
+                  <!-- Lapine -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-full bg-amber-100/70 text-amber-800 flex items-center justify-center font-bold text-xs">
+                        {{ getFemelleName(ctrl.value.femelleId).charAt(0) }}
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-800 leading-snug">
+                          {{ getFemelleName(ctrl.value.femelleId) }}
+                        </p>
+                        <span class="text-[11px] text-slate-400 font-mono">ID: {{ ctrl.value.femelleId }}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Total Sevrés -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle text-center">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                      {{ ctrl.value.totalSevres || 0 }} lapereaux
+                    </span>
+                  </td>
+
+                  <!-- Mâles Input -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle text-center">
+                    <input 
+                      type="number" 
+                      formControlName="males" 
+                      min="0" 
+                      class="form-input text-center w-20 font-bold text-blue-700 text-sm mx-auto">
+                  </td>
+
+                  <!-- Femelles Input -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle text-center">
+                    <input 
+                      type="number" 
+                      formControlName="femelles" 
+                      min="0" 
+                      class="form-input text-center w-20 font-bold text-rose-600 text-sm mx-auto">
+                  </td>
+
+                  <!-- Total Validation Check Pill -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle text-center">
+                    @let totalSexes = getTotalSexes(ctrl.value.males, ctrl.value.femelles);
+                    @let totalExpected = ctrl.value.totalSevres || 0;
+                    <span 
+                      class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold"
+                      [class.bg-emerald-100]="totalSexes === totalExpected"
+                      [class.text-emerald-800]="totalSexes === totalExpected"
+                      [class.bg-rose-100]="totalSexes !== totalExpected"
+                      [class.text-rose-800]="totalSexes !== totalExpected">
+                      {{ totalSexes }} / {{ totalExpected }}
+                    </span>
+                  </td>
+
+                  <!-- Retenus pour Renouvellement -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle min-w-[200px]">
+                    <input 
+                      type="number" 
+                      formControlName="retenus" 
+                      min="0" 
+                      placeholder="Ex: 2" 
+                      class="form-input w-28 text-xs font-medium">
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-100">
+          <button 
+            type="button" 
+            (click)="sexageForm.reset(); porteesFormArray.clear()"
+            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer">
+            <mat-icon class="text-[16px] w-[16px] h-[16px]">refresh</mat-icon>
+            Réinitialiser
+          </button>
+
+          <button 
+            type="submit" 
+            [disabled]="sexageForm.invalid || isSubmitting()" 
+            class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">save</mat-icon>
+            {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer le sexage' }}
+          </button>
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
+          <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center mb-3">
+            <mat-icon class="text-[24px]">wc</mat-icon>
+          </div>
+          <h4 class="font-bold text-slate-700 text-base mb-1">Aucun sevrage à sexer</h4>
+          <p class="text-sm text-slate-500 max-w-md mx-auto">
+            Veuillez sélectionner une bande sevrée dont le sexage des lapereaux n'a pas encore été effectué.
+          </p>
+        </div>
+      }
+    </form>
+  </div>
+</div>

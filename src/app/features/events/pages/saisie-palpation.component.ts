@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, BandeService, NotificationService } from '@core/services';
+import { BandeId } from '@core/models';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +19,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   imports: [
     DatePipe,
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -52,10 +54,11 @@ export class SaisiePalpationComponent {
   sailliesAPalper = computed(() => {
     const allSaillies = this.saillies() || [];
     const allPalpations = this.palpations() || [];
+    const selectedBande = this.selectedBandeId();
 
     return allSaillies.filter(s => {
       const hasPalpation = allPalpations.some(p => p.saillieId === s.id);
-      return !hasPalpation;
+      return s.bandeId === selectedBande && !hasPalpation;
     });
   });
 
@@ -82,6 +85,7 @@ export class SaisiePalpationComponent {
 
   onBandeChange(bandeId: string): void {
     this.selectedBandeId.set(bandeId);
+    this.form.patchValue({ bandeId, bande: bandeId });
     this.initPalpationsForBande(bandeId);
   }
 
@@ -122,11 +126,20 @@ export class SaisiePalpationComponent {
         this.bandeService.enregistrerPalpation({
           id: `palp_${Date.now()}_${p.femelleId}`,
           saillieId: p.saillieId,
+          cycleId: `cycle-${val.bandeId}-1`,
           femelleId: p.femelleId,
+          bandeId: val.bandeId,
           datePalpation: val.datePalpation,
           resultat: p.resultat,
           observations: p.observations
         });
+
+        // Fix P0 #5 : palpation négative → replanification immédiate d'une saillie.
+        if (p.resultat === 'Negative') {
+          const dateReSaillie = new Date(val.datePalpation);
+          dateReSaillie.setDate(dateReSaillie.getDate() + 2);
+          this.bandeService.replanifierSaillieFemelle(p.femelleId, val.bandeId as BandeId, dateReSaillie);
+        }
       });
 
       this.notifier.success(`${arrayValues.length} palpation(s) enregistrée(s) avec succès.`);

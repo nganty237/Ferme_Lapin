@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { 
   Reproducteur, 
   Saillie, 
@@ -11,7 +11,11 @@ import {
   Clapier, 
   SessionSaillie, 
   Palpation, 
-  Sexage 
+  Sexage,
+  ReferentielBande,
+  ReferentielMale,
+  CalendrierSaillieItem,
+  CycleBande
 } from '../models';
 import { StorageBaseRepository, STORAGE_KEYS } from '../repositories/storage-base.repository';
 import { ReproducteurRepository } from '../repositories/reproducteur.repository';
@@ -35,20 +39,24 @@ export class StorageService extends StorageBaseRepository {
 
   private readonly DEFAULT_CONFIG: Configuration = {
     nombreCagesTotal: 108,
-    densiteParCage: 3,
-    dureeGestationJours: 30,
-    dureeAllaitementJours: 30,
-    dureeSexageJours: 30,
-    dureeEngraissementJours: 60,
-    nombreCagesReproductrices: 33,
-    prixAlimentKg: 350,
-    prixVenteDefaut: 3000,
     nombreClapiers: 9,
     nombreCasesParClapier: 12,
-    taillePorteeMoyenne: 6,
     nombreFemelles: 33,
     nombreMales: 3,
-    nombreBandes: 3
+    nombreBandes: 3,
+    nombreFemEllesParBande: 11,
+    dureeGestationJours: 31,
+    jourPalpation: 15,
+    dureeAllaitementMinJours: 30,
+    dureeAllaitementMaxJours: 35,
+    dureeSexageJours: 30,
+    dureeEngraissementJours: 60,
+    taillePorteeMoyenne: 6,
+    densiteParCase: 3,
+    ageMaturiteSexuelleMois: 5,
+    decalageAgeBandesMois: 1,
+    prixAlimentKg: 350,
+    prixVenteDefaut: 3000
   };
 
   constructor() {
@@ -114,6 +122,13 @@ export class StorageService extends StorageBaseRepository {
   getAllClapiers(): Clapier[] { return this.bandeRepo.getAllClapiers(); }
   getAllAffectationMales(): Record<string, AffectationMaleGroup[]> { return this.bandeRepo.getAllAffectationMales(); }
 
+  // --- Référentiel & Cycles ---
+  getReferentielBandes(): ReferentielBande[] { return this.bandeRepo.getReferentielBandes(); }
+  getReferentielMales(): ReferentielMale[] { return this.bandeRepo.getReferentielMales(); }
+  getReferentielCalendrierSaillie(): CalendrierSaillieItem[] { return this.bandeRepo.getReferentielCalendrierSaillie(); }
+  getCyclesBande(): CycleBande[] { return this.bandeRepo.getCyclesBande(); }
+  addCycleBande(cycle: CycleBande): void { this.bandeRepo.addCycleBande(cycle); }
+
   // --- Sessions, Palpations & Sexages ---
   getAllSessionsSaillie(): SessionSaillie[] { return this.eventRepo.getAllSessionsSaillie(); }
   addSessionSaillie(session: SessionSaillie): void { this.eventRepo.addSessionSaillie(session); }
@@ -158,6 +173,16 @@ export class StorageService extends StorageBaseRepository {
   }
 
   initSeedData(force = false): void {
-    // Initialisation optionnelle
+    // json-server (db.json) est la source de vérité unique — pas de seed localStorage.
+    // On garde un avertissement exploitable quand force=true pour guider l'opérateur
+    // si l'API est down. Le fallback localStorage (DataStoreService.loadLocalData)
+    // prend le relais quand l'API est injoignable.
+    if (force && this.isBrowser()) {
+      console.warn(
+        '[StorageService] initSeedData ignoré : json-server (db.json) est la source de vérité. ' +
+          'Lancez `npm run api` ou `npx json-server --watch db.json --port 3000`. ' +
+          'Le fallback localStorage (DataStoreService.loadLocalData) prend le relais si l\'API est injoignable.'
+      );
+    }
   }
 }

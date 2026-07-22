@@ -18,6 +18,10 @@ export const STORAGE_KEYS = {
   PALPATIONS: `${PREFIX}palpations`,
   CLAPIERS: `${PREFIX}clapiers`,
   SEXAGES: `${PREFIX}sexages`,
+  REFERENTIEL_BANDES: `${PREFIX}referentiel_bandes`,
+  REFERENTIEL_MALES: `${PREFIX}referentiel_males`,
+  REFERENTIEL_CALENDRIER: `${PREFIX}referentiel_calendrier_saillie`,
+  CYCLES_BANDE: `${PREFIX}cycles_bande`,
 } as const;
 
 /**

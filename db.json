@@ -1,1025 +1,29 @@
 {
-  "reproducteurs": [
-    {
-      "id": "F001",
-      "nom": "F001 — Bande A",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F002",
-      "nom": "F002 — Bande A",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F003",
-      "nom": "F003 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F004",
-      "nom": "F004 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F005",
-      "nom": "F005 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F006",
-      "nom": "F006 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F007",
-      "nom": "F007 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F008",
-      "nom": "F008 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F009",
-      "nom": "F009 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F010",
-      "nom": "F010 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F011",
-      "nom": "F011 — Bande A",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-a"
-    },
-    {
-      "id": "F012",
-      "nom": "F012 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F013",
-      "nom": "F013 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F014",
-      "nom": "F014 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F015",
-      "nom": "F015 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F016",
-      "nom": "F016 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F017",
-      "nom": "F017 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F018",
-      "nom": "F018 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F019",
-      "nom": "F019 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F020",
-      "nom": "F020 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F021",
-      "nom": "F021 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F022",
-      "nom": "F022 — Bande B",
-      "sexe": "F",
-      "etat": "En gestation",
-      "bandeId": "bande-b"
-    },
-    {
-      "id": "F023",
-      "nom": "F023 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F024",
-      "nom": "F024 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F025",
-      "nom": "F025 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F026",
-      "nom": "F026 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F027",
-      "nom": "F027 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F028",
-      "nom": "F028 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F029",
-      "nom": "F029 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F030",
-      "nom": "F030 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F031",
-      "nom": "F031 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F032",
-      "nom": "F032 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "F033",
-      "nom": "F033 — Bande C",
-      "sexe": "F",
-      "etat": "Au repos",
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "M01",
-      "nom": "M01 — Mâle Reproducteur",
-      "sexe": "M",
-      "etat": "Actif"
-    },
-    {
-      "id": "M02",
-      "nom": "M02 — Mâle Reproducteur",
-      "sexe": "M",
-      "etat": "Actif"
-    },
-    {
-      "id": "M03",
-      "nom": "M03 — Mâle Reproducteur",
-      "sexe": "M",
-      "etat": "Actif"
-    }
-  ],
-  "saillies": [
-    {
-      "id": "sal-c-01",
-      "femelleId": "F023",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
-    },
-    {
-      "id": "sal-c-02",
-      "femelleId": "F024",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
-    },
-    {
-      "id": "sal-c-03",
-      "femelleId": "F009",
-      "maleId": "M01",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
-    },
-    {
-      "id": "sal-c-04",
-      "femelleId": "F010",
-      "maleId": "M01",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
-    },
-    {
-      "id": "sal-c-05",
-      "femelleId": "F020",
-      "maleId": "M02",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
-    },
-    {
-      "id": "sal-c-06",
-      "femelleId": "F021",
-      "maleId": "M02",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
-    },
-    {
-      "id": "sal-c-07",
-      "femelleId": "F030",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
-    },
-    {
-      "id": "sal-c-08",
-      "femelleId": "F031",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
-    },
-    {
-      "id": "sal-c-09",
-      "femelleId": "F011",
-      "maleId": "M01",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
-    },
-    {
-      "id": "sal-c-10",
-      "femelleId": "F022",
-      "maleId": "M02",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
-    },
-    {
-      "id": "sal-c-11",
-      "femelleId": "F032",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
-    },
-    {
-      "id": "sal-c-12",
-      "femelleId": "F033",
-      "maleId": "M03",
-      "bandeId": "bande-c",
-      "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande C — J2 Soir"
-    },
-    {
-      "id": "sal-b-01",
-      "femelleId": "F005",
-      "maleId": "M01",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
-    },
-    {
-      "id": "sal-b-02",
-      "femelleId": "F006",
-      "maleId": "M01",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
-    },
-    {
-      "id": "sal-b-03",
-      "femelleId": "F016",
-      "maleId": "M02",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
-    },
-    {
-      "id": "sal-b-04",
-      "femelleId": "F017",
-      "maleId": "M02",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
-    },
-    {
-      "id": "sal-b-05",
-      "femelleId": "F026",
-      "maleId": "M03",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
-    },
-    {
-      "id": "sal-b-06",
-      "femelleId": "F027",
-      "maleId": "M03",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
-    },
-    {
-      "id": "sal-b-07",
-      "femelleId": "F007",
-      "maleId": "M01",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
-    },
-    {
-      "id": "sal-b-08",
-      "femelleId": "F008",
-      "maleId": "M01",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
-    },
-    {
-      "id": "sal-b-09",
-      "femelleId": "F018",
-      "maleId": "M02",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
-    },
-    {
-      "id": "sal-b-10",
-      "femelleId": "F019",
-      "maleId": "M02",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
-    },
-    {
-      "id": "sal-b-11",
-      "femelleId": "F028",
-      "maleId": "M03",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
-    },
-    {
-      "id": "sal-b-12",
-      "femelleId": "F029",
-      "maleId": "M03",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
-    },
-    {
-      "id": "WiFQYhr-VyM",
-      "femelleId": "F001",
-      "maleId": "M01",
-      "dateSaillie": "2026-07-19T14:52:39.908Z",
-      "bandeId": "bande-a",
-      "dateMiseBasPrevue": "2026-08-19T14:52:39.908Z"
-    },
-    {
-      "id": "-d6bejD32Hk",
-      "femelleId": "F002",
-      "maleId": "M01",
-      "dateSaillie": "2026-07-19T14:53:08.167Z",
-      "bandeId": "bande-a",
-      "dateMiseBasPrevue": "2026-08-19T14:53:08.167Z"
-    }
-  ],
-  "misesBas": [
-    {
-      "id": "mb-c-01",
-      "saillieId": "sal-c-01",
-      "femelleId": "F023",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-19",
-      "nes": 7,
-      "vivants": 6,
-      "mortsNes": 1,
-      "viabiliteCalculee": 86
-    },
-    {
-      "id": "mb-c-02",
-      "saillieId": "sal-c-02",
-      "femelleId": "F024",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-19",
-      "nes": 6,
-      "vivants": 6,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-03",
-      "saillieId": "sal-c-03",
-      "femelleId": "F025",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-19",
-      "nes": 7,
-      "vivants": 7,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-04",
-      "saillieId": "sal-c-04",
-      "femelleId": "F026",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-20",
-      "nes": 6,
-      "vivants": 5,
-      "mortsNes": 1,
-      "viabiliteCalculee": 83
-    },
-    {
-      "id": "mb-c-05",
-      "saillieId": "sal-c-05",
-      "femelleId": "F027",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-20",
-      "nes": 7,
-      "vivants": 7,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-06",
-      "saillieId": "sal-c-06",
-      "femelleId": "F028",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-20",
-      "nes": 6,
-      "vivants": 6,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-07",
-      "saillieId": "sal-c-07",
-      "femelleId": "F029",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-20",
-      "nes": 7,
-      "vivants": 6,
-      "mortsNes": 1,
-      "viabiliteCalculee": 86
-    },
-    {
-      "id": "mb-c-08",
-      "saillieId": "sal-c-08",
-      "femelleId": "F030",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-21",
-      "nes": 6,
-      "vivants": 6,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-09",
-      "saillieId": "sal-c-09",
-      "femelleId": "F031",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-21",
-      "nes": 7,
-      "vivants": 7,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    },
-    {
-      "id": "mb-c-10",
-      "saillieId": "sal-c-10",
-      "femelleId": "F032",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-21",
-      "nes": 6,
-      "vivants": 5,
-      "mortsNes": 1,
-      "viabiliteCalculee": 83
-    },
-    {
-      "id": "mb-c-11",
-      "saillieId": "sal-c-11",
-      "femelleId": "F033",
-      "bandeId": "bande-c",
-      "dateMiseBas": "2026-06-21",
-      "nes": 6,
-      "vivants": 6,
-      "mortsNes": 0,
-      "viabiliteCalculee": 100
-    }
-  ],
-  "sevrages": [
-    {
-      "id": "sev-a-01",
-      "miseBasId": "mb-a-01",
-      "femelleId": "F001",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-25",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-02",
-      "miseBasId": "mb-a-02",
-      "femelleId": "F002",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-25",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-03",
-      "miseBasId": "mb-a-03",
-      "femelleId": "F003",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-26",
-      "sevres": 7,
-      "cagesOccupees": 3
-    },
-    {
-      "id": "sev-a-04",
-      "miseBasId": "mb-a-04",
-      "femelleId": "F004",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-26",
-      "sevres": 5,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-05",
-      "miseBasId": "mb-a-05",
-      "femelleId": "F005",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-27",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-06",
-      "miseBasId": "mb-a-06",
-      "femelleId": "F006",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-27",
-      "sevres": 7,
-      "cagesOccupees": 3
-    },
-    {
-      "id": "sev-a-07",
-      "miseBasId": "mb-a-07",
-      "femelleId": "F007",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-27",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-08",
-      "miseBasId": "mb-a-08",
-      "femelleId": "F008",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-28",
-      "sevres": 5,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-09",
-      "miseBasId": "mb-a-09",
-      "femelleId": "F009",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-28",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "sev-a-10",
-      "miseBasId": "mb-a-10",
-      "femelleId": "F010",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-28",
-      "sevres": 7,
-      "cagesOccupees": 3
-    },
-    {
-      "id": "sev-a-11",
-      "miseBasId": "mb-a-11",
-      "femelleId": "F011",
-      "bandeId": "bande-a",
-      "dateSevrage": "2026-04-29",
-      "sevres": 6,
-      "cagesOccupees": 2
-    },
-    {
-      "id": "QbYHzot04D8",
-      "miseBasId": "mb-c-01",
-      "femelleId": "F023",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "UZK7KcBVxU8",
-      "miseBasId": "mb-c-02",
-      "femelleId": "F024",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "rWH437DtC1E",
-      "miseBasId": "mb-c-03",
-      "femelleId": "F025",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 7,
-      "cagesOccupees": 3,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "NVLz6rJXi04",
-      "miseBasId": "mb-c-04",
-      "femelleId": "F026",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 5,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "edfL9SIgZtQ",
-      "miseBasId": "mb-c-05",
-      "femelleId": "F027",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 7,
-      "cagesOccupees": 3,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "4k_JHEwYKnM",
-      "miseBasId": "mb-c-06",
-      "femelleId": "F028",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "DmjvuwClEpQ",
-      "miseBasId": "mb-c-07",
-      "femelleId": "F029",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "uqakIvFPskk",
-      "miseBasId": "mb-c-08",
-      "femelleId": "F030",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "kzv_UKtTAP4",
-      "miseBasId": "mb-c-09",
-      "femelleId": "F031",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 7,
-      "cagesOccupees": 3,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "jDe0s1Y39RU",
-      "miseBasId": "mb-c-10",
-      "femelleId": "F032",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 5,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    },
-    {
-      "id": "erZ4zH6N1-4",
-      "miseBasId": "mb-c-11",
-      "femelleId": "F033",
-      "dateSevrage": "2026-07-19T23:00:00.000Z",
-      "sevres": 6,
-      "cagesOccupees": 2,
-      "bandeId": "bande-c"
-    }
-  ],
-  "ventes": [
-    {
-      "id": "ven-a-01",
-      "sevrageId": "sev-a-01",
-      "bandeId": "bande-a",
-      "dateVente": "2026-06-24",
-      "vendus": 6,
-      "prixUnitaire": 3000,
-      "prixTotal": 18000,
-      "client": "Marché Local"
-    },
-    {
-      "id": "ven-a-02",
-      "sevrageId": "sev-a-02",
-      "bandeId": "bande-a",
-      "dateVente": "2026-06-24",
-      "vendus": 6,
-      "prixUnitaire": 3000,
-      "prixTotal": 18000,
-      "client": "Marché Local"
-    },
-    {
-      "id": "ven-a-03",
-      "sevrageId": "sev-a-03",
-      "bandeId": "bande-a",
-      "dateVente": "2026-06-25",
-      "vendus": 7,
-      "prixUnitaire": 3000,
-      "prixTotal": 21000,
-      "client": "Centragel"
-    },
-    {
-      "id": "ven-a-04",
-      "sevrageId": "sev-a-04",
-      "bandeId": "bande-a",
-      "dateVente": "2026-06-25",
-      "vendus": 5,
-      "prixUnitaire": 3000,
-      "prixTotal": 15000,
-      "client": "Centragel"
-    },
-    {
-      "id": "ven-a-05",
-      "sevrageId": "sev-a-05",
-      "bandeId": "bande-a",
-      "dateVente": "2026-06-26",
-      "vendus": 6,
-      "prixUnitaire": 3000,
-      "prixTotal": 18000,
-      "client": "Marché Local"
-    }
-  ],
-  "deces": [],
   "configuration": {
     "nombreCagesTotal": 108,
     "nombreClapiers": 9,
     "nombreCasesParClapier": 12,
-    "densiteParCage": 3,
-    "dureeGestationJours": 30,
-    "dureeAllaitementJours": 30,
-    "dureeSexageJours": 30,
-    "dureeEngraissementJours": 60,
-    "nombreCagesReproductrices": 33,
-    "prixAlimentKg": 350,
-    "prixVenteDefaut": 3000,
-    "taillePorteeMoyenne": 6,
     "nombreFemelles": 33,
     "nombreMales": 3,
-    "nombreBandes": 3
+    "nombreBandes": 3,
+    "nombreFemEllesParBande": 11,
+    "dureeGestationJours": 31,
+    "jourPalpation": 15,
+    "dureeAllaitementMinJours": 30,
+    "dureeAllaitementMaxJours": 35,
+    "dureeSexageJours": 30,
+    "dureeEngraissementJours": 60,
+    "taillePorteeMoyenne": 6,
+    "densiteParCase": 3,
+    "ageMaturiteSexuelleMois": 5,
+    "decalageAgeBandesMois": 1,
+    "prixAlimentKg": 350,
+    "prixVenteDefaut": 3000
   },
-  "clapiers": [
+  "referentiel_males": [
     {
-      "id": "clap-m1",
-      "nom": "Clapier Maternité 1",
-      "type": "Maternité",
-      "nombreCases": 12,
-      "casesOccupees": 11
-    },
-    {
-      "id": "clap-m2",
-      "nom": "Clapier Maternité 2",
-      "type": "Maternité",
-      "nombreCases": 12,
-      "casesOccupees": 11
-    },
-    {
-      "id": "clap-m3",
-      "nom": "Clapier Maternité 3",
-      "type": "Maternité",
-      "nombreCases": 12,
-      "casesOccupees": 11
-    },
-    {
-      "id": "clap-e1",
-      "nom": "Clapier Engraissement 1",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 12
-    },
-    {
-      "id": "clap-e2",
-      "nom": "Clapier Engraissement 2",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 12
-    },
-    {
-      "id": "clap-e3",
-      "nom": "Clapier Engraissement 3",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 12
-    },
-    {
-      "id": "clap-e4",
-      "nom": "Clapier Engraissement 4",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 10
-    },
-    {
-      "id": "clap-e5",
-      "nom": "Clapier Engraissement 5",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 0
-    },
-    {
-      "id": "clap-e6",
-      "nom": "Clapier Engraissement 6",
-      "type": "Engraissement",
-      "nombreCases": 12,
-      "casesOccupees": 0
-    }
-  ],
-  "bandes": [
-    {
-      "id": "bande-a",
-      "nom": "Bande A",
-      "phase": "Repos",
-      "dateDemarragePhase": "2026-06-20",
+      "id": "M01",
+      "nom": "M01 — Mâle Reproducteur",
       "femellesIds": [
         "F001",
         "F002",
@@ -1035,10 +39,8 @@
       ]
     },
     {
-      "id": "bande-b",
-      "nom": "Bande B",
-      "phase": "Gestation",
-      "dateDemarragePhase": "2026-06-20",
+      "id": "M02",
+      "nom": "M02 — Mâle Reproducteur",
       "femellesIds": [
         "F012",
         "F013",
@@ -1054,10 +56,8 @@
       ]
     },
     {
-      "id": "bande-c",
-      "nom": "Bande C",
-      "phase": "Allaitement",
-      "dateDemarragePhase": "2026-06-20",
+      "id": "M03",
+      "nom": "M03 — Mâle Reproducteur",
       "femellesIds": [
         "F023",
         "F024",
@@ -1073,353 +73,1399 @@
       ]
     }
   ],
-  "palpations": [],
-  "sexages": [],
-  "sessions_saillie": [
+  "referentiel_bandes": [
+    {
+      "id": "bande-a",
+      "nom": "Bande A",
+      "couleur": "#4CAF50",
+      "nombreFemelles": 11,
+      "decalageAgeMois": 0,
+      "groupesParMale": [
+        {
+          "maleId": "M01",
+          "femellesIds": [
+            "F001",
+            "F002",
+            "F003",
+            "F004"
+          ]
+        },
+        {
+          "maleId": "M02",
+          "femellesIds": [
+            "F012",
+            "F013",
+            "F014",
+            "F015"
+          ]
+        },
+        {
+          "maleId": "M03",
+          "femellesIds": [
+            "F023",
+            "F024",
+            "F025"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bande-b",
+      "nom": "Bande B",
+      "couleur": "#2196F3",
+      "nombreFemelles": 11,
+      "decalageAgeMois": 1,
+      "groupesParMale": [
+        {
+          "maleId": "M01",
+          "femellesIds": [
+            "F005",
+            "F006",
+            "F007",
+            "F008"
+          ]
+        },
+        {
+          "maleId": "M02",
+          "femellesIds": [
+            "F016",
+            "F017",
+            "F018",
+            "F019"
+          ]
+        },
+        {
+          "maleId": "M03",
+          "femellesIds": [
+            "F026",
+            "F027",
+            "F028"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bande-c",
+      "nom": "Bande C",
+      "couleur": "#FF9800",
+      "nombreFemelles": 11,
+      "decalageAgeMois": 2,
+      "groupesParMale": [
+        {
+          "maleId": "M01",
+          "femellesIds": [
+            "F009",
+            "F010",
+            "F011"
+          ]
+        },
+        {
+          "maleId": "M02",
+          "femellesIds": [
+            "F020",
+            "F021",
+            "F022"
+          ]
+        },
+        {
+          "maleId": "M03",
+          "femellesIds": [
+            "F029",
+            "F030",
+            "F031",
+            "F032",
+            "F033"
+          ]
+        }
+      ]
+    }
+  ],
+  "referentiel_calendrier_saillie": [
+    {
+      "bandeId": "bande-a",
+      "maleId": "M01",
+      "femelleId": "F001",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 1
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M01",
+      "femelleId": "F002",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 2
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M02",
+      "femelleId": "F012",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 3
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M02",
+      "femelleId": "F013",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 4
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M03",
+      "femelleId": "F023",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 5
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M03",
+      "femelleId": "F024",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 6
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M01",
+      "femelleId": "F003",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 7
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M01",
+      "femelleId": "F004",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 8
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M02",
+      "femelleId": "F014",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 9
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M02",
+      "femelleId": "F015",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 10
+    },
+    {
+      "bandeId": "bande-a",
+      "maleId": "M03",
+      "femelleId": "F025",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 11
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M01",
+      "femelleId": "F005",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 1
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M01",
+      "femelleId": "F006",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 2
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M02",
+      "femelleId": "F016",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 3
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M02",
+      "femelleId": "F017",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 4
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M03",
+      "femelleId": "F026",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 5
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M03",
+      "femelleId": "F027",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 6
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M01",
+      "femelleId": "F007",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 7
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M01",
+      "femelleId": "F008",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 8
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M02",
+      "femelleId": "F018",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 9
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M02",
+      "femelleId": "F019",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 10
+    },
+    {
+      "bandeId": "bande-b",
+      "maleId": "M03",
+      "femelleId": "F028",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 11
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M01",
+      "femelleId": "F009",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 1
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M01",
+      "femelleId": "F010",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 2
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M02",
+      "femelleId": "F020",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 3
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M02",
+      "femelleId": "F021",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 4
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M03",
+      "femelleId": "F030",
+      "jourSaillie": 1,
+      "moment": "Matin",
+      "ordre": 5
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M03",
+      "femelleId": "F031",
+      "jourSaillie": 1,
+      "moment": "Soir",
+      "ordre": 6
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M01",
+      "femelleId": "F011",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 7
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M02",
+      "femelleId": "F022",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 8
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M03",
+      "femelleId": "F029",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "ordre": 9
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M03",
+      "femelleId": "F032",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 10
+    },
+    {
+      "bandeId": "bande-c",
+      "maleId": "M03",
+      "femelleId": "F033",
+      "jourSaillie": 2,
+      "moment": "Soir",
+      "ordre": 11
+    }
+  ],
+  "reproducteurs": [
+    {
+      "id": "F001",
+      "nom": "F001 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M01",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F002",
+      "nom": "F002 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M01",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F003",
+      "nom": "F003 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M01",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F004",
+      "nom": "F004 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M01",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F005",
+      "nom": "F005 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F006",
+      "nom": "F006 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F007",
+      "nom": "F007 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F008",
+      "nom": "F008 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F009",
+      "nom": "F009 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F010",
+      "nom": "F010 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F011",
+      "nom": "F011 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M01",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F012",
+      "nom": "F012 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M02",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F013",
+      "nom": "F013 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M02",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F014",
+      "nom": "F014 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M02",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F015",
+      "nom": "F015 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M02",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F016",
+      "nom": "F016 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F017",
+      "nom": "F017 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F018",
+      "nom": "F018 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F019",
+      "nom": "F019 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F020",
+      "nom": "F020 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F021",
+      "nom": "F021 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F022",
+      "nom": "F022 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M02",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F023",
+      "nom": "F023 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M03",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F024",
+      "nom": "F024 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M03",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F025",
+      "nom": "F025 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-a",
+      "maleResponsableId": "M03",
+      "etat": "En gestation"
+    },
+    {
+      "id": "F026",
+      "nom": "F026 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F027",
+      "nom": "F027 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F028",
+      "nom": "F028 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-b",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F029",
+      "nom": "F029 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F030",
+      "nom": "F030 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F031",
+      "nom": "F031 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F032",
+      "nom": "F032 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "F033",
+      "nom": "F033 — Femelle Reproductrice",
+      "sexe": "F",
+      "bandeId": "bande-c",
+      "maleResponsableId": "M03",
+      "etat": "Au repos"
+    },
+    {
+      "id": "M01",
+      "nom": "M01 — Mâle Reproducteur",
+      "sexe": "M",
+      "etat": "Actif",
+      "femellesIds": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005",
+        "F006",
+        "F007",
+        "F008",
+        "F009",
+        "F010",
+        "F011"
+      ]
+    },
+    {
+      "id": "M02",
+      "nom": "M02 — Mâle Reproducteur",
+      "sexe": "M",
+      "etat": "Actif",
+      "femellesIds": [
+        "F012",
+        "F013",
+        "F014",
+        "F015",
+        "F016",
+        "F017",
+        "F018",
+        "F019",
+        "F020",
+        "F021",
+        "F022"
+      ]
+    },
+    {
+      "id": "M03",
+      "nom": "M03 — Mâle Reproducteur",
+      "sexe": "M",
+      "etat": "Actif",
+      "femellesIds": [
+        "F023",
+        "F024",
+        "F025",
+        "F026",
+        "F027",
+        "F028",
+        "F029",
+        "F030",
+        "F031",
+        "F032",
+        "F033"
+      ]
+    }
+  ],
+  "bandes": [
+    {
+      "id": "bande-a",
+      "nom": "Bande A",
+      "phase": "Sexage",
+      "dateDemarragePhase": "2026-04-28",
+      "numeroCycle": 1
+    },
+    {
+      "id": "bande-b",
+      "nom": "Bande B",
+      "phase": "Gestation",
+      "dateDemarragePhase": "2026-06-19",
+      "numeroCycle": 1
+    },
+    {
+      "id": "bande-c",
+      "nom": "Bande C",
+      "phase": "Allaitement",
+      "dateDemarragePhase": "2026-06-20",
+      "numeroCycle": 1
+    }
+  ],
+  "cycles_bande": [
+    {
+      "id": "cycle-bande-a-1",
+      "bandeId": "bande-a",
+      "numeroCycle": 1,
+      "phaseCourante": "Repos",
+      "dateDebutSaillie": "",
+      "dateDebutPhase": "2026-06-20"
+    },
+    {
+      "id": "cycle-bande-b-1",
+      "bandeId": "bande-b",
+      "numeroCycle": 1,
+      "phaseCourante": "Gestation",
+      "dateDebutSaillie": "2026-06-19",
+      "dateDebutPhase": "2026-06-19"
+    },
+    {
+      "id": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "numeroCycle": 1,
+      "phaseCourante": "Allaitement",
+      "dateDebutSaillie": "2026-05-19",
+      "dateDebutPhase": "2026-06-20"
+    }
+  ],
+  "clapiers": [
+    {
+      "id": "clap-m1",
+      "nom": "Clapier Maternité 1",
+      "numero": 1,
+      "type": "Maternité",
+      "nombreCases": 12,
+      "casesOccupees": 11,
+      "bandeId": "bande-a"
+    },
+    {
+      "id": "clap-m2",
+      "nom": "Clapier Maternité 2",
+      "numero": 2,
+      "type": "Maternité",
+      "nombreCases": 12,
+      "casesOccupees": 11,
+      "bandeId": "bande-b"
+    },
+    {
+      "id": "clap-m3",
+      "nom": "Clapier Maternité 3",
+      "numero": 3,
+      "type": "Maternité",
+      "nombreCases": 12,
+      "casesOccupees": 11,
+      "bandeId": "bande-c"
+    },
+    {
+      "id": "clap-s1",
+      "nom": "Clapier Sexage 1",
+      "numero": 4,
+      "type": "Sexage",
+      "nombreCases": 12,
+      "casesOccupees": 0
+    },
+    {
+      "id": "clap-e1",
+      "nom": "Clapier Engraissement 1",
+      "numero": 5,
+      "type": "Engraissement",
+      "nombreCases": 12,
+      "casesOccupees": 12,
+      "bandeId": "bande-a"
+    },
+    {
+      "id": "clap-e2",
+      "nom": "Clapier Engraissement 2",
+      "numero": 6,
+      "type": "Engraissement",
+      "nombreCases": 12,
+      "casesOccupees": 12,
+      "bandeId": "bande-a"
+    },
+    {
+      "id": "clap-e3",
+      "nom": "Clapier Engraissement 3",
+      "numero": 7,
+      "type": "Engraissement",
+      "nombreCases": 12,
+      "casesOccupees": 12,
+      "bandeId": "bande-a"
+    },
+    {
+      "id": "clap-e4",
+      "nom": "Clapier Engraissement 4",
+      "numero": 8,
+      "type": "Engraissement",
+      "nombreCases": 12,
+      "casesOccupees": 10
+    },
+    {
+      "id": "clap-e5",
+      "nom": "Clapier Engraissement 5",
+      "numero": 9,
+      "type": "Engraissement",
+      "nombreCases": 12,
+      "casesOccupees": 0
+    }
+  ],
+  "saillies": [
     {
       "id": "sal-c-01",
-      "femelleId": "F023",
-      "maleId": "M03",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F029",
+      "maleId": "M03",
       "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
+      "dateMiseBasPrevue": "2026-06-19",
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-02",
-      "femelleId": "F024",
-      "maleId": "M03",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F009",
+      "maleId": "M01",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Matin",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-03",
-      "femelleId": "F009",
-      "maleId": "M01",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F010",
+      "maleId": "M01",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Soir",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-04",
-      "femelleId": "F010",
-      "maleId": "M01",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F020",
+      "maleId": "M02",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Matin",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-05",
-      "femelleId": "F020",
-      "maleId": "M02",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F021",
+      "maleId": "M02",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Soir",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-06",
-      "femelleId": "F021",
-      "maleId": "M02",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F030",
+      "maleId": "M03",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Matin",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-07",
-      "femelleId": "F030",
-      "maleId": "M03",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F031",
+      "maleId": "M03",
       "dateSaillie": "2026-05-19",
+      "jourSaillie": 1,
+      "moment": "Soir",
       "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande C — J1 Matin"
+      "datePalpationPrevue": "2026-06-03",
+      "reussie": true
     },
     {
       "id": "sal-c-08",
-      "femelleId": "F031",
-      "maleId": "M03",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
-      "dateSaillie": "2026-05-19",
-      "dateMiseBasPrevue": "2026-06-19",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande C — J1 Soir"
+      "femelleId": "F011",
+      "maleId": "M01",
+      "dateSaillie": "2026-05-20",
+      "jourSaillie": 2,
+      "moment": "Matin",
+      "dateMiseBasPrevue": "2026-06-20",
+      "datePalpationPrevue": "2026-06-04",
+      "reussie": true
     },
     {
       "id": "sal-c-09",
-      "femelleId": "F011",
-      "maleId": "M01",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F022",
+      "maleId": "M02",
       "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
+      "dateMiseBasPrevue": "2026-06-20",
+      "datePalpationPrevue": "2026-06-04",
+      "reussie": true
     },
     {
       "id": "sal-c-10",
-      "femelleId": "F022",
-      "maleId": "M02",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
+      "femelleId": "F032",
+      "maleId": "M03",
       "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
+      "dateMiseBasPrevue": "2026-06-20",
+      "datePalpationPrevue": "2026-06-04",
+      "reussie": true
     },
     {
       "id": "sal-c-11",
-      "femelleId": "F032",
-      "maleId": "M03",
+      "cycleId": "cycle-bande-c-1",
       "bandeId": "bande-c",
-      "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
-      "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande C — J2 Matin"
-    },
-    {
-      "id": "sal-c-12",
       "femelleId": "F033",
       "maleId": "M03",
-      "bandeId": "bande-c",
       "dateSaillie": "2026-05-20",
-      "dateMiseBasPrevue": "2026-06-20",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande C — J2 Soir"
+      "dateMiseBasPrevue": "2026-06-20",
+      "datePalpationPrevue": "2026-06-04",
+      "reussie": true
     },
     {
       "id": "sal-b-01",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F005",
       "maleId": "M01",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-02",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F006",
       "maleId": "M01",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-03",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F016",
       "maleId": "M02",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-04",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F017",
       "maleId": "M02",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-05",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F026",
       "maleId": "M03",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Matin",
-      "jour": 1,
-      "notes": "Bande B — J1 Matin"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-06",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F027",
       "maleId": "M03",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-19",
-      "dateMiseBasPrevue": "2026-07-20",
-      "reussie": true,
+      "jourSaillie": 1,
       "moment": "Soir",
-      "jour": 1,
-      "notes": "Bande B — J1 Soir"
+      "dateMiseBasPrevue": "2026-07-20",
+      "datePalpationPrevue": "2026-07-04",
+      "reussie": true
     },
     {
       "id": "sal-b-07",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F007",
       "maleId": "M01",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
+      "dateMiseBasPrevue": "2026-07-21",
+      "datePalpationPrevue": "2026-07-05",
+      "reussie": true
     },
     {
       "id": "sal-b-08",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F008",
       "maleId": "M01",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
+      "dateMiseBasPrevue": "2026-07-21",
+      "datePalpationPrevue": "2026-07-05",
+      "reussie": true
     },
     {
       "id": "sal-b-09",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F018",
       "maleId": "M02",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
+      "dateMiseBasPrevue": "2026-07-21",
+      "datePalpationPrevue": "2026-07-05",
+      "reussie": true
     },
     {
       "id": "sal-b-10",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F019",
       "maleId": "M02",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
+      "dateMiseBasPrevue": "2026-07-21",
+      "datePalpationPrevue": "2026-07-05",
+      "reussie": true
     },
     {
       "id": "sal-b-11",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
       "femelleId": "F028",
       "maleId": "M03",
-      "bandeId": "bande-b",
       "dateSaillie": "2026-06-20",
-      "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
+      "jourSaillie": 2,
       "moment": "Matin",
-      "jour": 2,
-      "notes": "Bande B — J2 Matin"
-    },
-    {
-      "id": "sal-b-12",
-      "femelleId": "F029",
-      "maleId": "M03",
-      "bandeId": "bande-b",
-      "dateSaillie": "2026-06-20",
       "dateMiseBasPrevue": "2026-07-21",
-      "reussie": true,
-      "moment": "Soir",
-      "jour": 2,
-      "notes": "Bande B — J2 Soir"
+      "datePalpationPrevue": "2026-07-05",
+      "reussie": true
     }
   ],
-  "affectationMales": {
-    "bande-a": [
-      {
-        "maleId": "M01",
-        "femellesIds": [
-          "F001",
-          "F002",
-          "F003",
-          "F004",
-          "F005",
-          "F006",
-          "F007",
-          "F008",
-          "F009",
-          "F010",
-          "F011"
-        ]
-      }
-    ],
-    "bande-b": [
-      {
-        "maleId": "M02",
-        "femellesIds": [
-          "F012",
-          "F013",
-          "F014",
-          "F015",
-          "F016",
-          "F017",
-          "F018",
-          "F019",
-          "F020",
-          "F021",
-          "F022"
-        ]
-      }
-    ],
-    "bande-c": [
-      {
-        "maleId": "M03",
-        "femellesIds": [
-          "F023",
-          "F024",
-          "F025",
-          "F026",
-          "F027",
-          "F028",
-          "F029",
-          "F030",
-          "F031",
-          "F032",
-          "F033"
-        ]
-      }
-    ]
-  },
-  "$schema": "./node_modules/json-server/schema.json"
+  "palpations": [],
+  "misesBas": [
+    {
+      "id": "mb-c-01",
+      "saillieId": "sal-c-01",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F023",
+      "dateMiseBas": "2026-06-19",
+      "nes": 7,
+      "vivants": 6,
+      "mortsNes": 1,
+      "viabiliteCalculee": 86
+    },
+    {
+      "id": "mb-c-02",
+      "saillieId": "sal-c-02",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F024",
+      "dateMiseBas": "2026-06-19",
+      "nes": 6,
+      "vivants": 6,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-03",
+      "saillieId": "sal-c-03",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F009",
+      "dateMiseBas": "2026-06-19",
+      "nes": 7,
+      "vivants": 7,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-04",
+      "saillieId": "sal-c-04",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F010",
+      "dateMiseBas": "2026-06-20",
+      "nes": 6,
+      "vivants": 5,
+      "mortsNes": 1,
+      "viabiliteCalculee": 83
+    },
+    {
+      "id": "mb-c-05",
+      "saillieId": "sal-c-05",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F020",
+      "dateMiseBas": "2026-06-20",
+      "nes": 7,
+      "vivants": 7,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-06",
+      "saillieId": "sal-c-06",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F021",
+      "dateMiseBas": "2026-06-20",
+      "nes": 6,
+      "vivants": 6,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-07",
+      "saillieId": "sal-c-07",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F030",
+      "dateMiseBas": "2026-06-20",
+      "nes": 7,
+      "vivants": 6,
+      "mortsNes": 1,
+      "viabiliteCalculee": 86
+    },
+    {
+      "id": "mb-c-08",
+      "saillieId": "sal-c-08",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F031",
+      "dateMiseBas": "2026-06-21",
+      "nes": 6,
+      "vivants": 6,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-09",
+      "saillieId": "sal-c-09",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F011",
+      "dateMiseBas": "2026-06-21",
+      "nes": 7,
+      "vivants": 7,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    },
+    {
+      "id": "mb-c-10",
+      "saillieId": "sal-c-10",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F022",
+      "dateMiseBas": "2026-06-21",
+      "nes": 6,
+      "vivants": 5,
+      "mortsNes": 1,
+      "viabiliteCalculee": 83
+    },
+    {
+      "id": "mb-c-11",
+      "saillieId": "sal-c-11",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "femelleId": "F032",
+      "dateMiseBas": "2026-06-21",
+      "nes": 6,
+      "vivants": 6,
+      "mortsNes": 0,
+      "viabiliteCalculee": 100
+    }
+  ],
+  "sevrages": [
+    {
+      "id": "sev-a-01",
+      "miseBasId": "mb-a-01",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F001",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-25",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-02",
+      "miseBasId": "mb-a-02",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F002",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-25",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-03",
+      "miseBasId": "mb-a-03",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F003",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-26",
+      "sevres": 7,
+      "cagesOccupees": 3
+    },
+    {
+      "id": "sev-a-04",
+      "miseBasId": "mb-a-04",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F004",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-26",
+      "sevres": 5,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-05",
+      "miseBasId": "mb-a-05",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F012",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-26",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-06",
+      "miseBasId": "mb-a-06",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F013",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-26",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-07",
+      "miseBasId": "mb-a-07",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F014",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-27",
+      "sevres": 7,
+      "cagesOccupees": 3
+    },
+    {
+      "id": "sev-a-08",
+      "miseBasId": "mb-a-08",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F015",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-27",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-09",
+      "miseBasId": "mb-a-09",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F023",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-27",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-10",
+      "miseBasId": "mb-a-10",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F024",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-28",
+      "sevres": 6,
+      "cagesOccupees": 2
+    },
+    {
+      "id": "sev-a-11",
+      "miseBasId": "mb-a-11",
+      "cycleId": "cycle-bande-a-1",
+      "femelleId": "F025",
+      "bandeId": "bande-a",
+      "dateSevrage": "2026-04-28",
+      "sevres": 5,
+      "cagesOccupees": 2
+    }
+  ],
+  "sexages": [],
+  "engraissements": [],
+  "ventes": [
+    {
+      "id": "ven-a-01",
+      "cycleId": "cycle-bande-a-1",
+      "bandeId": "bande-a",
+      "dateVente": "2026-06-24",
+      "vendus": 6,
+      "prixUnitaire": 3000,
+      "prixTotal": 18000,
+      "client": "Marché Local"
+    },
+    {
+      "id": "ven-a-02",
+      "cycleId": "cycle-bande-a-1",
+      "bandeId": "bande-a",
+      "dateVente": "2026-06-24",
+      "vendus": 6,
+      "prixUnitaire": 3000,
+      "prixTotal": 18000,
+      "client": "Marché Local"
+    },
+    {
+      "id": "ven-a-03",
+      "cycleId": "cycle-bande-a-1",
+      "bandeId": "bande-a",
+      "dateVente": "2026-06-25",
+      "vendus": 7,
+      "prixUnitaire": 3000,
+      "prixTotal": 21000,
+      "client": "Centragel"
+    }
+  ],
+  "deces": []
 }

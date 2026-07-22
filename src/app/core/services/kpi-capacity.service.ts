@@ -1,5 +1,5 @@
-﻿import { Injectable } from '@angular/core';
-import { Sevrage, Vente, Configuration, Reproducteur, Clapier } from '../models';
+import { Injectable } from '@angular/core';
+import { Sevrage, Vente, Configuration, Reproducteur, Clapier, isFemelle, isMale } from '../models';
 
 export interface ClapierSynthese {
   clapierId: string;
@@ -21,17 +21,11 @@ export interface CapacityKPIs {
   clapiersSynthese?: ClapierSynthese[];
 }
 
-/**
- * Service spécialisé dans les calculs de capacité des clapiers, occupation et projections d'extension.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class KpiCapacityService {
 
-  /**
-   * Calcule l'ensemble des métriques de capacité des cages et d'occupation.
-   */
   calculateCapacityKPIs(
     sevrages: Sevrage[],
     ventes: Vente[],
@@ -40,15 +34,21 @@ export class KpiCapacityService {
     clapiers: Clapier[] = []
   ): CapacityKPIs {
     const totalCagesTotal = config.nombreCagesTotal || 108;
-    const densite = config.densiteParCage || 3;
-    const capaciteTotaleLapins = totalCagesTotal * densite;
+    const densite = config.densiteParCase || 3;
+    const nbFemellesConfig = config.nombreFemelles || 33;
+    const nbMalesConfig = config.nombreMales || 3;
+    
+    // Capacité théorique : reproducteurs (1/cage) + lapereaux (densité/cage)
+    const cagesReproducteurs = nbFemellesConfig + nbMalesConfig;
+    const cagesDisponiblesLapereaux = totalCagesTotal - cagesReproducteurs;
+    const capaciteTotaleLapins = cagesReproducteurs + (cagesDisponiblesLapereaux * densite);
 
     const totalSevres = sevrages.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
     const totalVendus = ventes.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
     const lapinsEnEngraissement = Math.max(0, totalSevres - totalVendus);
 
     const cagesOccupees = Math.ceil(lapinsEnEngraissement / densite);
-    const cagesTotalesEngraissement = Math.max(1, totalCagesTotal - (config.nombreCagesReproductrices || 33));
+    const cagesTotalesEngraissement = Math.max(1, cagesDisponiblesLapereaux);
 
     const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100));
 
@@ -56,9 +56,8 @@ export class KpiCapacityService {
     const j60 = Math.round(cagesOccupees * 0.35);
     const j90 = Math.round(cagesOccupees * 0.25);
 
-    // Détection du goulot d'étranglement principal
-    const nbFemellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort').length;
-    const nbMalesActifs = reproducteurs.filter(r => r.sexe === 'M' && r.etat !== 'Réformé' && r.etat !== 'Mort').length;
+    const nbFemellesActives = reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length;
+    const nbMalesActifs = reproducteurs.filter(isMale).filter(r => r.etat !== 'Réformé' && r.etat !== 'Mort').length;
 
     let goulotPrincipal: 'Cages engraissement' | 'Femelles reproductrices' | 'Mâles' | 'Aucun' = 'Aucun';
     if (pourcentageOccupation >= 85) {
@@ -69,7 +68,6 @@ export class KpiCapacityService {
       goulotPrincipal = 'Mâles';
     }
 
-    // Estimation du ROI d'extension
     const coutUneCage = 15000;
     const cagesNeeded = 12;
     const investissement = cagesNeeded * coutUneCage;

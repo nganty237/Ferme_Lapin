@@ -38,7 +38,7 @@ export class RentabiliteComponent {
     const configVal = this.config();
     if (!configVal) return [];
 
-    const density = configVal.densiteParCage || 3;
+    const density = configVal.densiteParCase || 3;
     const prixAliment = configVal.prixAlimentKg || 350;
     const defaultPrice = configVal.prixVenteDefaut || 3000;
 

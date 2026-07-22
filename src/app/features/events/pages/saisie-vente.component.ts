@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, computed, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DecimalPipe } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -18,6 +18,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   imports: [
     DecimalPipe,
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -41,6 +42,7 @@ export class SaisieVenteComponent {
 
   formVente: FormGroup;
   get venteForm(): FormGroup { return this.formVente; }
+  clients = ['Centragel', 'Marché Local', 'Hôtel / Restaurant', 'Particulier', 'Autre'];
 
   prixVenteDefaut = computed(() => this.config()?.prixVenteDefaut || 3000);
   coutProductionParLapin = computed(() => this.kpis()?.coutProductionParLapin || 2100);
@@ -68,11 +70,12 @@ export class SaisieVenteComponent {
   });
 
   constructor() {
+    const todayStr = new Date().toISOString().substring(0, 10);
     this.formVente = this.fb.group({
-      date: [new Date(), Validators.required],
+      date: [todayStr, Validators.required],
       vendus: [10, [Validators.required, Validators.min(1)]],
       prixUnitaire: [3000, [Validators.required, Validators.min(0)]],
-      client: [''],
+      client: ['Marché Local'],
       observations: ['']
     });
 
@@ -101,8 +104,11 @@ export class SaisieVenteComponent {
 
     this.calcService.addVente({
       id: `vnt_${Date.now()}`,
+      cycleId: 'cycle-bande-a-1',
+      bandeId: 'bande-a',
       dateVente: formValue.date,
       vendus,
+      prixUnitaire,
       prixTotal,
       client: formValue.client || 'Client direct',
       notes: formValue.observations
@@ -113,11 +119,12 @@ export class SaisieVenteComponent {
   }
 
   onReset(): void {
+    const todayStr = new Date().toISOString().substring(0, 10);
     this.formVente.reset({
-      date: new Date(),
+      date: todayStr,
       vendus: 10,
       prixUnitaire: this.prixVenteDefaut(),
-      client: '',
+      client: 'Marché Local',
       observations: ''
     });
   }

@@ -1,84 +1,152 @@
 <div class="page-container">
-      <app-page-header
-        title="Mise-Bas par Bande"
-        subtitle="Enregistrer les naissances pour toute une bande en gestation">
-      </app-page-header>
+  <app-page-header
+    title="Mise-Bas par Bande"
+    subtitle="Enregistrer les naissances pour toute une bande en gestation">
+  </app-page-header>
 
-      <div class="bg-white border border-slate-200 rounded-xl p-6 mt-6">
-        <form [formGroup]="miseBasForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-              <mat-label>Bande en gestation</mat-label>
-              <mat-select formControlName="bande" placeholder="Sélectionner la bande">
-                @for (b of bandesDisponibles(); track b.id) {
-                  <mat-option [value]="b.id">
-                    {{ b.nom }} — {{ b.femellesIds?.length }} lapines
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+  <form [formGroup]="miseBasForm" (ngSubmit)="onSubmit()">
+    <!-- Filtres / En-tête -->
+    <div class="bg-white border border-slate-200 rounded-xl p-5 mb-6 shadow-xs">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-4">
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Bande en gestation
+            </label>
+            <select 
+              class="form-select"
+              [ngModel]="selectedBandeId()"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onBandeChange($event)">
+              @for (b of bandesDisponibles(); track b.id) {
+                <option [value]="b.id">
+                  {{ b.nom }} — Phase : {{ b.phase || 'Repos' }}
+                </option>
+              }
+            </select>
           </div>
 
-          @if (bandeSelectionnee() && sessionsGestation().length > 0) {
-            <div>
-              <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-bold text-slate-800">Liste des mises-bas (Lapines gestantes)</h3>
-                <mat-form-field appearance="outline" class="w-[200px] -mb-5">
-                  <mat-label>Date de Mise-bas</mat-label>
-                  <input matInput [matDatepicker]="picker" formControlName="dateCommune" placeholder="JJ/MM/AAAA">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
-              </div>
-              
-              <div formArrayName="femelles" class="flex flex-col gap-3">
-                @for (ctrl of femellesFormArray.controls; track $index) {
-                  <div [formGroupName]="$index" class="p-4 border rounded-xl bg-emerald-50 border-emerald-100 flex flex-col md:flex-row gap-4 items-center">
-                    <div class="w-48">
-                      <p class="font-bold text-emerald-900">{{ getFemelleName(ctrl.value.femelleId) }}</p>
-                      <p class="text-xs text-emerald-700">Saillie le : {{ ctrl.value.dateSaillie | date:'dd MMM yyyy' }}</p>
-                    </div>
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Date de Mise-Bas
+            </label>
+            <input 
+              type="date"
+              class="form-input"
+              formControlName="dateMiseBas" />
+          </div>
+        </div>
 
-                    <div class="flex-1 flex gap-3">
-                      <mat-form-field appearance="outline" class="w-24 -mb-5">
-                        <mat-label>Total nés</mat-label>
-                        <input matInput type="number" formControlName="nes" min="0">
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="w-24 -mb-5">
-                        <mat-label>Vivants</mat-label>
-                        <input matInput type="number" formControlName="vivants" min="0">
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="w-24 -mb-5">
-                        <mat-label>Morts-nés</mat-label>
-                        <input matInput type="number" formControlName="mortsNes" readonly>
-                      </mat-form-field>
-                    </div>
-                    
-                    <div class="flex-1 w-full md:w-auto">
-                      <mat-form-field appearance="outline" class="w-full mt-2 md:mt-0 -mb-5">
-                        <mat-label>Observations</mat-label>
-                        <input matInput formControlName="observations" placeholder="Optionnel...">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                }
-              </div>
-              
-              <div class="flex justify-end gap-3 mt-6">
-                <button mat-flat-button color="primary" type="submit" [disabled]="miseBasForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
-                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">save</mat-icon>
-                  {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer les naissances' }}
-                </button>
-              </div>
-            </div>
-          }
-          
-          @if (bandeSelectionnee() && sessionsGestation().length === 0) {
-            <div class="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-              <mat-icon class="text-slate-400 mb-2">info</mat-icon>
-              <p class="text-slate-600">Aucune femelle gestante trouvée pour cette bande.</p>
-            </div>
-          }
-        </form>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            Phase : {{ selectedBande()?.phase || 'Repos' }}
+          </span>
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+            <mat-icon class="text-emerald-600 text-[16px] w-[16px] h-[16px] mr-1.5">child_friendly</mat-icon>
+            {{ sessionsGestation().length }} / 11 femelle(s) gestante(s)
+          </span>
+        </div>
       </div>
     </div>
+
+    <!-- Content Section -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+      @if (sessionsGestation().length > 0) {
+        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Liste des mises-bas (Lapines gestantes)</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Saisissez les résultats de mise-bas pour chaque lapine gestante de la bande (effectif fixe : 11 lapines par bande)</p>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-separate border-spacing-0 text-sm">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tl-lg">
+                  Lapine
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">
+                  Date Saillie
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Vivants
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Morts-Nés
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                  Total Nés
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tr-lg">
+                  Observations
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="portees">
+              @for (ctrl of porteesArray.controls; track $index) {
+                <tr [formGroupName]="$index" class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">
+                    ♀ {{ ctrl.get('femelleId')?.value }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-600 border-b border-slate-100 align-middle text-xs">
+                    {{ ctrl.get('dateSaillie')?.value | date:'dd/MM/yyyy' }}
+                  </td>
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                    <input 
+                      type="number"
+                      min="0"
+                      max="20"
+                      class="form-input text-center font-bold text-emerald-800 bg-emerald-50/30 border-emerald-200 w-20 py-1"
+                      formControlName="vivants" />
+                  </td>
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                    <input 
+                      type="number"
+                      min="0"
+                      max="20"
+                      class="form-input text-center text-rose-700 bg-rose-50/30 border-rose-200 w-20 py-1"
+                      formControlName="mortsNes" />
+                  </td>
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-bold text-slate-800">
+                    {{ (ctrl.get('vivants')?.value || 0) + (ctrl.get('mortsNes')?.value || 0) }}
+                  </td>
+                  <td class="px-4 py-3 border-b border-slate-100 align-middle">
+                    <input 
+                      type="text"
+                      placeholder="Notes..."
+                      class="form-input w-full text-xs py-1"
+                      formControlName="observations" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-100">
+          <p class="text-xs text-slate-500">
+            En enregistrant, la bande passera automatiquement en phase <strong class="text-slate-700">Allaitement</strong>.
+          </p>
+
+          <button 
+            type="submit" 
+            [disabled]="miseBasForm.invalid || isSubmitting()" 
+            class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">check_circle</mat-icon>
+            {{ isSubmitting() ? 'Enregistrement...' : 'Valider la mise-bas de la bande' }}
+          </button>
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
+          <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">child_friendly</mat-icon>
+          <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie enregistrée en attente de mise-bas</h4>
+          <p class="text-xs text-slate-500 max-w-md">
+            Pour cette bande, aucune saillie en cours n'a été détectée. Veuillez d'abord enregistrer une session de saillie dans l'Assistant de Saillie.
+          </p>
+        </div>
+      }
+    </div>
+  </form>
+</div>

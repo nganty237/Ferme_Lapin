@@ -1,15 +1,19 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { StorageBaseRepository, STORAGE_KEYS } from './storage-base.repository';
-import { Bande, Clapier } from '../models';
+import { 
+  Bande, 
+  Clapier, 
+  ReferentielBande, 
+  ReferentielMale, 
+  CalendrierSaillieItem, 
+  CycleBande 
+} from '../models';
 
 export interface AffectationMaleGroup {
   maleId: string;
   femellesIds: string[];
 }
 
-/**
- * Répertoire d'accès aux données des bandes, clapiers et affectations en localStorage.
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -27,7 +31,46 @@ export class BandeRepository extends StorageBaseRepository {
     return this.getItems<Clapier>(STORAGE_KEYS.CLAPIERS);
   }
 
+  getReferentielBandes(): ReferentielBande[] {
+    return this.getItems<ReferentielBande>(STORAGE_KEYS.REFERENTIEL_BANDES);
+  }
+
+  getReferentielMales(): ReferentielMale[] {
+    return this.getItems<ReferentielMale>(STORAGE_KEYS.REFERENTIEL_MALES);
+  }
+
+  getReferentielCalendrierSaillie(): CalendrierSaillieItem[] {
+    return this.getItems<CalendrierSaillieItem>(STORAGE_KEYS.REFERENTIEL_CALENDRIER);
+  }
+
+  getCyclesBande(): CycleBande[] {
+    return this.getItems<CycleBande>(STORAGE_KEYS.CYCLES_BANDE);
+  }
+
+  getAllCyclesBande(): CycleBande[] {
+    return this.getCyclesBande();
+  }
+
+  addCycleBande(cycle: CycleBande): void {
+    const list = this.getCyclesBande();
+    this.setItems<CycleBande>(STORAGE_KEYS.CYCLES_BANDE, [...list, cycle]);
+  }
+
   getAllAffectationMales(): Record<string, AffectationMaleGroup[]> {
-    return this.getObject<Record<string, AffectationMaleGroup[]>>(STORAGE_KEYS.AFFECTATION_MALES, {});
+    const refBandes = this.getReferentielBandes();
+    if (refBandes && refBandes.length > 0) {
+      const result: Record<string, AffectationMaleGroup[]> = {};
+      refBandes.forEach(b => {
+        result[b.id] = b.groupesParMale;
+      });
+      return result;
+    }
+
+    const refMales = this.getReferentielMales();
+    const fallbackResult: Record<string, AffectationMaleGroup[]> = {};
+    if (refMales && refMales.length > 0) {
+      fallbackResult['bande-a'] = refMales.map(m => ({ maleId: m.id, femellesIds: m.femellesIds }));
+    }
+    return fallbackResult;
   }
 }

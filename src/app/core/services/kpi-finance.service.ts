@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Vente, Sevrage, MiseBas, Configuration, Reproducteur } from '../models';
 
 export interface FinanceKPIs {
@@ -47,7 +47,7 @@ export class KpiFinanceService {
     const revenuMoyenPortee = Math.round(chiffreAffairesTotal / nbPortees);
 
     // Rentabilité par femelle par an
-    const femellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort').length;
+    const femellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformée' && r.etat !== 'Morte').length;
     const nbFemelles = Math.max(1, femellesActives || (config.nombreFemelles || 33));
     const rentabiliteFemelleAn = Math.round(margeBruteTotale / nbFemelles);
 

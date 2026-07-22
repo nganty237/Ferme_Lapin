@@ -2,16 +2,19 @@ import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@a
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '@core/services';
+import { CalculationService, ReferentielService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { isFemelle } from '@core/models';
 
 interface FemelleRow {
   id: string;
   nom: string;
   bandeId: string;
+  bandeLabel: string;
+  maleResponsableId: string;
   portees: number;
   tailleMoyenne: number;
   survie: number;
@@ -21,13 +24,14 @@ interface FemelleRow {
 
 @Component({
   selector: 'app-liste-femelles',
-    imports: [FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule, MatSelectModule],
+  imports: [FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule, MatSelectModule],
   templateUrl: './liste-femelles.component.html',
   styleUrl: './liste-femelles.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListeFemellesComponent {
   private calcService = inject(CalculationService);
+  private referentielService = inject(ReferentielService);
   private router = inject(Router);
 
   reproducteurs = toSignal(this.calcService.reproducteurs$);
@@ -40,7 +44,6 @@ export class ListeFemellesComponent {
   sortCol = 'id';
   sortDir: 'asc' | 'desc' = 'asc';
 
-  // Version signal pour forcer le recalcul lors de changement de filtres
   private filterTrigger = signal(0);
 
   onFilterChange(): void {
@@ -48,27 +51,23 @@ export class ListeFemellesComponent {
   }
 
   filteredFemelles = computed<FemelleRow[]>(() => {
-    this.filterTrigger(); // trigger réactif
-    const repros = (this.reproducteurs() || []).filter(r => r.sexe === 'F');
-    const sailliesList = this.saillies() || [];
+    this.filterTrigger();
+    const repros = (this.reproducteurs() || []).filter(isFemelle);
     const mbList = this.misesBas() || [];
     const sevList = this.sevrages() || [];
 
     let rows: FemelleRow[] = repros.map(f => {
-      // Calcul des stats pour chaque femelle
       const femellesMb = mbList.filter((m: any) => m.femelleId === f.id);
       const portees = femellesMb.length;
       const totalVivants = femellesMb.reduce((sum: number, m: any) => sum + (m.vivants || 0), 0);
       const tailleMoyenne = portees > 0 ? Math.round(totalVivants / portees) : 0;
 
-      // Survie : sevrés / nés vivants
       let totalSevres = 0;
       let cages = 0;
       const config = this.calcService.config;
-      const density = config.densiteParCage || 3;
+      const density = config.densiteParCase || 3;
       const totalVendus = this.calcService.ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
 
-      // FIFO check helper for this specific list
       const isWeaningSold = (weaning: any): boolean => {
         const sortedSevrages = [...sevList].sort((a, b) => new Date(a.dateSevrage).getTime() - new Date(b.dateSevrage).getTime());
         const idx = sortedSevrages.findIndex(item => item.id === weaning.id);
@@ -91,19 +90,24 @@ export class ListeFemellesComponent {
       }
       const survie = totalVivants > 0 ? Math.round((totalSevres / totalVivants) * 100) : 0;
 
+      const maleResponsableId = f.maleResponsableId || this.referentielService.getMaleResponsable(f.id);
+      const bandeId = f.bandeId || 'bande-a';
+      const bandeLabel = bandeId === 'bande-a' ? 'Bande A' : bandeId === 'bande-b' ? 'Bande B' : 'Bande C';
+
       return {
         id: f.id,
         nom: f.nom || f.id,
-        bandeId: f.bandeId || '',
+        bandeId,
+        bandeLabel,
+        maleResponsableId,
         portees,
         tailleMoyenne,
         survie,
         cages,
-        etat: f.etat || 'Actif'
+        etat: f.etat || 'Au repos'
       };
     });
 
-    // Appliquer les filtres
     if (this.filtreBande) {
       rows = rows.filter(r => r.bandeId === this.filtreBande);
     }
@@ -111,7 +115,6 @@ export class ListeFemellesComponent {
       rows = rows.filter(r => r.etat === this.filtreEtat);
     }
 
-    // Tri
     const col = this.sortCol as keyof FemelleRow;
     const dir = this.sortDir === 'asc' ? 1 : -1;
     rows.sort((a, b) => {
@@ -141,11 +144,11 @@ export class ListeFemellesComponent {
   getEtatClass(etat: string): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (etat) {
-      case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Au repos': return `${base} bg-emerald-100 text-emerald-800`;
       case 'En gestation': return `${base} bg-purple-100 text-purple-800`;
       case 'En allaitement': return `${base} bg-blue-100 text-blue-800`;
-      case 'Réformé': return `${base} bg-amber-100 text-amber-800`;
-      case 'Mort': return `${base} bg-red-100 text-red-800`;
+      case 'Réformée': return `${base} bg-amber-100 text-amber-800`;
+      case 'Morte': return `${base} bg-red-100 text-red-800`;
       default: return `${base} bg-slate-100 text-slate-700`;
     }
   }

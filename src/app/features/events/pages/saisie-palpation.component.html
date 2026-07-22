@@ -1,69 +1,178 @@
 <div class="page-container">
-      <app-page-header
-        title="Diagnostic de Gestation (Palpation)"
-        subtitle="Enregistrer le diagnostic des lapines saillies à J+15">
-      </app-page-header>
+  <app-page-header
+    title="Diagnostic de Gestation (Palpation)"
+    subtitle="Enregistrer le diagnostic des lapines saillies à J+15">
+  </app-page-header>
 
-      <div class="bg-white border border-slate-200 rounded-xl p-6 mt-6">
-        <form [formGroup]="palpationForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-              <mat-label>Bande à palper</mat-label>
-              <mat-select formControlName="bande" placeholder="Sélectionner la bande">
-                @for (b of bandesDisponibles(); track b.id) {
-                  <mat-option [value]="b.id">
-                    {{ b.nom }} — {{ b.femellesIds?.length }} lapines
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
+  <!-- Filtres / En-tête -->
+  <div class="bg-white border border-slate-200 rounded-xl p-5 mb-6 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Bande à palper
+          </label>
+          <select 
+            class="form-select"
+            [ngModel]="selectedBandeId()"
+            (ngModelChange)="onBandeChange($event)">
+            @for (b of bandesDisponibles(); track b.id) {
+              <option [value]="b.id">
+                {{ b.nom }} (11 lapines)
+              </option>
+            }
+          </select>
+        </div>
 
-          @if (bandeSelectionnee() && sessionsBande().length > 0) {
-            <div>
-              <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Liste des femelles à palper</h3>
-              
-              <div formArrayName="femelles" class="flex flex-col gap-3">
-                @for (ctrl of femellesFormArray.controls; track $index) {
-                  <div [formGroupName]="$index" class="p-4 border rounded-xl bg-slate-50 flex flex-col md:flex-row gap-4 items-center">
-                    <div class="flex-1">
-                      <p class="font-bold text-slate-800">{{ getFemelleName(ctrl.value.femelleId) }}</p>
-                      <p class="text-xs text-slate-500">Saillie le : {{ ctrl.value.dateSaillie | date:'dd MMM yyyy' }}</p>
-                    </div>
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Date de Palpation
+          </label>
+          <input 
+            type="date"
+            class="form-input"
+            [formControl]="$any(palpationForm.get('datePalpation'))" />
+        </div>
+      </div>
 
-                    <div class="flex-2">
-                      <mat-radio-group formControlName="resultat" class="flex gap-4">
-                        <mat-radio-button value="Positive" class="text-emerald-700">Gestation Confirmée</mat-radio-button>
-                        <mat-radio-button value="Negative" class="text-rose-700">Vide (Négatif)</mat-radio-button>
-                        <mat-radio-button value="Incertaine" class="text-amber-600">Incertaine</mat-radio-button>
-                      </mat-radio-group>
-                    </div>
-                    
-                    <div class="flex-1 w-full md:w-auto">
-                      <mat-form-field appearance="outline" class="w-full mt-2 md:mt-0 -mb-5">
-                        <mat-label>Observations</mat-label>
-                        <input matInput formControlName="observations" placeholder="Ex: Avortement, problème santé...">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                }
-              </div>
-              
-              <div class="flex justify-end gap-3 mt-6">
-                <button mat-flat-button color="primary" type="submit" [disabled]="palpationForm.invalid || isSubmitting()" class="rounded-lg h-[42px] px-6">
-                  <mat-icon class="text-[18px] w-[18px] h-[18px] mr-1">save</mat-icon>
-                  {{ isSubmitting() ? 'Enregistrement...' : 'Enregistrer le diagnostic' }}
-                </button>
-              </div>
-            </div>
-          }
-          
-          @if (bandeSelectionnee() && sessionsBande().length === 0) {
-            <div class="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-              <mat-icon class="text-slate-400 mb-2">info</mat-icon>
-              <p class="text-slate-600">Aucune saillie récente trouvée pour cette bande.</p>
-            </div>
-          }
-        </form>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+          <mat-icon class="text-emerald-600 text-[16px] w-[16px] h-[16px] mr-1.5">pets</mat-icon>
+          {{ sessionsBande().length }} femelle(s) à palper
+        </span>
       </div>
     </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+    <form [formGroup]="palpationForm" (ngSubmit)="onSubmit()">
+      @if (sessionsBande().length > 0) {
+        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Liste des femelles à palper</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Saisissez les résultats de palpation pour chaque lapine de la bande</p>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto">
+          <table class="w-full border-separate border-spacing-0 text-sm">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tl-lg">
+                  Lapine
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">
+                  Date Saillie
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">
+                  Diagnostic (Résultat)
+                </th>
+                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tr-lg">
+                  Observations
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="palpationsArray">
+              @for (ctrl of femellesFormArray.controls; track $index) {
+                <tr [formGroupName]="$index" class="hover:bg-slate-50/60 transition-colors border-b border-slate-100">
+                  <!-- Lapine -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-full bg-emerald-100/70 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                        {{ getFemelleName(ctrl.value.femelleId).charAt(0) }}
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-800 leading-snug">
+                          {{ getFemelleName(ctrl.value.femelleId) }}
+                        </p>
+                        <span class="text-[11px] text-slate-400 font-mono">ID: {{ ctrl.value.femelleId }}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Date Saillie -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                      <mat-icon class="text-[14px] w-[14px] h-[14px] mr-1 text-slate-400">calendar_today</mat-icon>
+                      {{ ctrl.value.dateSaillie | date:'dd MMM yyyy' }}
+                    </span>
+                  </td>
+
+                  <!-- Diagnostic Radio Pills -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle">
+                    <div class="flex flex-wrap gap-2">
+                      <label 
+                        class="status-pill-radio"
+                        [class.active-positive]="ctrl.value.resultat === 'Positive'">
+                        <input type="radio" formControlName="resultat" value="Positive" class="hidden">
+                        <mat-icon class="text-[15px] w-[15px] h-[15px]">check_circle</mat-icon>
+                        Gestante (Confirmé)
+                      </label>
+
+                      <label 
+                        class="status-pill-radio"
+                        [class.active-negative]="ctrl.value.resultat === 'Negative'">
+                        <input type="radio" formControlName="resultat" value="Negative" class="hidden">
+                        <mat-icon class="text-[15px] w-[15px] h-[15px]">cancel</mat-icon>
+                        Vide (Négatif)
+                      </label>
+
+                      <label 
+                        class="status-pill-radio"
+                        [class.active-incertaine]="ctrl.value.resultat === 'Incertaine'">
+                        <input type="radio" formControlName="resultat" value="Incertaine" class="hidden">
+                        <mat-icon class="text-[15px] w-[15px] h-[15px]">help_outline</mat-icon>
+                        Incertaine
+                      </label>
+                    </div>
+                  </td>
+
+                  <!-- Observations -->
+                  <td class="px-4 py-4 border-b border-slate-100 align-middle min-w-[200px]">
+                    <input 
+                      type="text" 
+                      formControlName="observations" 
+                      placeholder="Ex: Saillie à reprendre, avortement..." 
+                      class="form-input w-full text-xs">
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-100">
+          <button 
+            type="button" 
+            (click)="onReset()"
+            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer">
+            <mat-icon class="text-[16px] w-[16px] h-[16px]">refresh</mat-icon>
+            Réinitialiser
+          </button>
+
+          <button 
+            type="submit" 
+            [disabled]="palpationForm.invalid || isSubmitting()" 
+            class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">save</mat-icon>
+            {{ isSubmitting() ? 'Enregistrement en cours...' : 'Enregistrer le diagnostic' }}
+          </button>
+        </div>
+      } @else {
+        <!-- Empty State -->
+        <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
+          <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
+            <mat-icon class="text-[24px]">check_circle_outline</mat-icon>
+          </div>
+          <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie à palper</h4>
+          <p class="text-sm text-slate-500 max-w-md mx-auto">
+            Toutes les lapines de cette bande ont déjà un diagnostic enregistré ou aucune saillie récente n'est en attente de palpation.
+          </p>
+        </div>
+      }
+    </form>
+  </div>
+</div>

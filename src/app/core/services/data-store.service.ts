@@ -15,16 +15,15 @@ import {
   Configuration, 
   Bande, 
   Clapier, 
-  SessionSaillie, 
   Palpation, 
-  Sexage 
+  Sexage,
+  CycleBande,
+  ReferentielBande,
+  ReferentielMale,
+  CalendrierSaillieItem
 } from '../models';
 import { AppNotification } from './notification.service';
 
-/**
- * Service centralisé de stockage et de gestion de l'état réactif de l'application (Data Store).
- * Gère le chargement, la persistance locale/API et la réactivité des collections.
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -34,7 +33,6 @@ export class DataStoreService {
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
 
-  // Flux réactifs internes (BehaviorSubjects)
   private readonly _reproducteurs$ = new BehaviorSubject<Reproducteur[]>([]);
   private readonly _saillies$ = new BehaviorSubject<Saillie[]>([]);
   private readonly _misesBas$ = new BehaviorSubject<MiseBas[]>([]);
@@ -43,30 +41,36 @@ export class DataStoreService {
   private readonly _deces$ = new BehaviorSubject<Deces[]>([]);
   private readonly _bandes$ = new BehaviorSubject<Bande[]>([]);
   private readonly _clapiers$ = new BehaviorSubject<Clapier[]>([]);
-  private readonly _sessionsSaillie$ = new BehaviorSubject<SessionSaillie[]>([]);
   private readonly _palpations$ = new BehaviorSubject<Palpation[]>([]);
   private readonly _sexages$ = new BehaviorSubject<Sexage[]>([]);
+  private readonly _cyclesBande$ = new BehaviorSubject<CycleBande[]>([]);
+  private readonly _refBandes$ = new BehaviorSubject<ReferentielBande[]>([]);
+  private readonly _refMales$ = new BehaviorSubject<ReferentielMale[]>([]);
+  private readonly _refCalendrier$ = new BehaviorSubject<CalendrierSaillieItem[]>([]);
   private readonly _notifications$ = new BehaviorSubject<AppNotification[]>([]);
 
   private readonly _config$ = new BehaviorSubject<Configuration>({
     nombreCagesTotal: 108,
-    densiteParCage: 3,
-    dureeGestationJours: 30,
-    dureeAllaitementJours: 30,
-    dureeSexageJours: 30,
-    dureeEngraissementJours: 60,
-    nombreCagesReproductrices: 33,
-    prixAlimentKg: 350,
-    prixVenteDefaut: 3000,
     nombreClapiers: 9,
     nombreCasesParClapier: 12,
-    taillePorteeMoyenne: 6,
     nombreFemelles: 33,
     nombreMales: 3,
-    nombreBandes: 3
+    nombreBandes: 3,
+    nombreFemEllesParBande: 11,
+    dureeGestationJours: 31,
+    jourPalpation: 15,
+    dureeAllaitementMinJours: 30,
+    dureeAllaitementMaxJours: 35,
+    dureeSexageJours: 30,
+    dureeEngraissementJours: 60,
+    taillePorteeMoyenne: 6,
+    densiteParCase: 3,
+    ageMaturiteSexuelleMois: 5,
+    decalageAgeBandesMois: 1,
+    prixAlimentKg: 350,
+    prixVenteDefaut: 3000
   });
 
-  // Observables publics réactifs
   readonly reproducteurs$ = this._reproducteurs$.asObservable();
   readonly saillies$ = this._saillies$.asObservable();
   readonly misesBas$ = this._misesBas$.asObservable();
@@ -75,9 +79,13 @@ export class DataStoreService {
   readonly deces$ = this._deces$.asObservable();
   readonly bandes$ = this._bandes$.asObservable();
   readonly clapiers$ = this._clapiers$.asObservable();
-  readonly sessionsSaillie$ = this._sessionsSaillie$.asObservable();
+  readonly sessionsSaillie$ = this._saillies$.asObservable();
   readonly palpations$ = this._palpations$.asObservable();
   readonly sexages$ = this._sexages$.asObservable();
+  readonly cyclesBande$ = this._cyclesBande$.asObservable();
+  readonly refBandes$ = this._refBandes$.asObservable();
+  readonly refMales$ = this._refMales$.asObservable();
+  readonly refCalendrier$ = this._refCalendrier$.asObservable();
   readonly config$ = this._config$.asObservable();
   readonly notifications$ = this._notifications$.asObservable();
 
@@ -85,9 +93,6 @@ export class DataStoreService {
     this.loadAllData();
   }
 
-  /**
-   * Charge l'intégralité des données métier depuis l'API REST (json-server) ou le localStorage de secours.
-   */
   loadAllData(): void {
     if (!this.isBrowser()) {
       this.loadLocalData();
@@ -104,9 +109,12 @@ export class DataStoreService {
       config: this.dataApi.getConfiguration(),
       bandes: this.dataApi.getBandes(),
       clapiers: this.dataApi.getClapiers(),
-      sessionsSaillie: this.dataApi.getSessionsSaillie(),
       palpations: this.dataApi.getPalpations(),
-      sexages: this.dataApi.getSexages()
+      sexages: this.dataApi.getSexages(),
+      cyclesBande: this.dataApi.getCyclesBande(),
+      refBandes: this.dataApi.getReferentielBandes(),
+      refMales: this.dataApi.getReferentielMales(),
+      refCalendrier: this.dataApi.getReferentielCalendrierSaillie()
     }).pipe(
       catchError((err) => {
         this.logApiError('loadAllData', err);
@@ -117,18 +125,21 @@ export class DataStoreService {
     ).subscribe((data) => {
       if (!data) return;
 
-      this._reproducteurs$.next(data.reproducteurs);
-      this._saillies$.next(data.saillies);
-      this._misesBas$.next(data.misesBas);
-      this._sevrages$.next(data.sevrages);
-      this._ventes$.next(data.ventes);
-      this._deces$.next(data.deces);
+      this._reproducteurs$.next(data.reproducteurs || []);
+      this._saillies$.next(data.saillies || []);
+      this._misesBas$.next(data.misesBas || []);
+      this._sevrages$.next(data.sevrages || []);
+      this._ventes$.next(data.ventes || []);
+      this._deces$.next(data.deces || []);
       this._config$.next(data.config);
-      this._bandes$.next(data.bandes);
-      this._clapiers$.next(data.clapiers);
-      this._sessionsSaillie$.next(data.sessionsSaillie);
-      this._palpations$.next(data.palpations);
-      this._sexages$.next(data.sexages);
+      this._bandes$.next(data.bandes || []);
+      this._clapiers$.next(data.clapiers || []);
+      this._palpations$.next(data.palpations || []);
+      this._sexages$.next(data.sexages || []);
+      this._cyclesBande$.next(data.cyclesBande || []);
+      this._refBandes$.next(data.refBandes || []);
+      this._refMales$.next(data.refMales || []);
+      this._refCalendrier$.next(data.refCalendrier || []);
     });
   }
 
@@ -143,9 +154,12 @@ export class DataStoreService {
     
     this._bandes$.next(this.storageService.getAllBandes());
     this._clapiers$.next(this.storageService.getAllClapiers());
-    this._sessionsSaillie$.next(this.storageService.getAllSessionsSaillie());
     this._palpations$.next(this.storageService.getAllPalpations());
     this._sexages$.next(this.storageService.getAllSexages());
+    this._cyclesBande$.next(this.storageService.getCyclesBande());
+    this._refBandes$.next(this.storageService.getReferentielBandes());
+    this._refMales$.next(this.storageService.getReferentielMales());
+    this._refCalendrier$.next(this.storageService.getReferentielCalendrierSaillie());
   }
 
   private isBrowser(): boolean {
@@ -156,7 +170,6 @@ export class DataStoreService {
     console.error(`[DataStoreService] Échec json-server: ${operation}`, error);
   }
 
-  // Getters synchrones
   get reproducteurs(): Reproducteur[] { return this._reproducteurs$.getValue(); }
   get saillies(): Saillie[] { return this._saillies$.getValue(); }
   get misesBas(): MiseBas[] { return this._misesBas$.getValue(); }
@@ -165,13 +178,16 @@ export class DataStoreService {
   get deces(): Deces[] { return this._deces$.getValue(); }
   get bandes(): Bande[] { return this._bandes$.getValue(); }
   get clapiers(): Clapier[] { return this._clapiers$.getValue(); }
-  get sessionsSaillie(): SessionSaillie[] { return this._sessionsSaillie$.getValue(); }
+  get sessionsSaillie(): Saillie[] { return this._saillies$.getValue(); }
   get palpations(): Palpation[] { return this._palpations$.getValue(); }
   get sexages(): Sexage[] { return this._sexages$.getValue(); }
+  get cyclesBande(): CycleBande[] { return this._cyclesBande$.getValue(); }
+  get refBandes(): ReferentielBande[] { return this._refBandes$.getValue(); }
+  get refMales(): ReferentielMale[] { return this._refMales$.getValue(); }
+  get refCalendrier(): CalendrierSaillieItem[] { return this._refCalendrier$.getValue(); }
   get config(): Configuration { return this._config$.getValue(); }
   get notifications(): AppNotification[] { return this._notifications$.getValue(); }
 
-  // Méthodes de mutation
   addNotification(notification: AppNotification): void {
     const current = this._notifications$.getValue();
     this._notifications$.next([notification, ...current]);
@@ -200,6 +216,27 @@ export class DataStoreService {
   addDeces(deces: Deces): void {
     const created = this.storageService.addDeces(deces);
     this._deces$.next([...this._deces$.getValue(), created]);
+  }
+
+  addCycleBande(cycle: CycleBande): void {
+    this.storageService.addCycleBande(cycle);
+    this._cyclesBande$.next([...this._cyclesBande$.getValue(), cycle]);
+  }
+
+  addPalpation(palpation: Palpation): void {
+    this.storageService.addPalpation(palpation);
+    this._palpations$.next([...this._palpations$.getValue(), palpation]);
+  }
+
+  addSexage(sexage: Sexage): void {
+    this.storageService.addSexage(sexage);
+    this._sexages$.next([...this._sexages$.getValue(), sexage]);
+  }
+
+  updateBande(id: string, partial: Partial<Bande>): void {
+    this.storageService.updateBande(id, partial);
+    const bandes = this._bandes$.getValue().map(b => b.id === id ? { ...b, ...partial } : b);
+    this._bandes$.next(bandes);
   }
 
   updateReproducteur(updated: Reproducteur): void {

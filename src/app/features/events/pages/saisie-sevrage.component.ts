@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CalculationService, BandeService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -12,9 +13,10 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-saisie-sevrage',
-    providers: [provideNativeDateAdapter()],
+  providers: [provideNativeDateAdapter()],
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -24,7 +26,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   ],
   templateUrl: './saisie-sevrage.component.html',
   styleUrl: './saisie-sevrage.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SaisieSevrageComponent {
   private fb = inject(FormBuilder);
@@ -64,9 +66,10 @@ export class SaisieSevrageComponent {
   }
 
   constructor() {
+    const todayStr = new Date().toISOString().substring(0, 10);
     this.sevrageForm = this.fb.group({
       bande: ['', Validators.required],
-      dateCommune: [new Date(), Validators.required],
+      dateCommune: [todayStr, Validators.required],
       femelles: this.fb.array([])
     });
 
@@ -100,6 +103,12 @@ export class SaisieSevrageComponent {
     return repro ? repro.nom : id;
   }
 
+  getTauxSurvie(sevres: any, vivants: any): number {
+    const s = Number(sevres) || 0;
+    const v = Number(vivants) || 0;
+    return v > 0 ? Math.round((s / v) * 100) : 0;
+  }
+
   onSubmit() {
     if (this.sevrageForm.invalid) {
       this.sevrageForm.markAllAsTouched();
@@ -117,10 +126,11 @@ export class SaisieSevrageComponent {
           const sev = {
             id: `sev-${Date.now()}-${f.femelleId}`,
             miseBasId: f.miseBasId,
+            cycleId: `cycle-${formValue.bande}-1`,
             femelleId: f.femelleId,
             dateSevrage: dateSev,
             sevres: f.sevres,
-            cagesOccupees: Math.ceil(f.sevres / 3), // estimation simple: 3 par cage
+            cagesOccupees: Math.ceil(f.sevres / 3),
             bandeId: formValue.bande
           };
           sevrages.push(sev);

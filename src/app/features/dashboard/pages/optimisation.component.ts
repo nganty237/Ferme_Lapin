@@ -8,10 +8,10 @@ import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-optimisation',
-    imports: [DecimalPipe, PageHeaderComponent, MatIconModule, MatButtonModule],
+  imports: [DecimalPipe, PageHeaderComponent, MatIconModule, MatButtonModule],
   templateUrl: './optimisation.component.html',
   styleUrl: './optimisation.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OptimisationComponent {
   private calcService = inject(CalculationService);
@@ -22,7 +22,7 @@ export class OptimisationComponent {
 
   nbFemelles = computed(() => {
     const list = this.reproducteurs() || [];
-    return list.filter(r => r.sexe === 'F' && r.etat !== 'Mort' && r.etat !== 'Réformé').length;
+    return list.filter(r => r.sexe === 'F' && r.etat !== 'Morte' && r.etat !== 'Réformée').length;
   });
 
   nbMales = computed(() => {
@@ -37,18 +37,18 @@ export class OptimisationComponent {
   });
 
   capacityFemelles = computed(() => {
-    return this.nbFemelles() * 8; // 8 vivants par portée
+    return this.nbFemelles() * 8;
   });
 
   capacityEngraissement = computed(() => {
     const configVal = this.config();
-    return configVal ? configVal.nombreCagesTotal - configVal.nombreCagesReproductrices : 75;
+    return configVal ? configVal.nombreCagesTotal - configVal.nombreFemelles : 75;
   });
 
   capacityTheorique = computed(() => {
     const cages = this.capacityEngraissement();
     const configVal = this.config();
-    const density = configVal ? configVal.densiteParCage : 3;
+    const density = configVal ? configVal.densiteParCase : 3;
     return cages * density;
   });
 }

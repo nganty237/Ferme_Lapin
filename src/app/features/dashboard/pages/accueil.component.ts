@@ -9,7 +9,7 @@ import type { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-accueil-dashboard',
-    imports: [
+  imports: [
     DatePipe,
     DecimalPipe,
     MetricCardComponent,
@@ -21,7 +21,7 @@ import type { Chart } from 'chart.js';
   ],
   templateUrl: './accueil.component.html',
   styleUrl: './accueil.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccueilComponent {
   private calcService = inject(CalculationService);
@@ -37,6 +37,7 @@ export class AccueilComponent {
   kpis = toSignal(this.calcService.kpis$);
   config = toSignal(this.calcService.config$);
   notifications = toSignal(this.notifService.notifications$);
+  bandes = toSignal(this.calcService.bandes$);
 
   constructor() {
     afterNextRender(() => {
@@ -80,7 +81,6 @@ export class AccueilComponent {
     const infoAlpha = 'rgba(59, 130, 246, 0.1)';
     const borderColor = rootStyles.getPropertyValue('--color-border').trim() || '#e8eaed';
 
-    // Tri et agrégation pour le graphique des naissances/sevrages
     const labels = misesBas.slice(-6).map(mb => {
       try {
         return new Date(mb.dateMiseBas).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
@@ -89,7 +89,6 @@ export class AccueilComponent {
       }
     });
 
-    // Gradients pour les courbes
     const ctxLine = this.lineChartCanvas.nativeElement.getContext('2d');
     let infoGradient: any = infoAlpha;
     let primaryGradient: any = primaryAlpha;
@@ -116,7 +115,7 @@ export class AccueilComponent {
             borderColor: infoColor,
             backgroundColor: infoGradient,
             fill: true,
-            tension: 0.4, // Courbes plus fluides et douces
+            tension: 0.4,
             borderWidth: 2.5,
             pointRadius: 2,
             pointHoverRadius: 6,
@@ -128,7 +127,7 @@ export class AccueilComponent {
             borderColor: primaryColor,
             backgroundColor: primaryGradient,
             fill: true,
-            tension: 0.4, // Courbes plus fluides et douces
+            tension: 0.4,
             borderWidth: 2.5,
             pointRadius: 2,
             pointHoverRadius: 6,
@@ -146,14 +145,13 @@ export class AccueilComponent {
           x: { grid: { display: false }, ticks: { font: { size: 10 } } },
           y: { 
             beginAtZero: true, 
-            grid: { color: borderColor, borderDash: [5, 5] } as any, // Lignes de repère en pointillés
+            grid: { color: borderColor, borderDash: [5, 5] } as any,
             ticks: { font: { size: 10 } } 
           }
         }
       }
     });
 
-    // Agrégation chronologique des ventes par mois
     const ventesTriees = [...ventes].sort((a, b) => new Date(a.dateVente).getTime() - new Date(b.dateVente).getTime());
     const ventesParMois: Record<string, number> = {};
     for (const v of ventesTriees) {
@@ -164,20 +162,18 @@ export class AccueilComponent {
           const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
           ventesParMois[capitalizedMonth] = (ventesParMois[capitalizedMonth] || 0) + (v.vendus || 0);
         } catch {
-          // fallback
         }
       }
     }
     const moisLabels = Object.keys(ventesParMois);
     const ventesData = Object.values(ventesParMois);
 
-    // Gradient vertical pour les barres de ventes
     const ctxBar = this.barChartCanvas.nativeElement.getContext('2d');
     let barGradient: any = primaryColor;
     if (ctxBar) {
       const g = ctxBar.createLinearGradient(0, 0, 0, 200);
-      g.addColorStop(0, '#22c55e'); // Vert clair au sommet
-      g.addColorStop(1, '#166534'); // Vert forêt à la base
+      g.addColorStop(0, '#22c55e');
+      g.addColorStop(1, '#166534');
       barGradient = g;
     }
 
@@ -191,7 +187,7 @@ export class AccueilComponent {
             data: ventesData.length > 0 ? ventesData : [0],
             backgroundColor: barGradient,
             borderRadius: 6,
-            maxBarThickness: 28 // Barres moins imposantes, plus pro
+            maxBarThickness: 28
           }
         ]
       },
@@ -211,5 +207,17 @@ export class AccueilComponent {
         }
       }
     });
+  }
+
+  getPhaseClass(phase: string): string {
+    const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide';
+    switch (phase) {
+      case 'Repos': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Saillie': return `${base} bg-purple-100 text-purple-800`;
+      case 'Allaitement': return `${base} bg-blue-100 text-blue-800`;
+      case 'Sexage': return `${base} bg-amber-100 text-amber-800`;
+      case 'Engraissement': return `${base} bg-orange-100 text-orange-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
+    }
   }
 }
