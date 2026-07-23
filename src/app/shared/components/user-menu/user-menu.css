@@ -1,0 +1,48 @@
+/* Personnalisation du menu Material */
+::ng-deep .modern-profile-menu.mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 4px 0 !important;
+  background-color: #ffffff !important;
+}
+
+/* Style des boutons d'options */
+.profile-menu-item {
+  height: 40px !important;
+  min-height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  cursor: pointer !important;
+}
+
+.profile-menu-item .menu-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #64748b !important;
+  margin-right: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Hover de base sur les items */
+::ng-deep .modern-profile-menu .mat-mdc-menu-item:hover {
+  background-color: #f8fafc !important;
+}
+
+/* Item de déconnexion spécifique */
+.logout-item {
+  color: #ef4444 !important;
+}
+
+.logout-item .logout-icon {
+  color: #ef4444 !important;
+}
+
+/* Hover spécifique rouge clair sur la déconnexion */
+::ng-deep .modern-profile-menu .logout-item:hover {
+  background-color: #fef2f2 !important;
+}

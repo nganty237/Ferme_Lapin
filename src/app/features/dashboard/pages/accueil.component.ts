@@ -68,11 +68,24 @@ export class AccueilComponent {
 
   async renderCharts(): Promise<void> {
     if (typeof window === 'undefined' || !this.lineChartCanvas) return;
-    if (this.lineChart) this.lineChart.destroy();
-    if (this.barChart) this.barChart.destroy();
 
     const { Chart, registerables } = await import('chart.js');
     Chart.register(...registerables);
+
+    const existingLineChart = Chart.getChart(this.lineChartCanvas.nativeElement);
+    if (existingLineChart) {
+      existingLineChart.destroy();
+    }
+    
+    if (this.barChartCanvas?.nativeElement) {
+      const existingBarChart = Chart.getChart(this.barChartCanvas.nativeElement);
+      if (existingBarChart) {
+        existingBarChart.destroy();
+      }
+    }
+
+    if (this.lineChart) this.lineChart.destroy();
+    if (this.barChart) this.barChart.destroy();
 
     const misesBas = this.calcService.misesBas;
     const sevrages = this.calcService.sevrages;
