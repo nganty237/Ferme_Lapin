@@ -20,7 +20,8 @@ import {
   CycleBande,
   ReferentielBande,
   ReferentielMale,
-  CalendrierSaillieItem
+  CalendrierSaillieItem,
+  Engraissement
 } from '../models';
 import { AppNotification } from './notification.service';
 
@@ -43,6 +44,7 @@ export class DataStoreService {
   private readonly _clapiers$ = new BehaviorSubject<Clapier[]>([]);
   private readonly _palpations$ = new BehaviorSubject<Palpation[]>([]);
   private readonly _sexages$ = new BehaviorSubject<Sexage[]>([]);
+  private readonly _engraissements$ = new BehaviorSubject<Engraissement[]>([]);
   private readonly _cyclesBande$ = new BehaviorSubject<CycleBande[]>([]);
   private readonly _refBandes$ = new BehaviorSubject<ReferentielBande[]>([]);
   private readonly _refMales$ = new BehaviorSubject<ReferentielMale[]>([]);
@@ -82,6 +84,7 @@ export class DataStoreService {
   readonly sessionsSaillie$ = this._saillies$.asObservable();
   readonly palpations$ = this._palpations$.asObservable();
   readonly sexages$ = this._sexages$.asObservable();
+  readonly engraissements$ = this._engraissements$.asObservable();
   readonly cyclesBande$ = this._cyclesBande$.asObservable();
   readonly refBandes$ = this._refBandes$.asObservable();
   readonly refMales$ = this._refMales$.asObservable();
@@ -111,6 +114,7 @@ export class DataStoreService {
       clapiers: this.dataApi.getClapiers(),
       palpations: this.dataApi.getPalpations(),
       sexages: this.dataApi.getSexages(),
+      engraissements: this.dataApi.getEngraissements(),
       cyclesBande: this.dataApi.getCyclesBande(),
       refBandes: this.dataApi.getReferentielBandes(),
       refMales: this.dataApi.getReferentielMales(),
@@ -137,6 +141,7 @@ export class DataStoreService {
         CLAPIERS: data.clapiers,
         PALPATIONS: data.palpations,
         SEXAGES: data.sexages,
+        ENGRAISSEMENTS: data.engraissements,
         CYCLES_BANDE: data.cyclesBande,
         REFERENTIEL_BANDES: data.refBandes,
         REFERENTIEL_MALES: data.refMales,
@@ -154,6 +159,7 @@ export class DataStoreService {
       this._clapiers$.next(data.clapiers || []);
       this._palpations$.next(data.palpations || []);
       this._sexages$.next(data.sexages || []);
+      this._engraissements$.next(data.engraissements || []);
       this._cyclesBande$.next(data.cyclesBande || []);
       this._refBandes$.next(data.refBandes || []);
       this._refMales$.next(data.refMales || []);
@@ -174,6 +180,7 @@ export class DataStoreService {
     this._clapiers$.next(this.storageService.getAllClapiers());
     this._palpations$.next(this.storageService.getAllPalpations());
     this._sexages$.next(this.storageService.getAllSexages());
+    this._engraissements$.next(this.storageService.getAllEngraissements());
     this._cyclesBande$.next(this.storageService.getCyclesBande());
     this._refBandes$.next(this.storageService.getReferentielBandes());
     this._refMales$.next(this.storageService.getReferentielMales());
@@ -199,6 +206,7 @@ export class DataStoreService {
   get sessionsSaillie(): Saillie[] { return this._saillies$.getValue(); }
   get palpations(): Palpation[] { return this._palpations$.getValue(); }
   get sexages(): Sexage[] { return this._sexages$.getValue(); }
+  get engraissements(): Engraissement[] { return this._engraissements$.getValue(); }
   get cyclesBande(): CycleBande[] { return this._cyclesBande$.getValue(); }
   get refBandes(): ReferentielBande[] { return this._refBandes$.getValue(); }
   get refMales(): ReferentielMale[] { return this._refMales$.getValue(); }
@@ -287,6 +295,16 @@ export class DataStoreService {
     if (this.isBrowser()) {
       this.dataApi.createSexage(sexage).subscribe({
         error: (err) => this.logApiError('addSexage', err)
+      });
+    }
+  }
+
+  addEngraissement(engraissement: Engraissement): void {
+    const created = this.storageService.addEngraissement(engraissement);
+    this._engraissements$.next([...this._engraissements$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createEngraissement(created).subscribe({
+        error: (err) => this.logApiError('addEngraissement', err)
       });
     }
   }

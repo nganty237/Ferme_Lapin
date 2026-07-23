@@ -16,7 +16,8 @@ import {
   ReferentielBande,
   ReferentielMale,
   CalendrierSaillieItem,
-  CycleBande
+  CycleBande,
+  Engraissement
 } from '../models';
 
 type CollectionName = 
@@ -30,6 +31,7 @@ type CollectionName =
   | 'clapiers' 
   | 'palpations' 
   | 'sexages'
+  | 'engraissements'
   | 'referentiel_males'
   | 'referentiel_bandes'
   | 'referentiel_calendrier_saillie'
@@ -84,6 +86,14 @@ export class JsonServerDataService {
 
   createSexage(item: Sexage): Observable<Sexage> {
     return this.create<Sexage>('sexages', item);
+  }
+
+  getEngraissements(): Observable<Engraissement[]> {
+    return this.list<Engraissement>('engraissements');
+  }
+
+  createEngraissement(item: Engraissement): Observable<Engraissement> {
+    return this.create<Engraissement>('engraissements', item);
   }
 
   patchBande(id: string, partial: Partial<Bande>): Observable<Bande> {

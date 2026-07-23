@@ -15,7 +15,8 @@ import {
   ReferentielBande,
   ReferentielMale,
   CalendrierSaillieItem,
-  CycleBande
+  CycleBande,
+  Engraissement
 } from '../models';
 import { StorageBaseRepository, STORAGE_KEYS } from '../repositories/storage-base.repository';
 import { ReproducteurRepository } from '../repositories/reproducteur.repository';
@@ -136,6 +137,10 @@ export class StorageService extends StorageBaseRepository {
   addPalpation(item: Palpation): void { this.eventRepo.addPalpation(item); }
   getAllSexages(): Sexage[] { return this.eventRepo.getAllSexages(); }
   addSexage(item: Sexage): void { this.eventRepo.addSexage(item); }
+
+  // --- Engraissements ---
+  getAllEngraissements(): Engraissement[] { return this.eventRepo.getAllEngraissements(); }
+  addEngraissement(item: Engraissement): Engraissement { return this.eventRepo.addEngraissement(item); }
 
   // --- Utilitaires Import / Export / Clear ---
   exportData(): Record<string, unknown> {

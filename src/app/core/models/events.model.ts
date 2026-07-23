@@ -87,7 +87,9 @@ export interface Engraissement {
   sexageId: string;
   dateDebut: string;
   datePrevueFin: string;
+  dateFin?: string;
   effectifDepart: number;
+  nombreLapereaux?: number;
   casesOccupees: number;
   clapiersIds: string[];
   mortalite?: number;
