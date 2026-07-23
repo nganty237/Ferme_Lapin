@@ -93,10 +93,6 @@
   .status-pill-radio.active-negative {
     @apply bg-rose-600 text-white border-rose-600 shadow-xs scale-[1.02];
   }
-
-  .status-pill-radio.active-incertaine {
-    @apply bg-amber-600 text-white border-amber-600 shadow-xs scale-[1.02];
-  }
 }
 
 /* === Angular Material Custom Overrides === */

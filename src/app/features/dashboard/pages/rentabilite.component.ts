@@ -41,6 +41,8 @@ export class RentabiliteComponent {
     const density = configVal.densiteParCase || 3;
     const prixAliment = configVal.prixAlimentKg || 350;
     const defaultPrice = configVal.prixVenteDefaut || 3000;
+    const duration = configVal.dureeEngraissementJours || 60;
+    const consumptionKg = duration * 0.1; // ~100g / day / rabbit
 
     return sevList.map((s: any, idx: number) => {
       const mb = mbList.find((m: any) => m.id === s.miseBasId);
@@ -52,11 +54,11 @@ export class RentabiliteComponent {
       // Calculate revenue: we assume 100% of this batch is eventually sold at defaultPrice
       // Or if there are actual sales, we can allocate. To keep it simple and clean:
       const revenu = s.sevres * defaultPrice;
-      const coutAliment = s.sevres * prixAliment * 5; // 5kg per rabbit
+      const coutAliment = s.sevres * prixAliment * consumptionKg;
       const marge = Math.max(0, revenu - coutAliment);
 
       return {
-        id: s.id.replace('sev_', '').substring(0, 4) || `P00${idx + 1}`,
+        id: s.id.replace('sev-', '').replace('sev_', '').substring(0, 5) || `P00${idx + 1}`,
         femelleId,
         vivants,
         cages,

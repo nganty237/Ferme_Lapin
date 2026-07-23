@@ -37,7 +37,7 @@ export interface Palpation {
   femelleId: string;
   bandeId: BandeId;
   datePalpation: string;
-  resultat: 'Positive' | 'Negative' | 'Incertaine';
+  resultat: 'Positive' | 'Negative';
   observations?: string;
 }
 

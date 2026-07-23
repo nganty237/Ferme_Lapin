@@ -111,20 +111,12 @@
                         Gestante (Confirmé)
                       </label>
 
-                      <label 
+                      <label
                         class="status-pill-radio"
                         [class.active-negative]="ctrl.value.resultat === 'Negative'">
                         <input type="radio" formControlName="resultat" value="Negative" class="hidden">
                         <mat-icon class="text-[15px] w-[15px] h-[15px]">cancel</mat-icon>
                         Vide (Négatif)
-                      </label>
-
-                      <label 
-                        class="status-pill-radio"
-                        [class.active-incertaine]="ctrl.value.resultat === 'Incertaine'">
-                        <input type="radio" formControlName="resultat" value="Incertaine" class="hidden">
-                        <mat-icon class="text-[15px] w-[15px] h-[15px]">help_outline</mat-icon>
-                        Incertaine
                       </label>
                     </div>
                   </td>
