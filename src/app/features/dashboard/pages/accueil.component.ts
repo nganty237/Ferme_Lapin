@@ -1,4 +1,4 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewChild, inject, effect } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
@@ -40,8 +40,12 @@ export class AccueilComponent {
   bandes = toSignal(this.calcService.bandes$);
 
   constructor() {
-    afterNextRender(() => {
-      this.scheduleChartRender();
+    effect(() => {
+      // Redessine les graphiques à chaque mise à jour ou chargement asynchrone des KPIs
+      const kpisVal = this.kpis();
+      if (kpisVal) {
+        this.scheduleChartRender();
+      }
     });
   }
 
@@ -81,13 +85,49 @@ export class AccueilComponent {
     const infoAlpha = 'rgba(59, 130, 246, 0.1)';
     const borderColor = rootStyles.getPropertyValue('--color-border').trim() || '#e8eaed';
 
-    const labels = misesBas.slice(-6).map(mb => {
-      try {
-        return new Date(mb.dateMiseBas).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-      } catch {
-        return String(mb.dateMiseBas);
+    // Groupement des naissances et sevrages par mois pour le graphique linéaire
+    const labels: string[] = [];
+    const today = new Date();
+    const mapMoisNes = new Map<string, number>();
+    const mapMoisSevres = new Map<string, number>();
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+      const capitalized = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
+      labels.push(capitalized);
+      mapMoisNes.set(capitalized, 0);
+      mapMoisSevres.set(capitalized, 0);
+    }
+
+    misesBas.forEach(mb => {
+      if (mb.dateMiseBas) {
+        try {
+          const d = new Date(mb.dateMiseBas);
+          const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+          const key = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
+          if (mapMoisNes.has(key)) {
+            mapMoisNes.set(key, mapMoisNes.get(key)! + (mb.vivants || 0));
+          }
+        } catch {}
       }
     });
+
+    sevrages.forEach(s => {
+      if (s.dateSevrage) {
+        try {
+          const d = new Date(s.dateSevrage);
+          const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+          const key = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
+          if (mapMoisSevres.has(key)) {
+            mapMoisSevres.set(key, mapMoisSevres.get(key)! + (s.sevres || 0));
+          }
+        } catch {}
+      }
+    });
+
+    const dataNes = labels.map(label => mapMoisNes.get(label) || 0);
+    const dataSevres = labels.map(label => mapMoisSevres.get(label) || 0);
 
     const ctxLine = this.lineChartCanvas.nativeElement.getContext('2d');
     let infoGradient: any = infoAlpha;
@@ -111,7 +151,7 @@ export class AccueilComponent {
         datasets: [
           {
             label: 'Nés vivants',
-            data: misesBas.slice(-6).map(mb => mb.vivants || 0),
+            data: dataNes,
             borderColor: infoColor,
             backgroundColor: infoGradient,
             fill: true,
@@ -123,7 +163,7 @@ export class AccueilComponent {
           },
           {
             label: 'Sevrés',
-            data: sevrages.slice(-6).map(s => s.sevres || 0),
+            data: dataSevres,
             borderColor: primaryColor,
             backgroundColor: primaryGradient,
             fill: true,

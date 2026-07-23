@@ -136,8 +136,8 @@ export class KpiReproductionService {
     // Fix P0 #2 : phases dérivées de `bandes[].phase` (au lieu de valeurs hardcodées).
     const phasesBandes = this.calcPhasesBandes(bandes);
     const etatBandes = this.calcEtatBandes(bandes);
-    const alertesPalpation = this.calcAlertesPalpation(saillies, palpations);
-    const alertesMiseBas = this.calcAlertesMiseBas(saillies, misesBas, config.dureeGestationJours || 31);
+    const alertesPalpation = this.calcAlertesPalpation(saillies, palpations, bandes);
+    const alertesMiseBas = this.calcAlertesMiseBas(saillies, misesBas, config.dureeGestationJours || 31, bandes);
     const productiviteParBande = this.calcProductiviteParBande(bandes, misesBas, sevrages);
 
     return {
@@ -179,10 +179,15 @@ export class KpiReproductionService {
     return res;
   }
 
-  private calcAlertesPalpation(saillies: Saillie[], palpations: Palpation[]): AlertePalpation[] {
+  private calcAlertesPalpation(saillies: Saillie[], palpations: Palpation[], bandes: Bande[] = []): AlertePalpation[] {
     const alertes: AlertePalpation[] = [];
     const today = new Date();
     saillies.forEach(s => {
+      const band = bandes.find(b => b.id === s.bandeId);
+      if (band && (band.phase as string) !== 'Gestation') {
+        return;
+      }
+
       const hasPalpation = palpations.find(p => p.saillieId === s.id);
       if (!hasPalpation) {
         const dateSaillie = new Date(s.dateSaillie);
@@ -201,13 +206,18 @@ export class KpiReproductionService {
     return alertes;
   }
 
-  private calcAlertesMiseBas(saillies: Saillie[], misesBas: MiseBas[], dureeGestation: number): AlerteMiseBas[] {
+  private calcAlertesMiseBas(saillies: Saillie[], misesBas: MiseBas[], dureeGestation: number, bandes: Bande[] = []): AlerteMiseBas[] {
     const alertes: AlerteMiseBas[] = [];
     const today = new Date();
     const todayMidnight = new Date(today);
     todayMidnight.setHours(0, 0, 0, 0);
 
     saillies.forEach(s => {
+      const band = bandes.find(b => b.id === s.bandeId);
+      if (band && (band.phase as string) !== 'Gestation') {
+        return;
+      }
+
       if (s.reussie !== false) {
         const hasMiseBas = misesBas.find(mb => mb.saillieId === s.id);
         if (!hasMiseBas) {

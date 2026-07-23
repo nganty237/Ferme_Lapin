@@ -2163,6 +2163,43 @@
       "clapiersIds": ["clap-e3"]
     }
   ],
-  "ventes": [],
+  "ventes": [
+    {
+      "id": "vnt-b-01",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
+      "dateVente": "2026-03-15",
+      "vendus": 40,
+      "prixUnitaire": 3000,
+      "prixTotal": 120000
+    },
+    {
+      "id": "vnt-c-01",
+      "cycleId": "cycle-bande-c-1",
+      "bandeId": "bande-c",
+      "dateVente": "2026-04-20",
+      "vendus": 50,
+      "prixUnitaire": 3000,
+      "prixTotal": 150000
+    },
+    {
+      "id": "vnt-a-01",
+      "cycleId": "cycle-bande-a-1",
+      "bandeId": "bande-a",
+      "dateVente": "2026-05-18",
+      "vendus": 60,
+      "prixUnitaire": 3000,
+      "prixTotal": 180000
+    },
+    {
+      "id": "vnt-b-02",
+      "cycleId": "cycle-bande-b-1",
+      "bandeId": "bande-b",
+      "dateVente": "2026-06-25",
+      "vendus": 55,
+      "prixUnitaire": 3000,
+      "prixTotal": 165000
+    }
+  ],
   "deces": []
 }
