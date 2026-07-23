@@ -23,11 +23,7 @@ export const dashboardRoutes: Routes = [
     loadComponent: () =>
       import('./pages/previsions.component').then((m) => m.PrevisionsComponent),
   },
-  {
-    path: 'projection',
-    loadComponent: () =>
-      import('./pages/projection.component').then((m) => m.ProjectionComponent),
-  },
+
   {
     path: 'optimisation',
     loadComponent: () =>

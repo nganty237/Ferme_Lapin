@@ -229,7 +229,7 @@ export class NotificationService {
     for (const mb of misesBas) {
       const config = this.calcService.config;
       const dateSevragePrevue = new Date(mb.dateMiseBas);
-      dateSevragePrevue.setDate(dateSevragePrevue.getDate() + (config.dureeAllaitementJours || 31));
+      dateSevragePrevue.setDate(dateSevragePrevue.getDate() + (config.dureeAllaitementMinJours || 30));
       dateSevragePrevue.setHours(0, 0, 0, 0);
 
       if (dateSevragePrevue.getTime() === tomorrow.getTime()) {

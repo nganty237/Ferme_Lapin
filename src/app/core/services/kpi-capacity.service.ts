@@ -1,5 +1,5 @@
-﻿import { Injectable } from '@angular/core';
-import { Sevrage, Vente, Configuration, Reproducteur, Clapier } from '../models';
+import { Injectable } from '@angular/core';
+import { Sevrage, Vente, Configuration, Reproducteur, Clapier, isFemelle, isMale, Bande, Engraissement } from '../models';
 
 export interface ClapierSynthese {
   clapierId: string;
@@ -21,44 +21,127 @@ export interface CapacityKPIs {
   clapiersSynthese?: ClapierSynthese[];
 }
 
-/**
- * Service spécialisé dans les calculs de capacité des clapiers, occupation et projections d'extension.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class KpiCapacityService {
 
-  /**
-   * Calcule l'ensemble des métriques de capacité des cages et d'occupation.
-   */
   calculateCapacityKPIs(
     sevrages: Sevrage[],
     ventes: Vente[],
     config: Configuration,
     reproducteurs: Reproducteur[] = [],
-    clapiers: Clapier[] = []
+    clapiers: Clapier[] = [],
+    bandes: Bande[] = [],
+    engraissements: Engraissement[] = []
   ): CapacityKPIs {
     const totalCagesTotal = config.nombreCagesTotal || 108;
-    const densite = config.densiteParCage || 3;
-    const capaciteTotaleLapins = totalCagesTotal * densite;
+    const densite = config.densiteParCase || 3;
+    const nbFemellesConfig = config.nombreFemelles || 33;
+    const nbMalesConfig = config.nombreMales || 3;
+    
+    // Capacité théorique : reproducteurs (1/cage) + lapereaux (densité/cage)
+    const cagesReproducteurs = nbFemellesConfig + nbMalesConfig;
+    const cagesDisponiblesLapereaux = totalCagesTotal - cagesReproducteurs;
+    const capaciteTotaleLapins = cagesReproducteurs + (cagesDisponiblesLapereaux * densite);
 
-    const totalSevres = sevrages.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
-    const totalVendus = ventes.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
-    const lapinsEnEngraissement = Math.max(0, totalSevres - totalVendus);
+    let lapinsEnEngraissement = 0;
+    let j30 = 0; // Libérées dans 0-30 jours
+    let j60 = 0; // Libérées dans 30-60 jours
+    let j90 = 0; // Libérées dans 60+ jours
+    let minDiffDays = 999;
+    let prochaineVenteDate: string | undefined = undefined;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (engraissements && engraissements.length > 0) {
+      const engraissementActif = engraissements.filter(eng => {
+        const dateDebut = new Date(eng.dateDebut);
+        dateDebut.setHours(0, 0, 0, 0);
+        const dateFin = new Date(eng.dateFin || eng.datePrevueFin);
+        dateFin.setHours(23, 59, 59, 999);
+        return dateDebut <= today && today <= dateFin;
+      });
+
+      lapinsEnEngraissement = engraissementActif.reduce(
+        (sum, eng) => sum + (eng.nombreLapereaux !== undefined ? eng.nombreLapereaux : eng.effectifDepart),
+        0
+      );
+
+      for (const eng of engraissementActif) {
+        const dateFinVal = new Date(eng.dateFin || eng.datePrevueFin);
+        dateFinVal.setHours(0, 0, 0, 0);
+        const remaining = Math.ceil((dateFinVal.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        const cages = Math.ceil((eng.nombreLapereaux !== undefined ? eng.nombreLapereaux : eng.effectifDepart) / densite);
+
+        if (remaining <= 30) {
+          j30 += cages;
+        } else if (remaining <= 60) {
+          j60 += cages;
+        } else {
+          j90 += cages;
+        }
+
+        if (remaining >= 0 && remaining < minDiffDays) {
+          minDiffDays = remaining;
+          prochaineVenteDate = dateFinVal.toISOString().slice(0, 10);
+        }
+      }
+    } else {
+      // Fallback : filtre uniquement par phase bande
+      const engraissementBandesIds = bandes.filter(b => b.phase === 'Engraissement').map(b => b.id);
+      const totalSevresEngraiss = sevrages
+        .filter(s => engraissementBandesIds.includes(s.bandeId))
+        .reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
+      const totalVendusEngraiss = ventes
+        .filter(v => engraissementBandesIds.includes(v.bandeId))
+        .reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
+      
+      lapinsEnEngraissement = Math.max(0, totalSevresEngraiss - totalVendusEngraiss);
+
+      for (const b of bandes) {
+        if (b.phase === 'Engraissement') {
+          const sevragesBande = sevrages.filter(s => s.bandeId === b.id);
+          const ventesBande = ventes.filter(v => v.bandeId === b.id);
+          const sevres = sevragesBande.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
+          const vendus = ventesBande.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
+          const restants = Math.max(0, sevres - vendus);
+          const cages = Math.ceil(restants / densite);
+
+          if (sevragesBande.length > 0) {
+            const dateSevrageVal = new Date(sevragesBande[0].dateSevrage);
+            dateSevrageVal.setHours(0, 0, 0, 0);
+            const ageJours = Math.round((today.getTime() - dateSevrageVal.getTime()) / (1000 * 3600 * 24));
+            const duration = config.dureeEngraissementJours || 60;
+            const remaining = duration - ageJours;
+
+            if (remaining <= 30) {
+              j30 += cages;
+            } else if (remaining <= 60) {
+              j60 += cages;
+            } else {
+              j90 += cages;
+            }
+
+            if (remaining >= 0 && remaining < minDiffDays) {
+              minDiffDays = remaining;
+              const expectedSale = new Date(dateSevrageVal);
+              expectedSale.setDate(expectedSale.getDate() + duration);
+              prochaineVenteDate = expectedSale.toISOString().slice(0, 10);
+            }
+          }
+        }
+      }
+    }
 
     const cagesOccupees = Math.ceil(lapinsEnEngraissement / densite);
-    const cagesTotalesEngraissement = Math.max(1, totalCagesTotal - (config.nombreCagesReproductrices || 33));
-
+    const cagesTotalesEngraissement = Math.max(1, cagesDisponiblesLapereaux);
     const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100));
+    const delaiLiberationCagesJours = minDiffDays === 999 ? 0 : minDiffDays;
 
-    const j30 = Math.round(cagesOccupees * 0.4);
-    const j60 = Math.round(cagesOccupees * 0.35);
-    const j90 = Math.round(cagesOccupees * 0.25);
-
-    // Détection du goulot d'étranglement principal
-    const nbFemellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort').length;
-    const nbMalesActifs = reproducteurs.filter(r => r.sexe === 'M' && r.etat !== 'Réformé' && r.etat !== 'Mort').length;
+    const nbFemellesActives = reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length;
+    const nbMalesActifs = reproducteurs.filter(isMale).filter(r => r.etat !== 'Réformé' && r.etat !== 'Mort').length;
 
     let goulotPrincipal: 'Cages engraissement' | 'Femelles reproductrices' | 'Mâles' | 'Aucun' = 'Aucun';
     if (pourcentageOccupation >= 85) {
@@ -69,7 +152,6 @@ export class KpiCapacityService {
       goulotPrincipal = 'Mâles';
     }
 
-    // Estimation du ROI d'extension
     const coutUneCage = 15000;
     const cagesNeeded = 12;
     const investissement = cagesNeeded * coutUneCage;
@@ -97,8 +179,8 @@ export class KpiCapacityService {
         totales: cagesTotalesEngraissement
       },
       prochainesLiberations: { j30, j60, j90 },
-      delaiLiberationCagesJours: 15,
-      prochaineVenteDate: new Date(Date.now() + 15 * 86400000).toISOString().slice(0, 10),
+      delaiLiberationCagesJours,
+      prochaineVenteDate,
       goulotPrincipal,
       cagesSupplementairesPourObjectif: cagesNeeded,
       roiAjouterCages: {

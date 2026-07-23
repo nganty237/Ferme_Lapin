@@ -15,16 +15,16 @@ import {
   Configuration, 
   Bande, 
   Clapier, 
-  SessionSaillie, 
   Palpation, 
-  Sexage 
+  Sexage,
+  CycleBande,
+  ReferentielBande,
+  ReferentielMale,
+  CalendrierSaillieItem,
+  Engraissement
 } from '../models';
 import { AppNotification } from './notification.service';
 
-/**
- * Service centralisé de stockage et de gestion de l'état réactif de l'application (Data Store).
- * Gère le chargement, la persistance locale/API et la réactivité des collections.
- */
 @Injectable({
   providedIn: 'root'
 })
@@ -34,7 +34,6 @@ export class DataStoreService {
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
 
-  // Flux réactifs internes (BehaviorSubjects)
   private readonly _reproducteurs$ = new BehaviorSubject<Reproducteur[]>([]);
   private readonly _saillies$ = new BehaviorSubject<Saillie[]>([]);
   private readonly _misesBas$ = new BehaviorSubject<MiseBas[]>([]);
@@ -43,30 +42,37 @@ export class DataStoreService {
   private readonly _deces$ = new BehaviorSubject<Deces[]>([]);
   private readonly _bandes$ = new BehaviorSubject<Bande[]>([]);
   private readonly _clapiers$ = new BehaviorSubject<Clapier[]>([]);
-  private readonly _sessionsSaillie$ = new BehaviorSubject<SessionSaillie[]>([]);
   private readonly _palpations$ = new BehaviorSubject<Palpation[]>([]);
   private readonly _sexages$ = new BehaviorSubject<Sexage[]>([]);
+  private readonly _engraissements$ = new BehaviorSubject<Engraissement[]>([]);
+  private readonly _cyclesBande$ = new BehaviorSubject<CycleBande[]>([]);
+  private readonly _refBandes$ = new BehaviorSubject<ReferentielBande[]>([]);
+  private readonly _refMales$ = new BehaviorSubject<ReferentielMale[]>([]);
+  private readonly _refCalendrier$ = new BehaviorSubject<CalendrierSaillieItem[]>([]);
   private readonly _notifications$ = new BehaviorSubject<AppNotification[]>([]);
 
   private readonly _config$ = new BehaviorSubject<Configuration>({
     nombreCagesTotal: 108,
-    densiteParCage: 3,
-    dureeGestationJours: 30,
-    dureeAllaitementJours: 30,
-    dureeSexageJours: 30,
-    dureeEngraissementJours: 60,
-    nombreCagesReproductrices: 33,
-    prixAlimentKg: 350,
-    prixVenteDefaut: 3000,
     nombreClapiers: 9,
     nombreCasesParClapier: 12,
-    taillePorteeMoyenne: 6,
     nombreFemelles: 33,
     nombreMales: 3,
-    nombreBandes: 3
+    nombreBandes: 3,
+    nombreFemellesParBande: 11,
+    dureeGestationJours: 31,
+    jourPalpation: 15,
+    dureeAllaitementMinJours: 35,
+    dureeAllaitementMaxJours: 35,
+    dureeSexageJours: 30,
+    dureeEngraissementJours: 60,
+    taillePorteeMoyenne: 6,
+    densiteParCase: 3,
+    ageMaturiteSexuelleMois: 5,
+    decalageAgeBandesMois: 1,
+    prixAlimentKg: 350,
+    prixVenteDefaut: 3000
   });
 
-  // Observables publics réactifs
   readonly reproducteurs$ = this._reproducteurs$.asObservable();
   readonly saillies$ = this._saillies$.asObservable();
   readonly misesBas$ = this._misesBas$.asObservable();
@@ -75,9 +81,14 @@ export class DataStoreService {
   readonly deces$ = this._deces$.asObservable();
   readonly bandes$ = this._bandes$.asObservable();
   readonly clapiers$ = this._clapiers$.asObservable();
-  readonly sessionsSaillie$ = this._sessionsSaillie$.asObservable();
+  readonly sessionsSaillie$ = this._saillies$.asObservable();
   readonly palpations$ = this._palpations$.asObservable();
   readonly sexages$ = this._sexages$.asObservable();
+  readonly engraissements$ = this._engraissements$.asObservable();
+  readonly cyclesBande$ = this._cyclesBande$.asObservable();
+  readonly refBandes$ = this._refBandes$.asObservable();
+  readonly refMales$ = this._refMales$.asObservable();
+  readonly refCalendrier$ = this._refCalendrier$.asObservable();
   readonly config$ = this._config$.asObservable();
   readonly notifications$ = this._notifications$.asObservable();
 
@@ -85,9 +96,6 @@ export class DataStoreService {
     this.loadAllData();
   }
 
-  /**
-   * Charge l'intégralité des données métier depuis l'API REST (json-server) ou le localStorage de secours.
-   */
   loadAllData(): void {
     if (!this.isBrowser()) {
       this.loadLocalData();
@@ -104,9 +112,13 @@ export class DataStoreService {
       config: this.dataApi.getConfiguration(),
       bandes: this.dataApi.getBandes(),
       clapiers: this.dataApi.getClapiers(),
-      sessionsSaillie: this.dataApi.getSessionsSaillie(),
       palpations: this.dataApi.getPalpations(),
-      sexages: this.dataApi.getSexages()
+      sexages: this.dataApi.getSexages(),
+      engraissements: this.dataApi.getEngraissements(),
+      cyclesBande: this.dataApi.getCyclesBande(),
+      refBandes: this.dataApi.getReferentielBandes(),
+      refMales: this.dataApi.getReferentielMales(),
+      refCalendrier: this.dataApi.getReferentielCalendrierSaillie()
     }).pipe(
       catchError((err) => {
         this.logApiError('loadAllData', err);
@@ -117,18 +129,41 @@ export class DataStoreService {
     ).subscribe((data) => {
       if (!data) return;
 
-      this._reproducteurs$.next(data.reproducteurs);
-      this._saillies$.next(data.saillies);
-      this._misesBas$.next(data.misesBas);
-      this._sevrages$.next(data.sevrages);
-      this._ventes$.next(data.ventes);
-      this._deces$.next(data.deces);
+      this.storageService.importData({
+        REPRODUCTEURS: data.reproducteurs,
+        SAILLIES: data.saillies,
+        MISES_BAS: data.misesBas,
+        SEVRAGES: data.sevrages,
+        VENTES: data.ventes,
+        DECES: data.deces,
+        CONFIGURATION: data.config,
+        BANDES: data.bandes,
+        CLAPIERS: data.clapiers,
+        PALPATIONS: data.palpations,
+        SEXAGES: data.sexages,
+        ENGRAISSEMENTS: data.engraissements,
+        CYCLES_BANDE: data.cyclesBande,
+        REFERENTIEL_BANDES: data.refBandes,
+        REFERENTIEL_MALES: data.refMales,
+        REFERENTIEL_CALENDRIER: data.refCalendrier
+      });
+
+      this._reproducteurs$.next(data.reproducteurs || []);
+      this._saillies$.next(data.saillies || []);
+      this._misesBas$.next(data.misesBas || []);
+      this._sevrages$.next(data.sevrages || []);
+      this._ventes$.next(data.ventes || []);
+      this._deces$.next(data.deces || []);
       this._config$.next(data.config);
-      this._bandes$.next(data.bandes);
-      this._clapiers$.next(data.clapiers);
-      this._sessionsSaillie$.next(data.sessionsSaillie);
-      this._palpations$.next(data.palpations);
-      this._sexages$.next(data.sexages);
+      this._bandes$.next(data.bandes || []);
+      this._clapiers$.next(data.clapiers || []);
+      this._palpations$.next(data.palpations || []);
+      this._sexages$.next(data.sexages || []);
+      this._engraissements$.next(data.engraissements || []);
+      this._cyclesBande$.next(data.cyclesBande || []);
+      this._refBandes$.next(data.refBandes || []);
+      this._refMales$.next(data.refMales || []);
+      this._refCalendrier$.next(data.refCalendrier || []);
     });
   }
 
@@ -143,9 +178,13 @@ export class DataStoreService {
     
     this._bandes$.next(this.storageService.getAllBandes());
     this._clapiers$.next(this.storageService.getAllClapiers());
-    this._sessionsSaillie$.next(this.storageService.getAllSessionsSaillie());
     this._palpations$.next(this.storageService.getAllPalpations());
     this._sexages$.next(this.storageService.getAllSexages());
+    this._engraissements$.next(this.storageService.getAllEngraissements());
+    this._cyclesBande$.next(this.storageService.getCyclesBande());
+    this._refBandes$.next(this.storageService.getReferentielBandes());
+    this._refMales$.next(this.storageService.getReferentielMales());
+    this._refCalendrier$.next(this.storageService.getReferentielCalendrierSaillie());
   }
 
   private isBrowser(): boolean {
@@ -156,7 +195,6 @@ export class DataStoreService {
     console.error(`[DataStoreService] Échec json-server: ${operation}`, error);
   }
 
-  // Getters synchrones
   get reproducteurs(): Reproducteur[] { return this._reproducteurs$.getValue(); }
   get saillies(): Saillie[] { return this._saillies$.getValue(); }
   get misesBas(): MiseBas[] { return this._misesBas$.getValue(); }
@@ -165,13 +203,17 @@ export class DataStoreService {
   get deces(): Deces[] { return this._deces$.getValue(); }
   get bandes(): Bande[] { return this._bandes$.getValue(); }
   get clapiers(): Clapier[] { return this._clapiers$.getValue(); }
-  get sessionsSaillie(): SessionSaillie[] { return this._sessionsSaillie$.getValue(); }
+  get sessionsSaillie(): Saillie[] { return this._saillies$.getValue(); }
   get palpations(): Palpation[] { return this._palpations$.getValue(); }
   get sexages(): Sexage[] { return this._sexages$.getValue(); }
+  get engraissements(): Engraissement[] { return this._engraissements$.getValue(); }
+  get cyclesBande(): CycleBande[] { return this._cyclesBande$.getValue(); }
+  get refBandes(): ReferentielBande[] { return this._refBandes$.getValue(); }
+  get refMales(): ReferentielMale[] { return this._refMales$.getValue(); }
+  get refCalendrier(): CalendrierSaillieItem[] { return this._refCalendrier$.getValue(); }
   get config(): Configuration { return this._config$.getValue(); }
   get notifications(): AppNotification[] { return this._notifications$.getValue(); }
 
-  // Méthodes de mutation
   addNotification(notification: AppNotification): void {
     const current = this._notifications$.getValue();
     this._notifications$.next([notification, ...current]);
@@ -180,38 +222,124 @@ export class DataStoreService {
   addSaillie(saillie: Saillie): void {
     const created = this.storageService.addSaillie(saillie);
     this._saillies$.next([...this._saillies$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createSaillie(created).subscribe({
+        error: (err) => this.logApiError('addSaillie', err)
+      });
+    }
   }
 
   addMiseBas(miseBas: MiseBas): void {
     const created = this.storageService.addMiseBas(miseBas);
     this._misesBas$.next([...this._misesBas$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createMiseBas(created).subscribe({
+        error: (err) => this.logApiError('addMiseBas', err)
+      });
+    }
   }
 
   addSevrage(sevrage: Sevrage): void {
     const created = this.storageService.addSevrage(sevrage);
     this._sevrages$.next([...this._sevrages$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createSevrage(created).subscribe({
+        error: (err) => this.logApiError('addSevrage', err)
+      });
+    }
   }
 
   addVente(vente: Vente): void {
     const created = this.storageService.addVente(vente);
     this._ventes$.next([...this._ventes$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createVente(created).subscribe({
+        error: (err) => this.logApiError('addVente', err)
+      });
+    }
   }
 
   addDeces(deces: Deces): void {
     const created = this.storageService.addDeces(deces);
     this._deces$.next([...this._deces$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createDeces(created).subscribe({
+        error: (err) => this.logApiError('addDeces', err)
+      });
+    }
+  }
+
+  addCycleBande(cycle: CycleBande): void {
+    this.storageService.addCycleBande(cycle);
+    this._cyclesBande$.next([...this._cyclesBande$.getValue(), cycle]);
+    if (this.isBrowser()) {
+      this.dataApi.createCycleBande(cycle).subscribe({
+        error: (err) => this.logApiError('addCycleBande', err)
+      });
+    }
+  }
+
+  addPalpation(palpation: Palpation): void {
+    this.storageService.addPalpation(palpation);
+    this._palpations$.next([...this._palpations$.getValue(), palpation]);
+    if (this.isBrowser()) {
+      this.dataApi.createPalpation(palpation).subscribe({
+        error: (err) => this.logApiError('addPalpation', err)
+      });
+    }
+  }
+
+  addSexage(sexage: Sexage): void {
+    this.storageService.addSexage(sexage);
+    this._sexages$.next([...this._sexages$.getValue(), sexage]);
+    if (this.isBrowser()) {
+      this.dataApi.createSexage(sexage).subscribe({
+        error: (err) => this.logApiError('addSexage', err)
+      });
+    }
+  }
+
+  addEngraissement(engraissement: Engraissement): void {
+    const created = this.storageService.addEngraissement(engraissement);
+    this._engraissements$.next([...this._engraissements$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createEngraissement(created).subscribe({
+        error: (err) => this.logApiError('addEngraissement', err)
+      });
+    }
+  }
+
+  updateBande(id: string, partial: Partial<Bande>): void {
+    this.storageService.updateBande(id, partial);
+    const bandes = this._bandes$.getValue().map(b => b.id === id ? { ...b, ...partial } : b);
+    this._bandes$.next(bandes);
+    if (this.isBrowser()) {
+      this.dataApi.patchBande(id, partial).subscribe({
+        error: (err) => this.logApiError('updateBande', err)
+      });
+    }
   }
 
   updateReproducteur(updated: Reproducteur): void {
     this.storageService.updateReproducteur(updated);
     const list = this._reproducteurs$.getValue().map(r => r.id === updated.id ? { ...r, ...updated } : r);
     this._reproducteurs$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.updateReproducteur(updated).subscribe({
+        error: (err) => this.logApiError('updateReproducteur', err)
+      });
+    }
   }
 
   deleteReproducteur(id: string): void {
     this.storageService.deleteReproducteur(id);
     const list = this._reproducteurs$.getValue().filter(r => r.id !== id);
     this._reproducteurs$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.deleteReproducteur(id).subscribe({
+        error: (err) => this.logApiError('deleteReproducteur', err)
+      });
+    }
   }
 
   updateConfiguration(configPartial: Partial<Configuration>): void {
@@ -219,5 +347,10 @@ export class DataStoreService {
     const updated = { ...currentConfig, ...configPartial };
     this.storageService.setConfiguration(updated);
     this._config$.next(updated);
+    if (this.isBrowser()) {
+      this.dataApi.updateConfiguration(updated).subscribe({
+        error: (err) => this.logApiError('updateConfiguration', err)
+      });
+    }
   }
 }

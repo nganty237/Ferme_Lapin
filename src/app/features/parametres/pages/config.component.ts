@@ -8,17 +8,17 @@ import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-config',
-    imports: [
+  imports: [
     FormsModule,
     ReactiveFormsModule,
-    PageHeaderComponent,
+    PageHeaderComponent, 
     MatButtonModule,
     MatInputModule,
     MatIconModule
   ],
   templateUrl: './config.component.html',
   styleUrl: './config.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConfigComponent implements OnInit {
   private storageService = inject(StorageService);
@@ -29,11 +29,11 @@ export class ConfigComponent implements OnInit {
   configForm!: FormGroup;
 
   ngOnInit(): void {
-    const config = this.storageService.getConfiguration();
+    const config = this.calcService.config || this.storageService.getConfiguration();
     this.configForm = this.fb.group({
       nombreCagesTotal: [config.nombreCagesTotal || 108, [Validators.required, Validators.min(1)]],
-      nombreCagesReproductrices: [config.nombreCagesReproductrices || 33, [Validators.required, Validators.min(0)]],
-      densiteParCage: [config.densiteParCage || 3, [Validators.required, Validators.min(1)]],
+      nombreFemelles: [config.nombreFemelles || 33, [Validators.required, Validators.min(0)]],
+      densiteParCase: [config.densiteParCase || 3, [Validators.required, Validators.min(1)]],
       prixAlimentKg: [config.prixAlimentKg || 350, [Validators.required, Validators.min(0)]],
       prixVenteDefaut: [config.prixVenteDefaut || 3000, [Validators.required, Validators.min(0)]]
     });
@@ -42,24 +42,24 @@ export class ConfigComponent implements OnInit {
   saveConfig(): void {
     if (this.configForm.valid) {
       const formValues = this.configForm.value;
-      const currentConfig = this.storageService.getConfiguration();
+      const currentConfig = this.calcService.config || this.storageService.getConfiguration();
       const updatedConfig = {
         ...currentConfig,
         ...formValues
       };
       this.calcService.updateConfiguration(updatedConfig);
-      this.notifier.success('Configuration enregistrée.');
+      this.notifier.success('Configuration enregistrée avec succès.');
     } else {
       this.notifier.error('Veuillez corriger les erreurs du formulaire.');
     }
   }
 
   resetForm(): void {
-    const config = this.storageService.getConfiguration();
+    const config = this.calcService.config || this.storageService.getConfiguration();
     this.configForm.reset({
       nombreCagesTotal: config.nombreCagesTotal || 108,
-      nombreCagesReproductrices: config.nombreCagesReproductrices || 33,
-      densiteParCage: config.densiteParCage || 3,
+      nombreFemelles: config.nombreFemelles || 33,
+      densiteParCase: config.densiteParCase || 3,
       prixAlimentKg: config.prixAlimentKg || 350,
       prixVenteDefaut: config.prixVenteDefaut || 3000
     });
@@ -92,10 +92,8 @@ export class ConfigComponent implements OnInit {
     reader.onload = (e: any) => {
       try {
         const json = JSON.parse(e.target.result);
-
-        // Simple validation check: we expect some database keys in the backup JSON
         const keys = Object.keys(json);
-        const hasRequiredKeys = keys.some(key => key.includes('REPRODUCTEURS') || key.includes('SAILLIES') || key.includes('BANDS'));
+        const hasRequiredKeys = keys.some(key => key.includes('REPRODUCTEURS') || key.includes('SAILLIES') || key.includes('BANDES'));
 
         if (!hasRequiredKeys) {
           this.notifier.error('Le fichier importé n\'est pas une sauvegarde valide.');
@@ -114,7 +112,7 @@ export class ConfigComponent implements OnInit {
       }
     };
     reader.readAsText(file);
-    event.target.value = ''; // Reset
+    event.target.value = '';
   }
 
   resetDatabase(): void {
@@ -128,7 +126,7 @@ export class ConfigComponent implements OnInit {
   }
 
   clearDatabase(): void {
-    if (confirm(' DANGER : Supprimer définitivement toutes vos données locales ? Cette action est irréversible.')) {
+    if (confirm('DANGER : Supprimer définitivement toutes vos données locales ? Cette action est irréversible.')) {
       this.storageService.clearAll();
       this.calcService.loadAllData();
       this.ngOnInit();

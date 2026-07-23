@@ -1,152 +1,219 @@
-<div class="page-container">
-      <app-page-header
-        title="Paramètres & Sauvegardes"
-        subtitle="Configuration technique de l'élevage et gestion des bases de données locales">
-      </app-page-header>
+<div class="page-container max-w-6xl mx-auto p-4 sm:p-6 space-y-8">
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+    
+    <!-- Left Section: Configuration (span 2 cols) -->
+    <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+      
+      <!-- Card: Configuration Form -->
+      <div class="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-xs hover:shadow-md/50 transition-shadow">
+        <h2 class="text-base font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">settings</mat-icon>
+          Configuration de l'Élevage
+        </h2>
 
-        <!-- Colonne Gauche : Configuration technique -->
-        <div class="space-y-6">
-          <!-- Formulaire configuration -->
-          <div class="bg-white border border-slate-200 rounded-xl p-6">
-            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-              <mat-icon class="text-emerald-700">settings</mat-icon>
-              Configuration Technique
-            </h2>
-
-            <form [formGroup]="configForm" (ngSubmit)="saveConfig()" class="flex flex-col gap-4">
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Nombre total de cages</mat-label>
-                  <input matInput type="number" formControlName="nombreCagesTotal" />
-                  <mat-hint>Capacité maximale de la ferme</mat-hint>
-                  @if (configForm.get('nombreCagesTotal')?.invalid) {
-                    <mat-error>Requis (min. 1)</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Cages repro. réservées</mat-label>
-                  <input matInput type="number" formControlName="nombreCagesReproductrices" />
-                  <mat-hint>Cages allouées aux reproducteurs</mat-hint>
-                  @if (configForm.get('nombreCagesReproductrices')?.invalid) {
-                    <mat-error>Requis (min. 0)</mat-error>
-                  }
-                </mat-form-field>
+        <form [formGroup]="configForm" (ngSubmit)="saveConfig()" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <!-- Nombre total de cages -->
+            <div class="space-y-1.5">
+              <label class="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Nombre total de cages
+              </label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  formControlName="nombreCagesTotal" 
+                  class="form-input w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold text-slate-800 text-sm transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">cages</span>
               </div>
-
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
-                <mat-label>Densité en engraissement (lapins/cage)</mat-label>
-                <input matInput type="number" formControlName="densiteParCage" />
-                <mat-hint>Nombre de lapereaux par cage d'engraissement</mat-hint>
-                @if (configForm.get('densiteParCage')?.invalid) {
-                  <mat-error>Requis (min. 1)</mat-error>
-                }
-              </mat-form-field>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Prix aliment (CFA / Kg)</mat-label>
-                  <input matInput type="number" formControlName="prixAlimentKg" />
-                  <mat-hint>Utilisé pour estimer les coûts alimentaires</mat-hint>
-                  @if (configForm.get('prixAlimentKg')?.invalid) {
-                    <mat-error>Requis (min. 0)</mat-error>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" floatLabel="always" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Prix de vente standard (CFA / lapin)</mat-label>
-                  <input matInput type="number" formControlName="prixVenteDefaut" />
-                  <mat-hint>Prix par défaut des ventes directes</mat-hint>
-                  @if (configForm.get('prixVenteDefaut')?.invalid) {
-                    <mat-error>Requis (min. 0)</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                <button type="button" mat-stroked-button (click)="resetForm()" class="h-[42px] px-6">
-                  Annuler
-                </button>
-                <button type="submit" mat-flat-button color="primary" [disabled]="configForm.invalid" class="h-[42px] px-6 flex-1">
-                  <mat-icon>save</mat-icon>
-                  Enregistrer les paramètres
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Durées physiologiques (lecture seule) -->
-          <div class="bg-white border border-slate-200 rounded-xl p-6">
-            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-              <mat-icon class="text-emerald-700">hourglass_empty</mat-icon>
-              Durées Cycles Biologiques
-            </h2>
-
-            <div class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
-                  <span class="text-2xl font-extrabold text-slate-800">30</span>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Gestation (Jours)</span>
-                </div>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
-                  <span class="text-2xl font-extrabold text-slate-800">30-35</span>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Allaitement (Jours)</span>
-                </div>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
-                  <span class="text-2xl font-extrabold text-slate-800">30</span>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Sexage (Jours)</span>
-                </div>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center">
-                  <span class="text-2xl font-extrabold text-slate-800">60</span>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase mt-1 text-center tracking-wide">Engraissement (Jours)</span>
-                </div>
-              </div>
-
-              <!-- Message de rappel lecture seule -->
-              <div class="flex gap-3 p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800 mt-4">
-                <mat-icon class="text-amber-600 mt-0.5">info</mat-icon>
-                <p class="text-xs font-medium m-0 leading-relaxed">
-                  Les durées biologiques et physiologiques de gestation, d'allaitement, sexage et d'engraissement sont fixes
-                  conformément aux standards physiologiques du lapin de chair et ne sont pas modifiables.
-                </p>
-              </div>
+              <span class="text-[11px] text-slate-400 block">Capacité physique maximale de l'installation</span>
             </div>
-          </div>
-        </div>
 
-        <!-- Colonne Droite : Import/Export et Reset -->
-        <div class="space-y-6">
+            <!-- Cages repro réservées -->
+            <div class="space-y-1.5">
+              <label class="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Cages repro. réservées (Femelles)
+              </label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  formControlName="nombreFemelles" 
+                  class="form-input w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold text-slate-800 text-sm transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">mères</span>
+              </div>
+              <span class="text-[11px] text-slate-400 block">Cages allouées aux reproductrices femelles</span>
+            </div>
 
-          <!-- Sauvegarde et Transfert -->
-          <div class="bg-white border border-slate-200 rounded-xl p-6">
-            <h2 class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-              <mat-icon class="text-emerald-700">backup</mat-icon>
-              Sauvegarde et Restauration
-            </h2>
+            <!-- Densité engraissement -->
+            <div class="space-y-1.5 sm:col-span-2">
+              <label class="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Densité en engraissement (lapins / cage)
+              </label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  formControlName="densiteParCase" 
+                  class="form-input w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold text-slate-800 text-sm transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">lapins/cage</span>
+              </div>
+              <span class="text-[11px] text-slate-400 block">Nombre maximal de lapereaux par cage d'engraissement</span>
+            </div>
 
-            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
-              Téléchargez une sauvegarde de vos données locales sous format JSON ou importez un fichier de sauvegarde existant.
-              Toutes les données de la ferme (reproducteurs, portées, ventes, cages) sont incluses.
-            </p>
+            <!-- Prix aliment -->
+            <div class="space-y-1.5">
+              <label class="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Prix aliment (CFA / Kg)
+              </label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  formControlName="prixAlimentKg" 
+                  class="form-input w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold text-slate-800 text-sm transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">FCFA</span>
+              </div>
+              <span class="text-[11px] text-slate-400 block">Utilisé pour l'estimation des coûts d'alimentation</span>
+            </div>
 
-            <div class="space-y-3 flex flex-col">
-              <button mat-flat-button color="primary" class="w-full h-[42px]" (click)="exportData()">
-                <mat-icon>cloud_download</mat-icon>
-                Exporter la base de données (JSON)
-              </button>
-
-              <button mat-stroked-button class="w-full h-[42px]" (click)="fileInput.click()">
-                <mat-icon>cloud_upload</mat-icon>
-                Importer une sauvegarde (JSON)
-              </button>
-              <input #fileInput type="file" accept=".json" class="hidden" (change)="onFileSelected($event)" />
+            <!-- Prix de vente standard -->
+            <div class="space-y-1.5">
+              <label class="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Prix de vente standard (CFA / lapin)
+              </label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  formControlName="prixVenteDefaut" 
+                  class="form-input w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold text-slate-800 text-sm transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">FCFA</span>
+              </div>
+              <span class="text-[11px] text-slate-400 block">Prix de base par défaut pour les ventes directes</span>
             </div>
           </div>
 
-        </div>
-
+          <!-- Buttons footer -->
+          <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+            <button 
+              type="button" 
+              (click)="resetForm()" 
+              class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold text-xs rounded-xl transition-all cursor-pointer">
+              Annuler les modifications
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="configForm.invalid" 
+              class="flex-1 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <mat-icon class="text-[16px] w-[16px] h-[16px]">save</mat-icon>
+              Enregistrer les paramètres
+            </button>
+          </div>
+        </form>
       </div>
+
+      <!-- Card: Durées cycles biologiques -->
+      <div class="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <h2 class="text-base font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">hourglass_empty</mat-icon>
+          Durées des Cycles Biologiques (Fixes)
+        </h2>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col items-center justify-center shadow-2xs hover:shadow-xs/80 transition-shadow">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">30</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase mt-1.5 text-center tracking-wider">Gestation</span>
+            <span class="text-[9px] text-slate-400">(Jours)</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col items-center justify-center shadow-2xs hover:shadow-xs/80 transition-shadow">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">30-35</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase mt-1.5 text-center tracking-wider">Allaitement</span>
+            <span class="text-[9px] text-slate-400">(Jours)</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col items-center justify-center shadow-2xs hover:shadow-xs/80 transition-shadow">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">30</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase mt-1.5 text-center tracking-wider">Sexage</span>
+            <span class="text-[9px] text-slate-400">(Jours)</span>
+          </div>
+          <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col items-center justify-center shadow-2xs hover:shadow-xs/80 transition-shadow">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">60</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase mt-1.5 text-center tracking-wider">Engraissement</span>
+            <span class="text-[9px] text-slate-400">(Jours)</span>
+          </div>
+        </div>
+
+        <div class="flex gap-3 p-4 rounded-xl border bg-amber-50/50 border-amber-200/60 text-amber-800 mt-5">
+          <mat-icon class="text-amber-600 mt-0.5 text-[18px] w-[18px] h-[18px]">info</mat-icon>
+          <p class="text-xs font-semibold m-0 leading-relaxed">
+            Les durées physiologiques de reproduction et de développement des lapins sont configurées en lecture seule conformément aux standards physiologiques cunicoles de base.
+          </p>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Right Section: Sauvegarde, Import/Export & Zone de danger -->
+    <div class="space-y-6 sm:space-y-8">
+      
+      <!-- Card: Backup & Restore -->
+      <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md/50 transition-shadow">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">backup</mat-icon>
+          Sauvegarde & Restauration
+        </h2>
+        
+        <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+          Exportez l'intégralité de vos données d'élevage (reproducteurs, saillies, mises-bas, sevrages, etc.) sous format JSON, ou importez un fichier de sauvegarde précédemment créé pour restaurer vos données.
+        </p>
+
+        <div class="space-y-3 flex flex-col">
+          <button 
+            type="button" 
+            (click)="exportData()"
+            class="w-full h-11 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">cloud_download</mat-icon>
+            Exporter la base de données (JSON)
+          </button>
+
+          <button 
+            type="button" 
+            (click)="fileInput.click()"
+            class="w-full h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">cloud_upload</mat-icon>
+            Importer une sauvegarde (JSON)
+          </button>
+          <input #fileInput type="file" accept=".json" class="hidden" (change)="onFileSelected($event)" />
+        </div>
+      </div>
+
+      <!-- Card: Danger Zone -->
+      <div class="bg-rose-50/20 border border-rose-200/60 rounded-2xl p-6 shadow-sm">
+        <h2 class="text-base font-bold text-rose-800 mb-4 flex items-center gap-2">
+          <mat-icon class="text-rose-700 text-[20px] w-[20px] h-[20px]">report_problem</mat-icon>
+          Zone de Danger
+        </h2>
+        
+        <p class="text-xs text-rose-700/80 mb-6 leading-relaxed">
+          Ces actions écrasent ou suppriment de manière permanente toutes les données de l'application. Soyez extrêmement vigilant.
+        </p>
+
+        <div class="space-y-3 flex flex-col">
+          <button 
+            type="button" 
+            (click)="resetDatabase()"
+            class="w-full h-11 border border-rose-200 hover:bg-rose-50 text-rose-800 font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">restore</mat-icon>
+            Restaurer les données de démo
+          </button>
+
+          <button 
+            type="button" 
+            (click)="clearDatabase()"
+            class="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">delete_forever</mat-icon>
+            Vider toute la base de données
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

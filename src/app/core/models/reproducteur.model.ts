@@ -1,37 +1,69 @@
-﻿export type Sexe = 'F' | 'M';
-export type EtatReproducteur = 'Actif' | 'En gestation' | 'En allaitement' | 'Au repos' | 'Réformé' | 'Mort';
+import type { BandeId } from './referentiel.model';
 
-export interface Reproducteur {
+export type Sexe = 'F' | 'M';
+
+export type EtatFemelle =
+  | 'Au repos'
+  | 'En gestation'
+  | 'En allaitement'
+  | 'Réformée'
+  | 'Morte';
+
+export type EtatMale = 'Actif' | 'Réformé' | 'Mort';
+
+export interface Femelle {
   id: string;
   nom: string;
-  sexe: Sexe;
-  dateNaissance?: Date;
-  bandeId?: string;
-  etat: EtatReproducteur;
+  sexe: 'F';
+  bandeId: BandeId;
+  maleResponsableId: string;
+  etat: EtatFemelle;
+  dateNaissance?: string;
   notes?: string;
 }
 
-export interface MaleReproducteur extends Reproducteur {
+export interface Male {
+  id: string;
+  nom: string;
   sexe: 'M';
-  femellesIds: string[];      // F001-F011 pour M01
-  nombreSailliesJour: number; // max 2 par jour
+  femellesIds: string[];
+  etat: EtatMale;
+  dateNaissance?: string;
+  notes?: string;
 }
 
-export type EtatBande = 
+export type Reproducteur = Femelle | Male;
+
+export function isFemelle(r: Reproducteur): r is Femelle {
+  return r.sexe === 'F';
+}
+
+export function isMale(r: Reproducteur): r is Male {
+  return r.sexe === 'M';
+}
+
+export type EtatBande =
   | 'Repos'
   | 'Saillie'
-  | 'Gestation'
-  | 'Palpation'
   | 'Allaitement'
-  | 'Sevrage'
   | 'Sexage'
-  | 'Engraissement';
+  | 'Engraissement'
+  | 'Vendue';
+
+export interface EtatCycleBande {
+  bandeId: BandeId;
+  phaseCourante: EtatBande;
+  dateDebutPhaseCourante: string;
+  datePrevuFinPhase?: string;
+  numeroCycle: number;
+  cycleId: string;
+}
 
 export interface Bande {
-  id: string;              // 'bande-a' | 'bande-b' | 'bande-c'
-  nom: string;             // 'Bande A'
+  id: BandeId;
+  nom: string;
+  couleur?: string;
   phase: EtatBande;
   dateDemarragePhase?: string;
-  femellesIds?: string[];
-  couleur?: string;
+  numeroCycle?: number;
 }

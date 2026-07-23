@@ -1,6 +1,6 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { StorageBaseRepository, STORAGE_KEYS } from './storage-base.repository';
-import { Saillie, MiseBas, Sevrage, Deces, SessionSaillie, Palpation, Sexage } from '../models';
+import { Saillie, MiseBas, Sevrage, Deces, SessionSaillie, Palpation, Sexage, Engraissement } from '../models';
 
 /**
  * Répertoire d'accès aux événements de l'élevage (Saillies, Mises-bas, Sevrages, Palpations, Sexages, Décès).
@@ -135,5 +135,18 @@ export class EventRepository extends StorageBaseRepository {
     const all = this.getAllSexages();
     all.push(entry);
     this.setItems<Sexage>(STORAGE_KEYS.SEXAGES, all);
+  }
+
+  // --- Engraissements ---
+  getAllEngraissements(): Engraissement[] {
+    return this.getItems<Engraissement>(STORAGE_KEYS.ENGRAISSEMENTS);
+  }
+
+  addEngraissement(item: Engraissement): Engraissement {
+    const entry = { ...item, id: item.id || this.generateId('eng') };
+    const all = this.getAllEngraissements();
+    all.push(entry);
+    this.setItems<Engraissement>(STORAGE_KEYS.ENGRAISSEMENTS, all);
+    return entry;
   }
 }

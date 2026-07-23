@@ -1,126 +1,121 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { 
-  Bande, 
-  EtatBande, 
-  SessionSaillie, 
-  Palpation, 
-  Sexage, 
-  MiseBas, 
+import { Observable } from 'rxjs';
+import {
+  Bande,
+  EtatBande,
+  Saillie,
+  Palpation,
+  Sexage,
+  MiseBas,
   Sevrage,
-  Reproducteur 
+  BandeId,
+  Femelle,
+  isFemelle,
+  CycleBande
 } from '../models';
 import { StorageService } from './storage.service';
 import { NotificationService } from './notification.service';
-import { AffectationMaleGroup } from '../repositories/bande.repository';
+import { ReferentielService } from './referentiel.service';
+import { DataStoreService } from './data-store.service';
 
-/**
- * Service de gestion du cycle de vie des bandes d'élevage cunicole et des événements associés.
- * Flow : Repos → Saillie → Gestation → Palpation → Allaitement → Sevrage → Sexage → Engraissement → Repos.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class BandeService {
   private storageService = inject(StorageService);
+  private dataStore = inject(DataStoreService);
+  private referentielService = inject(ReferentielService);
   private notifier = inject(NotificationService);
 
-  private readonly _bandes$ = new BehaviorSubject<Bande[]>([]);
-  readonly bandes$: Observable<Bande[]> = this._bandes$.asObservable();
+  readonly bandes$: Observable<Bande[]> = this.dataStore.bandes$;
 
-  private get AFFECTATION_MALES(): Record<string, AffectationMaleGroup[]> {
-    return this.storageService.getAllAffectationMales();
+  getCalendrierSaillie(bandeId: BandeId, dateDebut: Date): Saillie[] {
+    const itemsStatiques = this.referentielService.getCalendrierSaillieStatique(bandeId);
+    if (!itemsStatiques || itemsStatiques.length === 0) return [];
+
+    return itemsStatiques.map(item => {
+      const jourOffset = item.jourSaillie - 1;
+      const dateSaillie = new Date(dateDebut);
+      dateSaillie.setDate(dateSaillie.getDate() + jourOffset);
+
+      const dPalp = new Date(dateSaillie);
+      dPalp.setDate(dPalp.getDate() + 15);
+
+      const dMB = new Date(dateSaillie);
+      dMB.setDate(dMB.getDate() + 31);
+
+      return {
+        id: `sal-${Date.now()}-${item.femelleId}`,
+        cycleId: `cycle-${bandeId}-1`,
+        bandeId,
+        maleId: item.maleId,
+        femelleId: item.femelleId,
+        jourSaillie: item.jourSaillie,
+        moment: item.moment,
+        dateSaillie: dateSaillie.toISOString(),
+        datePalpationPrevue: dPalp.toISOString(),
+        dateMiseBasPrevue: dMB.toISOString()
+      };
+    });
   }
 
-  constructor() {
-    this.loadBandes();
-  }
-
-  /**
-   * Recharge les bandes depuis le stockage centralisé.
-   */
-  loadBandes(): void {
+  demarrerCycle(bandeId: BandeId, dateDebutSaillie: Date): CycleBande {
     const bandes = this.storageService.getAllBandes();
-    this._bandes$.next(bandes);
-  }
+    const bandeActuelle = bandes.find(b => b.id === bandeId);
+    const numCycle = (bandeActuelle?.numeroCycle || 1) + 1;
+    const cycleId = `cycle-${bandeId}-${numCycle}`;
 
-  /**
-   * Génère le calendrier de saillie d'une bande en respectant la contrainte biologique de 2 saillies max par mâle par jour (Matin/Soir).
-   * @param bandeId Identifiant de la bande ('bande-a' | 'bande-b' | 'bande-c').
-   * @param dateDebut Date de démarrage de la session de saillie.
-   * @returns Liste planifiée des sessions de saillie.
-   */
-  getCalendrierSaillie(bandeId: string, dateDebut: Date): SessionSaillie[] {
-    const affectations = this.AFFECTATION_MALES[bandeId];
-    if (!affectations || !Array.isArray(affectations)) return [];
+    const nouveauCycle: CycleBande = {
+      id: cycleId,
+      bandeId,
+      numeroCycle: numCycle,
+      phaseCourante: 'Saillie',
+      dateDebutSaillie: dateDebutSaillie.toISOString(),
+      dateDebutPhase: dateDebutSaillie.toISOString()
+    };
 
-    const sessions: SessionSaillie[] = [];
+    this.dataStore.addCycleBande(nouveauCycle);
+    this.changerPhase(bandeId, 'Saillie', dateDebutSaillie);
 
-    affectations.forEach((affectation: AffectationMaleGroup) => {
-      // Contrainte zootechnique cunicole : un mâle peut effectuer au maximum 2 saillies par jour (1 Matin, 1 Soir).
-      affectation.femellesIds.forEach((femId: string, index: number) => {
-        const jourOffset = Math.floor(index / 2); // 0 pour les 2 premières femelles (J1), 1 pour les 2 suivantes (J2), etc.
-        const jourNumber = jourOffset + 1;
-        const moment = (index % 2 === 0) ? 'Matin' : 'Soir';
-
-        const dateSaillie = new Date(dateDebut);
-        dateSaillie.setDate(dateSaillie.getDate() + jourOffset);
-
-        sessions.push({
-          id: `sess-${Date.now()}-${femId}`,
-          bandeId,
-          maleId: affectation.maleId,
-          femelleId: femId,
-          jour: jourNumber,
-          moment,
-          dateSaillie: dateSaillie.toISOString()
-        });
-      });
+    const planifiedSaillies = this.getCalendrierSaillie(bandeId, dateDebutSaillie);
+    planifiedSaillies.forEach(s => {
+      s.cycleId = cycleId;
+      this.dataStore.addSaillie(s);
     });
 
-    return sessions;
+    this.notifier.success(`Nouveau cycle #${numCycle} démarré pour la ${bandeId} (${planifiedSaillies.length} saillies planifiées).`);
+    return nouveauCycle;
   }
 
-  /**
-   * Démarre une nouvelle phase de saillie pour une bande.
-   */
-  demarrerSaillie(bandeId: string, dateDebut: Date): void {
-    const sessions = this.getCalendrierSaillie(bandeId, dateDebut);
-    sessions.forEach(s => this.storageService.addSessionSaillie(s));
-
-    this.changerPhase(bandeId, 'Saillie', dateDebut);
-    this.notifier.success(`Bande ${bandeId} passée en phase Saillie`);
+  demarrerSaillie(bandeId: BandeId, dateDebut: Date): void {
+    this.demarrerCycle(bandeId, dateDebut);
   }
 
-  /**
-   * Enregistre un résultat de palpation à J+15 et met à jour le statut physiologique de la femelle.
-   */
   enregistrerPalpation(palpation: Palpation): void {
-    this.storageService.addPalpation(palpation);
+    this.dataStore.addPalpation(palpation);
     
     const reproducteurs = this.storageService.getAllReproducteurs();
     const index = reproducteurs.findIndex(r => r.id === palpation.femelleId);
     if (index !== -1) {
-      reproducteurs[index].etat = palpation.resultat === 'Positive' ? 'En gestation' : 'Au repos';
-      this.storageService.updateReproducteur(reproducteurs[index]);
+      const repro = reproducteurs[index];
+      if (isFemelle(repro)) {
+        const updated = { ...repro, etat: (palpation.resultat === 'Positive' ? 'En gestation' : 'Au repos') as any };
+        this.dataStore.updateReproducteur(updated);
+      }
     }
   }
 
-  /**
-   * Confirme la mise-bas d'une portée et passe la bande en phase d'allaitement.
-   */
-  confirmerMiseBas(bandeId: string, misesBas: MiseBas[]): void {
+  confirmerMiseBas(bandeId: BandeId, misesBas: MiseBas[]): void {
     misesBas.forEach(mb => {
       mb.bandeId = bandeId;
       const dateSevrage = new Date(mb.dateMiseBas);
-      dateSevrage.setDate(dateSevrage.getDate() + 31);
+      dateSevrage.setDate(dateSevrage.getDate() + 35);
       mb.dateSevragePrevue = dateSevrage.toISOString();
-      this.storageService.addMiseBas(mb);
+      this.dataStore.addMiseBas(mb);
 
-      // Met à jour l'état de la femelle en allaitement
       const repro = this.storageService.getAllReproducteurs().find(r => r.id === mb.femelleId);
-      if (repro) {
-        this.storageService.updateReproducteur({ ...repro, etat: 'En allaitement' });
+      if (repro && isFemelle(repro)) {
+        this.dataStore.updateReproducteur({ ...repro, etat: 'En allaitement' });
       }
     });
 
@@ -128,58 +123,73 @@ export class BandeService {
     this.notifier.success(`Bande ${bandeId} passée en phase Allaitement`);
   }
 
-  /**
-   * Confirme le sevrage des lapereaux et remet les mères au repos.
-   */
-  confirmerSevrage(bandeId: string, sevrages: Sevrage[]): void {
+  confirmerSevrage(bandeId: BandeId, sevrages: Sevrage[]): void {
     sevrages.forEach(s => {
       s.bandeId = bandeId;
-      this.storageService.addSevrage(s);
+      this.dataStore.addSevrage(s);
     });
 
-    // Les mères reproductrices réintègrent la phase de repos
     const reproducteurs = this.storageService.getAllReproducteurs();
     reproducteurs.forEach(r => {
-      if (r.bandeId === bandeId && r.sexe === 'F' && r.etat === 'En allaitement') {
-        this.storageService.updateReproducteur({ ...r, etat: 'Au repos' });
+      if (isFemelle(r) && r.bandeId === bandeId && r.etat === 'En allaitement') {
+        this.dataStore.updateReproducteur({ ...r, etat: 'Au repos' });
       }
     });
 
-    this.changerPhase(bandeId, 'Sevrage', new Date());
+    this.changerPhase(bandeId, 'Sexage', new Date());
     this.notifier.success(`Bande ${bandeId} sevrée et prête pour le sexage`);
   }
 
-  /**
-   * Enregistre le sexage d'un lot de lapereaux sevrés.
-   */
   enregistrerSexage(sexage: Sexage): void {
-    this.storageService.addSexage(sexage);
+    this.dataStore.addSexage(sexage);
     if (sexage.bandeId) {
       this.changerPhase(sexage.bandeId, 'Sexage');
     }
   }
 
-  /**
-   * Transfère la bande sevrée vers les cages d'engraissement.
-   */
-  transfererEngraissement(bandeId: string, dateTransfert: Date): void {
+  transfererEngraissement(bandeId: BandeId, dateTransfert: Date): void {
     this.changerPhase(bandeId, 'Engraissement', dateTransfert);
     this.notifier.success(`Bande ${bandeId} transférée en Engraissement`);
   }
 
   /**
-   * Modifie la phase courante d'une bande et persiste le changement.
+   * Fix P0 #5 : replanifie une saillie pour une femelle dont la palpation est négative.
+   * Réutilise le maleResponsableId de la femelle (affectation statique du référentiel).
    */
-  changerPhase(bandeId: string, phase: EtatBande, datePhase: Date = new Date()): void {
-    this.storageService.updateBande(bandeId, { phase, dateDemarragePhase: datePhase.toISOString() });
-    this.loadBandes();
+  replanifierSaillieFemelle(femelleId: string, bandeId: BandeId, dateSaillie: Date): void {
+    const repros = this.storageService.getAllReproducteurs();
+    const femelle = repros.find(r => r.id === femelleId && isFemelle(r)) as Femelle | undefined;
+    if (!femelle) {
+      this.notifier.error(`Femelle ${femelleId} introuvable.`);
+      return;
+    }
+    const dateMB = new Date(dateSaillie);
+    dateMB.setDate(dateMB.getDate() + 31);
+    const datePalp = new Date(dateSaillie);
+    datePalp.setDate(datePalp.getDate() + 15);
+    const saillie: Saillie = {
+      id: `sal-resal-${Date.now()}-${femelleId}`,
+      cycleId: `cycle-${bandeId}-resal`,
+      bandeId,
+      femelleId,
+      maleId: femelle.maleResponsableId,
+      dateSaillie: dateSaillie.toISOString(),
+      dateMiseBasPrevue: dateMB.toISOString(),
+      datePalpationPrevue: datePalp.toISOString(),
+      jourSaillie: 1,
+      moment: 'Matin'
+    };
+    this.dataStore.addSaillie(saillie);
+    this.dataStore.updateReproducteur({ ...femelle, etat: 'Au repos' });
+    this.notifier.info(`Re-saillie planifiée pour ${femelleId} le ${dateSaillie.toLocaleDateString()}.`);
   }
 
-  /**
-   * Retourne l'état synthétique actuel des 3 bandes principales.
-   */
+  changerPhase(bandeId: BandeId, phase: EtatBande, datePhase: Date = new Date()): void {
+    this.dataStore.updateBande(bandeId, { phase, dateDemarragePhase: datePhase.toISOString() });
+  }
+
   getEtatBandes(): { A: EtatBande; B: EtatBande; C: EtatBande } {
-    const bandes = this._bandes$.getValue();
+    const bandes = this.storageService.getAllBandes();
     const findPhase = (id: string): EtatBande => bandes.find(b => b.id === id)?.phase || 'Repos';
     return {
       A: findPhase('bande-a'),

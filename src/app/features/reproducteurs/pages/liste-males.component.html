@@ -1,68 +1,64 @@
 <div class="page-container">
-      <app-page-header
-        title="Mâles Reproducteurs"
-        subtitle="Liste et performance des mâles de l'élevage">
-      </app-page-header>
+  <app-page-header
+    title="Mâles Reproducteurs"
+    subtitle="Liste et performance des mâles de l'élevage">
+  </app-page-header>
 
-      <!-- Filtres -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
-        <div class="flex flex-wrap gap-4 items-end">
-          <div>
-            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">État</label>
-            <select class="form-select" [(ngModel)]="filtreEtat" (ngModelChange)="onFilterChange()">
-              <option value="">Tous les états</option>
-              <option value="Actif">Actif</option>
-              <option value="Réformé">Réformé</option>
-              <option value="Mort">Décédé</option>
-            </select>
-          </div>
-          <div class="ml-auto text-sm text-slate-500">
-            {{ filteredMales().length }} mâle(s) trouvé(s)
-          </div>
-        </div>
+  <!-- Filtres -->
+  <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
+    <div class="flex flex-wrap gap-4 items-end">
+      <div>
+        <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1">État</label>
+        <select class="form-select" [(ngModel)]="filtreEtat" (ngModelChange)="onFilterChange()">
+          <option value="">Tous les états</option>
+          <option value="Actif">Actif</option>
+          <option value="Réformé">Réformé</option>
+          <option value="Mort">Décédé</option>
+        </select>
       </div>
-
-      <!-- Tableau -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6">
-        <div class="overflow-x-auto" style="max-height: 520px;">
-          <table class="w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('id')">
-                  ID @if (sortCol === 'id') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('nom')">
-                  Nom @if (sortCol === 'nom') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('saillies')">
-                  Saillies @if (sortCol === 'saillies') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('porteesProduites')">
-                  Portées produites @if (sortCol === 'porteesProduites') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">État</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (filteredMales().length === 0) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td colspan="5" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucun mâle trouvé avec ces filtres.</td>
-                </tr>
-              } @else {
-                @for (m of filteredMales(); track m.id) {
-                  <tr class="cursor-pointer hover:bg-slate-50/50 transition-colors" (click)="goToDetail(m.id)">
-                    <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">{{ m.id }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle font-semibold">{{ m.nom }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ m.saillies }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ m.porteesProduites }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
-                      <span [class]="getEtatClass(m.etat)">{{ m.etat }}</span>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
+      <div class="ml-auto text-sm text-slate-500">
+        {{ filteredMales().length }} mâle(s) trouvé(s)
       </div>
     </div>
+  </div>
+
+  <!-- Tableau -->
+  <div class="bg-white border border-slate-200 rounded-xl p-6">
+    <div class="overflow-x-auto" style="max-height: 520px;">
+      <table class="w-full border-separate border-spacing-0 text-sm">
+        <thead>
+          <tr>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left cursor-pointer select-none" (click)="sortBy('id')">
+              ID Mâle @if (sortCol === 'id') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
+            </th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('saillies')">
+              Saillies @if (sortCol === 'saillies') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
+            </th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center cursor-pointer select-none" (click)="sortBy('porteesProduites')">
+              Portées produites @if (sortCol === 'porteesProduites') { <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;">{{ sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon> }
+            </th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">État</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredMales().length === 0) {
+            <tr class="hover:bg-slate-50/50 transition-colors">
+              <td colspan="4" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucun mâle trouvé avec ces filtres.</td>
+            </tr>
+          } @else {
+            @for (m of filteredMales(); track m.id) {
+              <tr class="cursor-pointer hover:bg-slate-50/50 transition-colors" (click)="goToDetail(m.id)">
+                <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-bold text-slate-800 text-base">♂ {{ m.id }}</td>
+                <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-medium">{{ m.saillies }}</td>
+                <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-medium">{{ m.porteesProduites }}</td>
+                <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle">
+                  <span [class]="getEtatClass(m.etat)">{{ m.etat }}</span>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

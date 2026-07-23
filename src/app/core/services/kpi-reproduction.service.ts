@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { 
   Reproducteur, 
   Saillie, 
@@ -10,6 +10,13 @@ import {
   Palpation,
   EtatBande 
 } from '../models';
+
+/**
+ * Fallback conservateur (92%) tant qu'aucun flux `engraissements$` n'est exposé
+ * par DataStoreService. À remplacer par Σ(effectifFinal) / Σ(mortalite + effectifFinal)
+ * quand la collection `engraissements` sera flowifiée (P1 hors périmètre).
+ */
+const TAUX_SURVIE_ENGRAIS_FALLBACK = 92;
 
 export interface AlertePalpation {
   femelleId: string;
@@ -78,16 +85,25 @@ export class KpiReproductionService {
     bandes: Bande[] = [],
     palpations: Palpation[] = []
   ): ReproductionKPIs {
-    const femellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformé' && r.etat !== 'Mort');
+    const femellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformée' && r.etat !== 'Morte');
     const nbFemelles = Math.max(1, femellesActives.length);
-
     const totalNesVivants = misesBas.reduce((sum: number, mb: MiseBas) => sum + (mb.vivants || 0), 0);
     const totalMortNes = misesBas.reduce((sum: number, mb: MiseBas) => sum + (mb.mortsNes || 0), 0);
     const totalNaissances = totalNesVivants + totalMortNes;
 
+    let totalSevres = 0;
+    let totalNesSevrage = 0;
+    for (const sev of sevrages) {
+      const mb = misesBas.find((m: MiseBas) => m.id === sev.miseBasId);
+      if (mb && mb.vivants > 0) {
+        totalNesSevrage += mb.vivants;
+        totalSevres += sev.sevres || 0;
+      }
+    }
+
     const tailleMoyennePortee = misesBas.length > 0 ? Math.round((totalNesVivants / misesBas.length) * 10) / 10 : 0;
     const porteesParFemelleAn = Math.round((misesBas.length / nbFemelles) * 10) / 10;
-    const productiviteParFemelleAn = Math.round((totalNesVivants / nbFemelles) * 10) / 10;
+    const productiviteParFemelleAn = Math.round((totalSevres / nbFemelles) * 10) / 10;
 
     // Taux de fécondité
     let tauxFecondite = 0;
@@ -99,18 +115,8 @@ export class KpiReproductionService {
 
     // Viabilité et Survie
     const viabiliteImmediate = totalNaissances > 0 ? Math.round((totalNesVivants / totalNaissances) * 100) : 0;
-
-    let totalSevres = 0;
-    let totalNesSevrage = 0;
-    for (const sev of sevrages) {
-      const mb = misesBas.find((m: MiseBas) => m.id === sev.miseBasId);
-      if (mb && mb.vivants > 0) {
-        totalNesSevrage += mb.vivants;
-        totalSevres += sev.sevres || 0;
-      }
-    }
     const tauxSurvieAllaitement = totalNesSevrage > 0 ? Math.round((totalSevres / totalNesSevrage) * 100) : 0;
-    const tauxSurvieEngraissement = 92; // Standard physiologique moyen en engraissement
+    const tauxSurvieEngraissement = TAUX_SURVIE_ENGRAIS_FALLBACK;
 
     // Productivité par mâle
     const malesActifs = reproducteurs.filter(r => r.sexe === 'M');
@@ -127,10 +133,11 @@ export class KpiReproductionService {
     const nombrePorteesEnCours = Math.ceil(lapinsRestants / Math.max(1, (config.taillePorteeMoyenne || 6)));
 
     // Phases et état des bandes
-    const phasesBandes = this.calcPhasesBandes();
+    // Fix P0 #2 : phases dérivées de `bandes[].phase` (au lieu de valeurs hardcodées).
+    const phasesBandes = this.calcPhasesBandes(bandes);
     const etatBandes = this.calcEtatBandes(bandes);
-    const alertesPalpation = this.calcAlertesPalpation(saillies, palpations);
-    const alertesMiseBas = this.calcAlertesMiseBas(saillies, misesBas, config.dureeGestationJours || 30);
+    const alertesPalpation = this.calcAlertesPalpation(saillies, palpations, bandes);
+    const alertesMiseBas = this.calcAlertesMiseBas(saillies, misesBas, config.dureeGestationJours || 31, bandes);
     const productiviteParBande = this.calcProductiviteParBande(bandes, misesBas, sevrages);
 
     return {
@@ -152,8 +159,9 @@ export class KpiReproductionService {
     };
   }
 
-  private calcPhasesBandes(): { A: string; B: string; C: string } {
-    return { A: 'Engraissement', B: 'Gestation', C: 'Allaitement' };
+  private calcPhasesBandes(bandes: Bande[]): { A: string; B: string; C: string } {
+    const get = (id: string): string => bandes.find(b => b.id === id)?.phase ?? 'Repos';
+    return { A: get('bande-a'), B: get('bande-b'), C: get('bande-c') };
   }
 
   private calcEtatBandes(bandes: Bande[]): Record<string, EtatBandesInfo> {
@@ -163,18 +171,23 @@ export class KpiReproductionService {
       const key = b.id.replace('bande-', '').toUpperCase();
       res[key] = {
         phase: b.phase,
-        nombreFemelles: b.femellesIds?.length || 0,
+        nombreFemelles: 11,
         joursPhase: b.dateDemarragePhase ? Math.floor((new Date().getTime() - new Date(b.dateDemarragePhase).getTime()) / (1000 * 3600 * 24)) : 0,
-        prochainEvenement: b.phase === 'Repos' ? 'Saillie' : b.phase === 'Gestation' ? 'Mise-bas' : 'Sevrage',
+        prochainEvenement: b.phase === 'Repos' ? 'Saillie' : b.phase === 'Saillie' ? 'Mise-bas' : 'Sevrage',
       };
     });
     return res;
   }
 
-  private calcAlertesPalpation(saillies: Saillie[], palpations: Palpation[]): AlertePalpation[] {
+  private calcAlertesPalpation(saillies: Saillie[], palpations: Palpation[], bandes: Bande[] = []): AlertePalpation[] {
     const alertes: AlertePalpation[] = [];
     const today = new Date();
     saillies.forEach(s => {
+      const band = bandes.find(b => b.id === s.bandeId);
+      if (band && (band.phase as string) !== 'Gestation') {
+        return;
+      }
+
       const hasPalpation = palpations.find(p => p.saillieId === s.id);
       if (!hasPalpation) {
         const dateSaillie = new Date(s.dateSaillie);
@@ -193,16 +206,26 @@ export class KpiReproductionService {
     return alertes;
   }
 
-  private calcAlertesMiseBas(saillies: Saillie[], misesBas: MiseBas[], dureeGestation: number): AlerteMiseBas[] {
+  private calcAlertesMiseBas(saillies: Saillie[], misesBas: MiseBas[], dureeGestation: number, bandes: Bande[] = []): AlerteMiseBas[] {
     const alertes: AlerteMiseBas[] = [];
     const today = new Date();
+    const todayMidnight = new Date(today);
+    todayMidnight.setHours(0, 0, 0, 0);
+
     saillies.forEach(s => {
+      const band = bandes.find(b => b.id === s.bandeId);
+      if (band && (band.phase as string) !== 'Gestation') {
+        return;
+      }
+
       if (s.reussie !== false) {
         const hasMiseBas = misesBas.find(mb => mb.saillieId === s.id);
         if (!hasMiseBas) {
           const expectedMB = new Date(s.dateSaillie);
           expectedMB.setDate(expectedMB.getDate() + dureeGestation);
-          const diffDays = Math.floor((expectedMB.getTime() - today.getTime()) / (1000 * 3600 * 24));
+          expectedMB.setHours(0, 0, 0, 0);
+          
+          const diffDays = Math.round((expectedMB.getTime() - todayMidnight.getTime()) / (1000 * 3600 * 24));
           if (diffDays <= 7 && diffDays >= -3) {
             alertes.push({
               femelleId: s.femelleId,

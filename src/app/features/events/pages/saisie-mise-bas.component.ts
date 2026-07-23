@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, BandeService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
@@ -17,6 +17,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   imports: [
     DatePipe,
     ReactiveFormsModule,
+    FormsModule,
     PageHeaderComponent,
     MatButtonModule,
     MatInputModule,
@@ -37,36 +38,74 @@ export class SaisieMiseBasComponent {
   bandes = toSignal(this.bandeService.bandes$);
   saillies = toSignal(this.calcService.saillies$);
   misesBas = toSignal(this.calcService.misesBas$);
+  palpations = toSignal(this.calcService.palpations$);
   reproducteurs = toSignal(this.calcService.reproducteurs$);
 
   form: FormGroup;
   get miseBasForm(): FormGroup { return this.form; }
 
-  selectedBandeId = signal<string>('bande-a');
+  selectedBandeId = signal<string>('bande-b');
   bandeSelectionnee = this.selectedBandeId;
   bandesDisponibles = computed(() => this.bandes() || []);
+  selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.selectedBandeId()));
   isSubmitting = signal<boolean>(false);
 
+  /**
+   * Filtrage strict des saillies éligibles à la mise-bas pour la bande sélectionnée :
+   * - Strictement rattachées à la bande sélectionnée (s.bandeId === bandeId)
+   * - Pas de mise-bas déjà enregistrée (saillie non clôturée)
+   * - Pas de palpation négative
+   * - Maximum 11 femelles (taille standard d'une bande)
+   */
   sailliesEligibles = computed(() => {
     const bandeId = this.selectedBandeId();
     const allSaillies = this.saillies() || [];
     const allMB = this.misesBas() || [];
+    const allPalpations = this.palpations() || [];
 
-    return allSaillies.filter(s => {
+    const result = allSaillies.filter(s => {
+      if (s.bandeId !== bandeId) return false;
       const dejaMB = allMB.some(mb => mb.saillieId === s.id);
-      return !dejaMB;
+      if (dejaMB) return false;
+      const palpationNegative = allPalpations.some(p => p.saillieId === s.id && p.resultat === 'Negative');
+      if (palpationNegative) return false;
+      return true;
     });
+
+    return result.slice(0, 11);
   });
 
   constructor() {
     this.form = this.fb.group({
-      bandeId: ['bande-a', Validators.required],
-      bande: ['bande-a'],
+      bandeId: ['bande-b', Validators.required],
+      bande: ['bande-b'],
       dateMiseBas: [new Date(), Validators.required],
       portees: this.fb.array([])
     });
 
-    this.initPorteesForBande('bande-a');
+    // Auto-détection et pré-sélection de la bande actuellement en gestation / mise-bas
+    effect(() => {
+      const allBandes = this.bandes() || [];
+      const allSaillies = this.saillies() || [];
+      const allMB = this.misesBas() || [];
+
+      if (allBandes.length > 0) {
+        const bandeGestation = allBandes.find(b => {
+          const pendings = allSaillies.filter(s => s.bandeId === b.id && !allMB.some(mb => mb.saillieId === s.id));
+          return pendings.length > 0 || b.phase === 'Saillie' || (b.phase as string) === 'Gestation';
+        });
+        if (bandeGestation && this.selectedBandeId() !== bandeGestation.id) {
+          this.selectedBandeId.set(bandeGestation.id);
+          this.form.patchValue({ bandeId: bandeGestation.id, bande: bandeGestation.id });
+        }
+      }
+    }, { allowSignalWrites: true });
+
+    // Synchronisation réactive auto des portées
+    effect(() => {
+      const eligibles = this.sailliesEligibles();
+      this.updatePorteesForm(eligibles);
+    });
   }
 
   get porteesArray(): FormArray {
@@ -89,20 +128,27 @@ export class SaisieMiseBasComponent {
 
   onBandeChange(bandeId: string): void {
     this.selectedBandeId.set(bandeId);
-    this.initPorteesForBande(bandeId);
+    this.form.patchValue({ bandeId, bande: bandeId });
   }
 
-  private initPorteesForBande(bandeId: string): void {
-    this.porteesArray.clear();
-    const eligibles = this.sailliesEligibles();
+  private lastEligiblesHash = '';
 
+  private updatePorteesForm(eligibles: any[]): void {
+    const hash = eligibles.map(e => `${e.id}_${e.femelleId}`).join(',');
+    if (this.lastEligiblesHash === hash && this.porteesArray.length === eligibles.length) {
+      return;
+    }
+    this.lastEligiblesHash = hash;
+
+    this.porteesArray.clear();
     eligibles.forEach(s => {
       const group = this.fb.group({
         saillieId: [s.id],
         femelleId: [s.femelleId],
         dateSaillie: [s.dateSaillie],
         vivants: [6, [Validators.required, Validators.min(0)]],
-        mortsNes: [0, [Validators.required, Validators.min(0)]]
+        mortsNes: [0, [Validators.required, Validators.min(0)]],
+        observations: ['']
       });
       this.porteesArray.push(group);
     });
@@ -144,7 +190,6 @@ export class SaisieMiseBasComponent {
 
       this.bandeService.confirmerMiseBas(val.bandeId, misesBasAEnregistrer);
       this.notifier.success(`${misesBasAEnregistrer.length} mise(s)-bas enregistrée(s) avec succès pour la ${val.bandeId}.`);
-      this.initPorteesForBande(val.bandeId);
     } finally {
       this.isSubmitting.set(false);
     }
@@ -152,6 +197,6 @@ export class SaisieMiseBasComponent {
 
   onReset(): void {
     this.form.reset({ bandeId: 'bande-a', dateMiseBas: new Date() });
-    this.initPorteesForBande('bande-a');
+    this.selectedBandeId.set('bande-a');
   }
 }

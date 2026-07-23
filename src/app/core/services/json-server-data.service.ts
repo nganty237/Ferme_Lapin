@@ -1,9 +1,41 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Configuration, Deces, MiseBas, Reproducteur, Saillie, Sevrage, Vente, Bande, Clapier, SessionSaillie, Palpation, Sexage } from '../models';
+import { 
+  Configuration, 
+  Deces, 
+  MiseBas, 
+  Reproducteur, 
+  Saillie, 
+  Sevrage, 
+  Vente, 
+  Bande, 
+  Clapier, 
+  Palpation, 
+  Sexage,
+  ReferentielBande,
+  ReferentielMale,
+  CalendrierSaillieItem,
+  CycleBande,
+  Engraissement
+} from '../models';
 
-type CollectionName = 'reproducteurs' | 'saillies' | 'misesBas' | 'sevrages' | 'ventes' | 'deces' | 'bandes' | 'clapiers' | 'sessions_saillie' | 'palpations' | 'sexages';
+type CollectionName = 
+  | 'reproducteurs' 
+  | 'saillies' 
+  | 'misesBas' 
+  | 'sevrages' 
+  | 'ventes' 
+  | 'deces' 
+  | 'bandes' 
+  | 'clapiers' 
+  | 'palpations' 
+  | 'sexages'
+  | 'engraissements'
+  | 'referentiel_males'
+  | 'referentiel_bandes'
+  | 'referentiel_calendrier_saillie'
+  | 'cycles_bande';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +43,26 @@ type CollectionName = 'reproducteurs' | 'saillies' | 'misesBas' | 'sevrages' | '
 export class JsonServerDataService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = '/api';
+
+  getReferentielBandes(): Observable<ReferentielBande[]> {
+    return this.list<ReferentielBande>('referentiel_bandes');
+  }
+
+  getReferentielMales(): Observable<ReferentielMale[]> {
+    return this.list<ReferentielMale>('referentiel_males');
+  }
+
+  getReferentielCalendrierSaillie(): Observable<CalendrierSaillieItem[]> {
+    return this.list<CalendrierSaillieItem>('referentiel_calendrier_saillie');
+  }
+
+  getCyclesBande(): Observable<CycleBande[]> {
+    return this.list<CycleBande>('cycles_bande');
+  }
+
+  createCycleBande(item: CycleBande): Observable<CycleBande> {
+    return this.create<CycleBande>('cycles_bande', item);
+  }
 
   getBandes(): Observable<Bande[]> {
     return this.list<Bande>('bandes');
@@ -20,16 +72,32 @@ export class JsonServerDataService {
     return this.list<Clapier>('clapiers');
   }
 
-  getSessionsSaillie(): Observable<SessionSaillie[]> {
-    return this.list<SessionSaillie>('sessions_saillie');
-  }
-
   getPalpations(): Observable<Palpation[]> {
     return this.list<Palpation>('palpations');
   }
 
+  createPalpation(item: Palpation): Observable<Palpation> {
+    return this.create<Palpation>('palpations', item);
+  }
+
   getSexages(): Observable<Sexage[]> {
     return this.list<Sexage>('sexages');
+  }
+
+  createSexage(item: Sexage): Observable<Sexage> {
+    return this.create<Sexage>('sexages', item);
+  }
+
+  getEngraissements(): Observable<Engraissement[]> {
+    return this.list<Engraissement>('engraissements');
+  }
+
+  createEngraissement(item: Engraissement): Observable<Engraissement> {
+    return this.create<Engraissement>('engraissements', item);
+  }
+
+  patchBande(id: string, partial: Partial<Bande>): Observable<Bande> {
+    return this.http.patch<Bande>(`${this.apiUrl}/bandes/${id}`, partial);
   }
 
   getReproducteurs(): Observable<Reproducteur[]> {

@@ -6,6 +6,7 @@ import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
+import { isMale } from '@core/models';
 
 interface MaleRow {
   id: string;
@@ -18,10 +19,10 @@ interface MaleRow {
 
 @Component({
   selector: 'app-liste-males',
-    imports: [FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule],
+  imports: [FormsModule, PageHeaderComponent, MatIconModule, MatButtonModule],
   templateUrl: './liste-males.component.html',
   styleUrl: './liste-males.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListeMalesComponent {
   private calcService = inject(CalculationService);
@@ -43,7 +44,7 @@ export class ListeMalesComponent {
 
   filteredMales = computed<MaleRow[]>(() => {
     this.filterTrigger();
-    const repros = (this.reproducteurs() || []).filter(r => r.sexe === 'M');
+    const repros = (this.reproducteurs() || []).filter(isMale);
     const saillies = this.sailliesList() || [];
     const misesBas = this.misesBasList() || [];
 
@@ -55,7 +56,7 @@ export class ListeMalesComponent {
       return {
         id: m.id,
         nom: m.nom || m.id,
-        bandeId: m.bandeId || '',
+        bandeId: 'Toutes (A, B, C)',
         saillies: maleSaillies.length,
         porteesProduites,
         etat: m.etat || 'Actif'
@@ -96,8 +97,11 @@ export class ListeMalesComponent {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (etat) {
       case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Au repos': return `${base} bg-slate-100 text-slate-700`;
+      case 'Réformé':
+      case 'Réformée': return `${base} bg-amber-100 text-amber-800`;
       case 'Mort': return `${base} bg-red-100 text-red-800`;
-      default: return `${base} bg-amber-100 text-amber-800`; // Réformé
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
   }
 }

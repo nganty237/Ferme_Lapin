@@ -8,3 +8,5 @@ export * from './storage.service';
 export * from './json-server-data.service';
 export * from './toast.service';
 export * from './bande.service';
+export * from './referentiel.service';
+export * from './auth.service';

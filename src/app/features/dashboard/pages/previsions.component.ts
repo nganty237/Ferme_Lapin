@@ -8,15 +8,15 @@ interface PrevisionItem {
   id: string;
   date: Date;
   details: string;
-  cle: string; // ex: femelle ID, nombre de lapereaux
+  cle: string;
 }
 
 @Component({
   selector: 'app-previsions-dashboard',
-    imports: [PageHeaderComponent, MatIconModule],
+  imports: [PageHeaderComponent, MatIconModule],
   templateUrl: './previsions.component.html',
   styleUrl: './previsions.component.css',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrevisionsComponent {
   private calcService = inject(CalculationService);
@@ -26,14 +26,12 @@ export class PrevisionsComponent {
   sevrages = toSignal(this.calcService.sevrages$);
   config = toSignal(this.calcService.config$);
 
-  // Today marker
   private getTodayZero(): Date {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   }
 
-  // 1. Prochaines Mises-bas (🔴)
   upcomingMisesBas = computed<PrevisionItem[]>(() => {
     const list = this.calcService.saillies;
     const mbList = this.calcService.misesBas;
@@ -43,7 +41,6 @@ export class PrevisionsComponent {
     const result: PrevisionItem[] = [];
 
     for (const saillie of list) {
-      // Check if kindling already happened
       const isDone = mbList.some((m: any) => m.saillieId === saillie.id);
       if (isDone) continue;
 
@@ -66,7 +63,6 @@ export class PrevisionsComponent {
     return result.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5);
   });
 
-  // 2. Prochains Sevrages (🟡)
   upcomingSevrages = computed<PrevisionItem[]>(() => {
     const list = this.calcService.misesBas;
     const sevList = this.calcService.sevrages;
@@ -76,12 +72,11 @@ export class PrevisionsComponent {
     const result: PrevisionItem[] = [];
 
     for (const mb of list) {
-      // Check if weaning already happened
       const isDone = sevList.some((s: any) => s.miseBasId === mb.id);
       if (isDone) continue;
 
       const datePrevue = new Date(mb.dateMiseBas);
-      datePrevue.setDate(datePrevue.getDate() + (c.dureeAllaitementJours || 31));
+      datePrevue.setDate(datePrevue.getDate() + (c.dureeAllaitementMaxJours || 35));
 
       if (datePrevue >= today) {
         result.push({
@@ -96,7 +91,6 @@ export class PrevisionsComponent {
     return result.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5);
   });
 
-  // 3. Prochaines Ventes (🟢)
   upcomingVentes = computed<PrevisionItem[]>(() => {
     const list = this.calcService.sevrages;
     const c = this.calcService.config;
@@ -106,15 +100,14 @@ export class PrevisionsComponent {
 
     for (const sev of list) {
       const datePrevue = new Date(sev.dateSevrage);
-      // Weaning to sale duration
-      datePrevue.setDate(datePrevue.getDate() + (c.dureeEngraissementJours || 120));
+      datePrevue.setDate(datePrevue.getDate() + (c.dureeEngraissementJours || 60));
 
       if (datePrevue >= today) {
         result.push({
           id: sev.id,
           date: datePrevue,
           cle: `Lot : ${sev.sevres || 0} lapereaux`,
-          details: `Sevrés le ${this.formatSourceDate(sev.dateSevrage)} - Cages estimées: ${Math.ceil(sev.sevres / (c.densiteParCage || 3))}`
+          details: `Sevrés le ${this.formatSourceDate(sev.dateSevrage)} - Cages estimées: ${Math.ceil(sev.sevres / (c.densiteParCase || 3))}`
         });
       }
     }
@@ -122,7 +115,6 @@ export class PrevisionsComponent {
     return result.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5);
   });
 
-  // Format date helper: "dd MMM" (ex: "15 Août")
   formatDate(d: Date): string {
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   }

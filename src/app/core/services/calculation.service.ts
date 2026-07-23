@@ -5,19 +5,21 @@ import { DataStoreService } from './data-store.service';
 import { KpiCapacityService, CapacityKPIs } from './kpi-capacity.service';
 import { KpiReproductionService, ReproductionKPIs } from './kpi-reproduction.service';
 import { KpiFinanceService, FinanceKPIs } from './kpi-finance.service';
-import { 
-  Reproducteur, 
-  Saillie, 
-  MiseBas, 
-  Sevrage, 
-  Vente, 
-  Deces, 
-  Configuration, 
-  Bande, 
-  Clapier, 
-  SessionSaillie, 
-  Palpation, 
-  Sexage 
+import {
+  Reproducteur,
+  Saillie,
+  MiseBas,
+  Sevrage,
+  Vente,
+  Deces,
+  Configuration,
+  Bande,
+  Clapier,
+  SessionSaillie,
+  Palpation,
+  Sexage,
+  CycleBande,
+  Engraissement
 } from '../models';
 import { AppNotification } from './notification.service';
 
@@ -44,6 +46,8 @@ export class CalculationService {
   readonly ventes$: Observable<Vente[]> = this.dataStore.ventes$;
   readonly deces$: Observable<Deces[]> = this.dataStore.deces$;
   readonly bandes$: Observable<Bande[]> = this.dataStore.bandes$;
+  readonly engraissements$: Observable<Engraissement[]> = this.dataStore.engraissements$;
+  readonly cyclesBande$: Observable<CycleBande[]> = this.dataStore.cyclesBande$;
   readonly clapiers$: Observable<Clapier[]> = this.dataStore.clapiers$;
   readonly sessionsSaillie$: Observable<SessionSaillie[]> = this.dataStore.sessionsSaillie$;
   readonly palpations$: Observable<Palpation[]> = this.dataStore.palpations$;
@@ -60,10 +64,11 @@ export class CalculationService {
     this.dataStore.config$,
     this.dataStore.bandes$,
     this.dataStore.clapiers$,
-    this.dataStore.palpations$
+    this.dataStore.palpations$,
+    this.dataStore.engraissements$
   ]).pipe(
-    map(([reproducteurs, saillies, misesBas, sevrages, ventes, config, bandes, clapiers, palpations]) => {
-      const capacityKpis = this.capacityKpiService.calculateCapacityKPIs(sevrages, ventes, config, reproducteurs, clapiers);
+    map(([reproducteurs, saillies, misesBas, sevrages, ventes, config, bandes, clapiers, palpations, engraissements]) => {
+      const capacityKpis = this.capacityKpiService.calculateCapacityKPIs(sevrages, ventes, config, reproducteurs, clapiers, bandes, engraissements);
       const reproKpis = this.reproKpiService.calculateReproductionKPIs(reproducteurs, saillies, misesBas, sevrages, ventes, config, bandes, palpations);
       const financeKpis = this.financeKpiService.calculateFinanceKPIs(ventes, sevrages, misesBas, config, reproducteurs);
 
@@ -79,6 +84,7 @@ export class CalculationService {
   get saillies(): Saillie[] { return this.dataStore.saillies; }
   get misesBas(): MiseBas[] { return this.dataStore.misesBas; }
   get sevrages(): Sevrage[] { return this.dataStore.sevrages; }
+  get engraissements(): Engraissement[] { return this.dataStore.engraissements; }
   get ventes(): Vente[] { return this.dataStore.ventes; }
   get deces(): Deces[] { return this.dataStore.deces; }
   get config(): Configuration { return this.dataStore.config; }

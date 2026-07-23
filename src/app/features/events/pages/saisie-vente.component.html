@@ -1,140 +1,166 @@
 <div class="page-container">
-      <app-page-header
-        title="Saisie de Vente"
-        subtitle="Enregistrer une vente pour libérer des cages d'engraissement et calculer la rentabilité">
-      </app-page-header>
+  <app-page-header
+    title="Saisie de Vente"
+    subtitle="Enregistrer une vente pour libérer des cages d'engraissement et calculer la rentabilité">
+  </app-page-header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Formulaire de saisie -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2">
-          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">point_of_sale</mat-icon> Informations de vente
-          </p>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Formulaire de saisie -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs lg:col-span-2">
+      <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">point_of_sale</mat-icon>
+            Informations de Vente
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Saisissez la quantité de lapins vendus et le montant encaissé</p>
+        </div>
+      </div>
 
-          <form [formGroup]="venteForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 mt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Nombre de lapins vendus -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Lapins vendus</mat-label>
-                <input matInput type="number" formControlName="vendus" placeholder="Ex: 10">
-                @if (venteForm.get('vendus')?.hasError('required')) {
-                  <mat-error>Le nombre de lapins vendus est obligatoire.</mat-error>
-                }
-                @if (venteForm.get('vendus')?.hasError('min')) {
-                  <mat-error>Le nombre de lapins vendus doit être supérieur à 0.</mat-error>
-                }
-              </mat-form-field>
+      <form [formGroup]="venteForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nombre de lapins vendus -->
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Lapins vendus <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="number" 
+              formControlName="vendus" 
+              placeholder="Ex: 10" 
+              class="form-input w-full font-bold text-slate-800 text-sm">
+          </div>
 
-              <!-- Date de vente -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Date de vente</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="date" placeholder="JJ/MM/AAAA">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                @if (venteForm.get('date')?.hasError('required')) {
-                  <mat-error>La date est obligatoire.</mat-error>
-                }
-                @if (venteForm.get('date')?.hasError('futureDate')) {
-                  <mat-error>La date ne peut pas être dans le futur.</mat-error>
-                }
-              </mat-form-field>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Prix de vente unitaire -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Prix unitaire (FCFA / lapin)</mat-label>
-                <input matInput type="number" formControlName="prixUnitaire" placeholder="Ex: 3000">
-                @if (venteForm.get('prixUnitaire')?.hasError('required')) {
-                  <mat-error>Le prix unitaire est obligatoire.</mat-error>
-                }
-                @if (venteForm.get('prixUnitaire')?.hasError('min')) {
-                  <mat-error>Le prix unitaire doit être positif.</mat-error>
-                }
-              </mat-form-field>
-
-              <!-- Client -->
-              <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-                <mat-label>Client</mat-label>
-                <mat-select formControlName="client" placeholder="Sélectionner le client">
-                  <mat-option value="Centragel">Centragel</mat-option>
-                  <mat-option value="Marché Local">Marché Local</mat-option>
-                  <mat-option value="Autre">Autre</mat-option>
-                </mat-select>
-                @if (venteForm.get('client')?.hasError('required')) {
-                  <mat-error>Le client est obligatoire.</mat-error>
-                }
-              </mat-form-field>
-            </div>
-
-            <!-- Observations -->
-            <mat-form-field appearance="outline" floatLabel="always" class="w-full">
-              <mat-label>Observations (Optionnel)</mat-label>
-              <textarea matInput formControlName="observations" rows="3" placeholder="Notes de vente..."></textarea>
-            </mat-form-field>
-
-            <!-- Boutons actions -->
-            <div class="flex justify-end gap-3 mt-2">
-              <button mat-stroked-button type="button" (click)="onReset()" style="border-radius: 8px; height: 42px;">
-                Annuler
-              </button>
-              <button mat-flat-button color="primary" type="submit" [disabled]="venteForm.invalid" style="border-radius: 8px; height: 42px; padding: 0 24px;">
-                <mat-icon style="font-size:18px;width:18px;height:18px;margin-right:4px;">check</mat-icon>
-                Enregistrer la Vente
-              </button>
-            </div>
-          </form>
+          <!-- Date de vente -->
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Date de vente <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="date"
+              class="form-input w-full"
+              formControlName="date" />
+          </div>
         </div>
 
-        <!-- Section de calcul et prévisions -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6">
-          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">calculate</mat-icon>
-            Calculs de rentabilité & Cages
-          </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Prix unitaire -->
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Prix unitaire (FCFA / lapin) <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="number" 
+              formControlName="prixUnitaire" 
+              placeholder="Ex: 3000" 
+              class="form-input w-full font-bold text-emerald-700 text-sm">
+          </div>
 
-          <div class="mt-4 flex flex-col gap-4">
-            <!-- Revenu total calculé -->
-            <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                <mat-icon>attach_money</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">Revenu Total</span>
-                <span class="text-sm font-bold text-slate-800">{{ totalRevenu() | number:'1.0-0' }} FCFA</span>
-              </div>
+          <!-- Client -->
+          <div>
+            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+              Client / Destination <span class="text-rose-500">*</span>
+            </label>
+            <select class="form-select w-full" formControlName="client">
+              @for (c of clients; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Observations -->
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Observations (Optionnel)
+          </label>
+          <input 
+            type="text" 
+            formControlName="observations"
+            placeholder="Notes de vente..." 
+            class="form-input w-full text-xs">
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
+          <button 
+            type="button" 
+            (click)="onReset()"
+            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer">
+            <mat-icon class="text-[16px] w-[16px] h-[16px]">refresh</mat-icon>
+            Réinitialiser
+          </button>
+
+          <button 
+            type="submit" 
+            [disabled]="venteForm.invalid" 
+            class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">check_circle</mat-icon>
+            Enregistrer la Vente
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section de calcul & rentabilité (Colonne Droite) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+            <mat-icon class="text-[18px]">calculate</mat-icon>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">Calculs de Rentabilité & Cages</h4>
+            <p class="text-[11px] text-slate-500">Estimations en temps réel</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- Revenu Total -->
+          <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-100/70 text-emerald-800 flex items-center justify-center font-bold">
+              <mat-icon class="text-[20px]">payments</mat-icon>
             </div>
-
-            <!-- Cages libérées -->
-            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                <mat-icon>lock_open</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-emerald-700 font-bold block">Cages libérées</span>
-                <span class="text-sm font-bold text-slate-800">{{ cagesLiberees() }} cages</span>
-              </div>
-            </div>
-
-            <!-- Marge brute estimée -->
-            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                <mat-icon>trending_up</mat-icon>
-              </div>
-              <div>
-                <span class="text-[11px] uppercase tracking-wider text-emerald-700 font-bold block">Marge brute estimée</span>
-                <span class="text-sm font-bold text-emerald-800">{{ margeEstimee() | number:'1.0-0' }} FCFA</span>
-              </div>
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Revenu Total</span>
+              <span class="text-base font-bold text-slate-900">{{ totalRevenu() | number:'1.0-0' }} FCFA</span>
             </div>
           </div>
 
-          <div class="mt-6 p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500 leading-normal">
-            <h5 class="font-bold text-slate-700 mb-1">Détails :</h5>
-            <ul class="list-disc pl-4 flex flex-col gap-1">
-              <li><strong>Cages libérées</strong> : Lapins vendus divisés par la densité cible (3), libérés immédiatement.</li>
-              <li><strong>Marge brute</strong> : Revenu total moins coût de production estimé ({{ coutProductionParLapin() | number:'1.0-0' }} FCFA par lapin).</li>
-            </ul>
+          <!-- Cages libérées -->
+          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/60 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+              <mat-icon class="text-[20px]">door_open</mat-icon>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-emerald-700 font-bold block">Cages libérées</span>
+              <span class="text-base font-bold text-emerald-900">{{ cagesLiberees() }} cages</span>
+            </div>
+          </div>
+
+          <!-- Marge brute estimée -->
+          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/60 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+              <mat-icon class="text-[20px]">trending_up</mat-icon>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-emerald-700 font-bold block">Marge brute estimée</span>
+              <span class="text-base font-bold text-emerald-900">{{ margeEstimee() | number:'1.0-0' }} FCFA</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="mt-5 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-500 leading-relaxed">
+        <h5 class="font-bold text-slate-700 mb-1 flex items-center gap-1">
+          <mat-icon class="text-[14px] text-slate-400">info</mat-icon>
+          Détails des règles :
+        </h5>
+        <ul class="list-disc pl-4 flex flex-col gap-1 text-[11px]">
+          <li><strong>Cages libérées</strong> : Lapins vendus divisés par la densité (3 lapins/cage).</li>
+          <li><strong>Marge brute</strong> : Revenu moins le coût de production estimé ({{ coutProductionParLapin() | number:'1.0-0' }} FCFA/lapin).</li>
+        </ul>
+      </div>
     </div>
+  </div>
+</div>
