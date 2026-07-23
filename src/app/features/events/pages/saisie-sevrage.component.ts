@@ -46,6 +46,7 @@ export class SaisieSevrageComponent {
 
   sevrageForm: FormGroup;
   bandeSelectionnee = signal<string | null>(null);
+  selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
   isSubmitting = signal(false);
 
   misesBasBande = computed(() => {

@@ -29,7 +29,7 @@ export class ConfigComponent implements OnInit {
   configForm!: FormGroup;
 
   ngOnInit(): void {
-    const config = this.storageService.getConfiguration();
+    const config = this.calcService.config || this.storageService.getConfiguration();
     this.configForm = this.fb.group({
       nombreCagesTotal: [config.nombreCagesTotal || 108, [Validators.required, Validators.min(1)]],
       nombreFemelles: [config.nombreFemelles || 33, [Validators.required, Validators.min(0)]],
@@ -42,20 +42,20 @@ export class ConfigComponent implements OnInit {
   saveConfig(): void {
     if (this.configForm.valid) {
       const formValues = this.configForm.value;
-      const currentConfig = this.storageService.getConfiguration();
+      const currentConfig = this.calcService.config || this.storageService.getConfiguration();
       const updatedConfig = {
         ...currentConfig,
         ...formValues
       };
       this.calcService.updateConfiguration(updatedConfig);
-      this.notifier.success('Configuration enregistrée.');
+      this.notifier.success('Configuration enregistrée avec succès.');
     } else {
       this.notifier.error('Veuillez corriger les erreurs du formulaire.');
     }
   }
 
   resetForm(): void {
-    const config = this.storageService.getConfiguration();
+    const config = this.calcService.config || this.storageService.getConfiguration();
     this.configForm.reset({
       nombreCagesTotal: config.nombreCagesTotal || 108,
       nombreFemelles: config.nombreFemelles || 33,
