@@ -25,33 +25,56 @@
 
   @if (kpis()) {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- Graphique Barre Horizontale -->
       <div class="bg-white border border-slate-200 rounded-xl p-6 lg:col-span-2 flex flex-col justify-between">
-        <div>
-          <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">grid_view</mat-icon>
-            Occupation Cages Engraissement
-          </p>
-          <div class="my-6">
+        <div class="flex flex-col gap-6">
+          <!-- Widget Engraissement -->
+          <div>
+            <p class="text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">grid_view</mat-icon>
+              Occupation Cages Engraissement
+            </p>
             <div class="flex justify-between items-end mb-2">
               <span class="text-2xl font-bold text-slate-800">
-                {{ kpis()!.occupationCages.occupees }} <span class="text-sm font-normal text-slate-500">/ {{ kpis()!.occupationCages.totales }} cases</span>
+                {{ cagesEngraissement().occupees }} <span class="text-sm font-normal text-slate-500">/ {{ cagesEngraissement().totales }} cases</span>
               </span>
-              <span class="text-lg font-bold" [class]="getProgressTextColor(kpis()!.occupationCages.pourcentage)">
-                {{ kpis()!.occupationCages.pourcentage }}%
+              <span class="text-lg font-bold" [class]="getProgressTextColor(cagesEngraissement().pourcentage)">
+                {{ cagesEngraissement().pourcentage }}%
               </span>
             </div>
             
             <div class="w-full h-8 bg-slate-100 rounded-full overflow-hidden border border-slate-200 relative">
               <div class="h-full rounded-full transition-all duration-500 ease-out"
-                   [style.width.%]="kpis()!.occupationCages.pourcentage"
-                   [class]="getProgressBarClass(kpis()!.occupationCages.pourcentage)">
+                   [style.width.%]="cagesEngraissement().pourcentage"
+                   [class]="getProgressBarClass(cagesEngraissement().pourcentage)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Widget Sexage -->
+          <div>
+            <p class="text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
+              <mat-icon class="text-emerald-700">insights</mat-icon>
+              Occupation Cages Sexage
+            </p>
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-2xl font-bold text-slate-800">
+                {{ cagesSexage().occupees }} <span class="text-sm font-normal text-slate-500">/ {{ cagesSexage().totales }} cases</span>
+              </span>
+              <span class="text-lg font-bold" [class]="getProgressTextColor(cagesSexage().pourcentage)">
+                {{ cagesSexage().pourcentage }}%
+              </span>
+            </div>
+            
+            <div class="w-full h-8 bg-slate-100 rounded-full overflow-hidden border border-slate-200 relative">
+              <div class="h-full rounded-full transition-all duration-500 ease-out"
+                   [style.width.%]="cagesSexage().pourcentage"
+                   [class]="getProgressBarClass(cagesSexage().pourcentage)">
               </div>
             </div>
           </div>
         </div>
         
-        <div class="flex flex-wrap gap-x-4 gap-y-2 border-t pt-4 border-slate-100 text-xs text-slate-500">
+        <div class="flex flex-wrap gap-x-4 gap-y-2 border-t pt-4 mt-4 border-slate-100 text-xs text-slate-500">
           <div class="flex items-center gap-1.5">
             <div class="w-3.5 h-1.5 rounded bg-emerald-500"></div>
             <span>Normal (&lt; 80%)</span>
@@ -85,7 +108,7 @@
             </div>
             <div class="flex justify-between items-center py-2">
               <span class="text-slate-500 text-sm">Capacité maximale</span>
-              <span class="font-bold text-slate-800">{{ (config()?.nombreCagesTotal || 108) * (config()?.densiteParCase || 3) }} lapins</span>
+              <span class="font-bold text-slate-800">{{ kpis()?.capaciteTheorique || 252 }} lapins</span>
             </div>
           </div>
         </div>

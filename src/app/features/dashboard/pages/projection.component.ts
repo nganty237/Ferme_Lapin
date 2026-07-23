@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService } from '@core/services';
-import { Configuration } from '@core/models';
+import { Configuration, MiseBas, Sevrage } from '@core/models';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,13 +32,21 @@ export class ProjectionComponent {
   config = toSignal(this.calcService.config$);
   bandes = toSignal(this.calcService.bandes$);
   cyclesBande = toSignal(this.calcService.cyclesBande$);
+  clapiers = toSignal(this.calcService.clapiers$);
+  misesBas = toSignal(this.calcService.misesBas$);
+  sevrages = toSignal(this.calcService.sevrages$);
 
   projections = computed<ProjectionWeek[]>(() => {
     const list: ProjectionWeek[] = [];
     const configVal = this.config();
     if (!configVal) return [];
 
-    const totalEngraissement = configVal.nombreCagesTotal - configVal.nombreFemelles;
+    // Fix P0-4 : capacité d'engraissement dérivée des clapiers physiques type Engraissement
+    // (5 clapiers × 12 cases = 60), pas du nombreCagesTotal - femelles (=75) qui surestime.
+    const clapiers = this.clapiers() || [];
+    const totalEngraissement = clapiers
+      .filter(c => c.type === 'Engraissement')
+      .reduce((sum, c) => sum + (c.nombreCases || 0), 0) || (configVal.nombreCagesTotal - configVal.nombreFemelles);
     const density = configVal.densiteParCase || 3;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -64,12 +72,11 @@ export class ProjectionComponent {
       // Cages d'engraissement : approach dérivé du nombre de lapereaux sevrs cumulés
       // et non-divisés par bandes encore vendues. Borné à la capacité totale.
       let cagesOccupees = 0;
-      if (phaseA === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal);
-      if (phaseB === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal);
-      if (phaseC === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal);
-
-      if (cagesOccupees === 0) cagesOccupees = 15;
-      else cagesOccupees += 15;
+      const mb = this.misesBas() || [];
+      const sev = this.sevrages() || [];
+      if (phaseA === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal, mb, sev);
+      if (phaseB === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal, mb, sev);
+      if (phaseC === 'Engraissement') cagesOccupees += this.cagesEngraissementBande(configVal, mb, sev);
 
       cagesOccupees = Math.min(cagesOccupees, totalEngraissement);
 
@@ -128,7 +135,7 @@ export class ProjectionComponent {
     target.setDate(target.getDate() + week * 7);
     const days = Math.max(0, Math.round((target.getTime() - start.getTime()) / 86400000));
     const gest = configVal.dureeGestationJours;
-    const all = configVal.dureeAllaitementMinJours;
+    const all = configVal.dureeAllaitementMaxJours || 35;
     const sex = configVal.dureeSexageJours;
     const eng = configVal.dureeEngraissementJours;
     if (days < gest) return 'Saillie';
@@ -141,12 +148,28 @@ export class ProjectionComponent {
   /**
    * Cages d'engraissement estimées pour une bande en engraissement,
    * basées sur la taille de portée moyenne et la densité par case.
+   * Fix P0-6 : le taux de survie au sevrage (0.8 codé dur) est remplacé par
+   * le taux réel observé (Σ sevrages.sevres / Σ misesBas.vivants sur portées sevrées),
+   * avec fallback 0.8 si aucune donnée n'est encore disponible.
    */
-  private cagesEngraissementBande(configVal: Configuration): number {
-    const femellesParBande = configVal.nombreFemEllesParBande || 11;
+  private cagesEngraissementBande(
+    configVal: Configuration,
+    misesBas: MiseBas[],
+    sevrages: Sevrage[]
+  ): number {
+    const femellesParBande = configVal.nombreFemellesParBande || 11;
     const portee = configVal.taillePorteeMoyenne || 6;
     const densite = configVal.densiteParCase || 3;
-    const sevrés = Math.round(femellesParBande * portee * 0.8);
+    const sevragesValides = sevrages.filter(s => s.sevres != null && s.miseBasId);
+    const totalSevres = sevragesValides.reduce((sum, s) => sum + (s.sevres || 0), 0);
+    const mbIds = new Set(sevragesValides.map(s => s.miseBasId));
+    const totalVivantsPourSevrage = misesBas
+      .filter(mb => mbIds.has(mb.id))
+      .reduce((sum, mb) => sum + (mb.vivants || 0), 0);
+    const tauxSurvie = totalVivantsPourSevrage > 0
+      ? Math.min(1, totalSevres / totalVivantsPourSevrage)
+      : 0.8;
+    const sevrés = Math.round(femellesParBande * portee * tauxSurvie);
     return Math.ceil(sevrés / densite);
   }
 

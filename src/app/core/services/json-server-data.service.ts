@@ -74,8 +74,20 @@ export class JsonServerDataService {
     return this.list<Palpation>('palpations');
   }
 
+  createPalpation(item: Palpation): Observable<Palpation> {
+    return this.create<Palpation>('palpations', item);
+  }
+
   getSexages(): Observable<Sexage[]> {
     return this.list<Sexage>('sexages');
+  }
+
+  createSexage(item: Sexage): Observable<Sexage> {
+    return this.create<Sexage>('sexages', item);
+  }
+
+  patchBande(id: string, partial: Partial<Bande>): Observable<Bande> {
+    return this.http.patch<Bande>(`${this.apiUrl}/bandes/${id}`, partial);
   }
 
   getReproducteurs(): Observable<Reproducteur[]> {

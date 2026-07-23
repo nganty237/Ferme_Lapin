@@ -65,7 +65,7 @@ export class CalculationService {
     this.dataStore.palpations$
   ]).pipe(
     map(([reproducteurs, saillies, misesBas, sevrages, ventes, config, bandes, clapiers, palpations]) => {
-      const capacityKpis = this.capacityKpiService.calculateCapacityKPIs(sevrages, ventes, config, reproducteurs, clapiers);
+      const capacityKpis = this.capacityKpiService.calculateCapacityKPIs(sevrages, ventes, config, reproducteurs, clapiers, bandes);
       const reproKpis = this.reproKpiService.calculateReproductionKPIs(reproducteurs, saillies, misesBas, sevrages, ventes, config, bandes, palpations);
       const financeKpis = this.financeKpiService.calculateFinanceKPIs(ventes, sevrages, misesBas, config, reproducteurs);
 

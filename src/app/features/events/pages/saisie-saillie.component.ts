@@ -76,7 +76,7 @@ export class SaisieSaillieComponent {
     const cfg = this.config();
     const palp = cfg?.jourPalpation ?? 15;
     const gest = cfg?.dureeGestationJours ?? 31;
-    const all = cfg?.dureeAllaitementMinJours ?? 30;
+    const all = cfg?.dureeAllaitementMaxJours ?? 35;
 
     const datePalpation = new Date(dateSaillie);
     datePalpation.setDate(datePalpation.getDate() + palp);

@@ -109,7 +109,7 @@ export class BandeService {
     misesBas.forEach(mb => {
       mb.bandeId = bandeId;
       const dateSevrage = new Date(mb.dateMiseBas);
-      dateSevrage.setDate(dateSevrage.getDate() + 30);
+      dateSevrage.setDate(dateSevrage.getDate() + 35);
       mb.dateSevragePrevue = dateSevrage.toISOString();
       this.dataStore.addMiseBas(mb);
 

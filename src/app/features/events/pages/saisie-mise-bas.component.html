@@ -51,99 +51,112 @@
 
     <!-- Content Section -->
     <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
-      @if (sessionsGestation().length > 0) {
-        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
-          <div>
-            <h3 class="font-bold text-slate-800 text-base">Liste des mises-bas (Lapines gestantes)</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Saisissez les résultats de mise-bas pour chaque lapine gestante de la bande (effectif fixe : 11 lapines par bande)</p>
+      @if ($any(selectedBande()?.phase) === 'Gestation' || selectedBande()?.phase === 'Saillie') {
+        @if (sessionsGestation().length > 0) {
+          <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">Liste des mises-bas (Lapines gestantes)</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Saisissez les résultats de mise-bas pour chaque lapine gestante de la bande (effectif fixe : 11 lapines par bande)</p>
+            </div>
           </div>
-        </div>
 
-        <!-- Table View -->
-        <div class="overflow-x-auto">
-          <table class="w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tl-lg">
-                  Lapine
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">
-                  Date Saillie
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
-                  Vivants
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
-                  Morts-Nés
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
-                  Total Nés
-                </th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tr-lg">
-                  Observations
-                </th>
-              </tr>
-            </thead>
-            <tbody formArrayName="portees">
-              @for (ctrl of porteesArray.controls; track $index) {
-                <tr [formGroupName]="$index" class="hover:bg-slate-50/50 transition-colors">
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">
-                    ♀ {{ ctrl.get('femelleId')?.value }}
-                  </td>
-                  <td class="px-4 py-3 text-slate-600 border-b border-slate-100 align-middle text-xs">
-                    {{ ctrl.get('dateSaillie')?.value | date:'dd/MM/yyyy' }}
-                  </td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
-                    <input 
-                      type="number"
-                      min="0"
-                      max="20"
-                      class="form-input text-center font-bold text-emerald-800 bg-emerald-50/30 border-emerald-200 w-20 py-1"
-                      formControlName="vivants" />
-                  </td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
-                    <input 
-                      type="number"
-                      min="0"
-                      max="20"
-                      class="form-input text-center text-rose-700 bg-rose-50/30 border-rose-200 w-20 py-1"
-                      formControlName="mortsNes" />
-                  </td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-bold text-slate-800">
-                    {{ (ctrl.get('vivants')?.value || 0) + (ctrl.get('mortsNes')?.value || 0) }}
-                  </td>
-                  <td class="px-4 py-3 border-b border-slate-100 align-middle">
-                    <input 
-                      type="text"
-                      placeholder="Notes..."
-                      class="form-input w-full text-xs py-1"
-                      formControlName="observations" />
-                  </td>
+          <!-- Table View -->
+          <div class="overflow-x-auto">
+            <table class="w-full border-separate border-spacing-0 text-sm">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tl-lg">
+                    Lapine
+                  </th>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">
+                    Date Saillie
+                  </th>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                    Vivants
+                  </th>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                    Morts-Nés
+                  </th>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">
+                    Total Nés
+                  </th>
+                  <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left rounded-tr-lg">
+                    Observations
+                  </th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody formArrayName="portees">
+                @for (ctrl of porteesArray.controls; track $index) {
+                  <tr [formGroupName]="$index" class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle font-mono font-semibold text-slate-700">
+                      ♀ {{ ctrl.get('femelleId')?.value }}
+                    </td>
+                    <td class="px-4 py-3 text-slate-600 border-b border-slate-100 align-middle text-xs">
+                      {{ ctrl.get('dateSaillie')?.value | date:'dd/MM/yyyy' }}
+                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="20"
+                        class="form-input text-center font-bold text-emerald-800 bg-emerald-50/30 border-emerald-200 w-20 py-1"
+                        formControlName="vivants" />
+                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-center">
+                      <input 
+                        type="number"
+                        min="0"
+                        max="20"
+                        class="form-input text-center text-rose-700 bg-rose-50/30 border-rose-200 w-20 py-1"
+                        formControlName="mortsNes" />
+                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-center font-bold text-slate-800">
+                      {{ (ctrl.get('vivants')?.value || 0) + (ctrl.get('mortsNes')?.value || 0) }}
+                    </td>
+                    <td class="px-4 py-3 border-b border-slate-100 align-middle">
+                      <input 
+                        type="text"
+                        placeholder="Notes..."
+                        class="form-input w-full text-xs py-1"
+                        formControlName="observations" />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
 
-        <div class="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-100">
-          <p class="text-xs text-slate-500">
-            En enregistrant, la bande passera automatiquement en phase <strong class="text-slate-700">Allaitement</strong>.
-          </p>
+          <div class="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-100">
+            <p class="text-xs text-slate-500">
+              En enregistrant, la bande passera automatiquement en phase <strong class="text-slate-700">Allaitement</strong>.
+            </p>
 
-          <button 
-            type="submit" 
-            [disabled]="miseBasForm.invalid || isSubmitting()" 
-            class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
-            <mat-icon class="text-[18px] w-[18px] h-[18px]">check_circle</mat-icon>
-            {{ isSubmitting() ? 'Enregistrement...' : 'Valider la mise-bas de la bande' }}
-          </button>
-        </div>
+            <button 
+              type="submit" 
+              [disabled]="miseBasForm.invalid || isSubmitting()" 
+              class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+              <mat-icon class="text-[18px] w-[18px] h-[18px]">check_circle</mat-icon>
+              {{ isSubmitting() ? 'Enregistrement...' : 'Valider la mise-bas de la bande' }}
+            </button>
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
+            <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">child_friendly</mat-icon>
+            <h4 class="font-bold text-slate-700 text-base mb-1">Aucune femelle gestante trouvée</h4>
+            <p class="text-xs text-slate-500 max-w-md">
+              Bien que cette bande soit marquée en phase de Gestation, aucune saillie active n'a été détectée. Veuillez d'abord enregistrer une session de saillie.
+            </p>
+          </div>
+        }
       } @else {
         <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
-          <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">child_friendly</mat-icon>
-          <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie enregistrée en attente de mise-bas</h4>
+          <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">block</mat-icon>
+          <h4 class="font-bold text-slate-700 text-base mb-1">
+            La {{ selectedBande()?.nom || 'bande sélectionnée' }} n'est pas en phase de gestation
+          </h4>
           <p class="text-xs text-slate-500 max-w-md">
-            Pour cette bande, aucune saillie en cours n'a été détectée. Veuillez d'abord enregistrer une session de saillie dans l'Assistant de Saillie.
+            La phase actuelle de cette bande est : <strong class="text-slate-700">{{ selectedBande()?.phase || 'Repos' }}</strong>.<br>
+            Pour pouvoir enregistrer des mises-bas, la bande doit d'abord être en phase de Gestation.
           </p>
         </div>
       }

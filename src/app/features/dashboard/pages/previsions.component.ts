@@ -76,7 +76,7 @@ export class PrevisionsComponent {
       if (isDone) continue;
 
       const datePrevue = new Date(mb.dateMiseBas);
-      datePrevue.setDate(datePrevue.getDate() + (c.dureeAllaitementMinJours || 30));
+      datePrevue.setDate(datePrevue.getDate() + (c.dureeAllaitementMaxJours || 35));
 
       if (datePrevue >= today) {
         result.push({

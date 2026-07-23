@@ -4,6 +4,8 @@ import { CalculationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 
+import { Configuration, Bande } from '@core/models';
+
 interface SevrageEnCours {
   porteeId: string;
   femelleId: string;
@@ -24,6 +26,61 @@ export class OccupationCagesComponent {
 
   kpis = toSignal(this.calcService.kpis$);
   config = toSignal(this.calcService.config$);
+  bandes = toSignal(this.calcService.bandes$);
+
+  cagesSexage = computed(() => {
+    const configVal = this.config();
+    const bandesVal = this.bandes() || [];
+    const sevragesVal = this.calcService.sevrages || [];
+    const densite = configVal?.densiteParCase || 3;
+
+    const bandsInSexage = bandesVal.filter(b => b.phase === 'Sexage').map(b => b.id);
+    if (bandsInSexage.length === 0) return { occupees: 0, totales: 72, pourcentage: 0 };
+
+    const totalLapinsSexage = sevragesVal
+      .filter(s => bandsInSexage.includes(s.bandeId))
+      .reduce((sum, s) => sum + (s.sevres || 0), 0);
+
+    const lapins = totalLapinsSexage || (bandsInSexage.length * 66);
+    const occupees = Math.ceil(lapins / densite);
+    const totales = configVal ? configVal.nombreCagesTotal - configVal.nombreFemelles - configVal.nombreMales : 72;
+    const pourcentage = Math.min(100, Math.round((occupees / totales) * 100));
+
+    return { occupees, totales, pourcentage };
+  });
+
+  cagesEngraissement = computed(() => {
+    const configVal = this.config();
+    const kpisVal = this.kpis();
+    const bandesVal = this.bandes() || [];
+    const sevragesVal = this.calcService.sevrages || [];
+    const ventesVal = this.calcService.ventes || [];
+    const densite = configVal?.densiteParCase || 3;
+
+    const bandsInEngraissement = bandesVal.filter(b => b.phase === 'Engraissement').map(b => b.id);
+    
+    if (bandsInEngraissement.length === 0) {
+      return { 
+        occupees: kpisVal?.occupationCages.occupees || 0, 
+        totales: kpisVal?.occupationCages.totales || 72, 
+        pourcentage: kpisVal?.occupationCages.pourcentage || 0 
+      };
+    }
+
+    const totalLapinsEngraissement = sevragesVal
+      .filter(s => bandsInEngraissement.includes(s.bandeId))
+      .reduce((sum, s) => {
+        const sold = ventesVal.filter(v => v.bandeId === s.bandeId).reduce((vSum, v) => vSum + (v.vendus || 0), 0);
+        return sum + Math.max(0, (s.sevres || 0) - sold);
+      }, 0);
+
+    const lapins = totalLapinsEngraissement || (bandsInEngraissement.length * 66);
+    const occupees = Math.ceil(lapins / densite);
+    const totales = configVal ? configVal.nombreCagesTotal - configVal.nombreFemelles - configVal.nombreMales : 72;
+    const pourcentage = Math.min(100, Math.round((occupees / totales) * 100));
+
+    return { occupees, totales, pourcentage };
+  });
 
   // Computes active weaning batches under fattening
   sevragesEnCours = computed<SevrageEnCours[]>(() => {

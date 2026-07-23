@@ -87,14 +87,23 @@ export class KpiReproductionService {
   ): ReproductionKPIs {
     const femellesActives = reproducteurs.filter(r => r.sexe === 'F' && r.etat !== 'Réformée' && r.etat !== 'Morte');
     const nbFemelles = Math.max(1, femellesActives.length);
-
     const totalNesVivants = misesBas.reduce((sum: number, mb: MiseBas) => sum + (mb.vivants || 0), 0);
     const totalMortNes = misesBas.reduce((sum: number, mb: MiseBas) => sum + (mb.mortsNes || 0), 0);
     const totalNaissances = totalNesVivants + totalMortNes;
 
+    let totalSevres = 0;
+    let totalNesSevrage = 0;
+    for (const sev of sevrages) {
+      const mb = misesBas.find((m: MiseBas) => m.id === sev.miseBasId);
+      if (mb && mb.vivants > 0) {
+        totalNesSevrage += mb.vivants;
+        totalSevres += sev.sevres || 0;
+      }
+    }
+
     const tailleMoyennePortee = misesBas.length > 0 ? Math.round((totalNesVivants / misesBas.length) * 10) / 10 : 0;
     const porteesParFemelleAn = Math.round((misesBas.length / nbFemelles) * 10) / 10;
-    const productiviteParFemelleAn = Math.round((totalNesVivants / nbFemelles) * 10) / 10;
+    const productiviteParFemelleAn = Math.round((totalSevres / nbFemelles) * 10) / 10;
 
     // Taux de fécondité
     let tauxFecondite = 0;
@@ -106,19 +115,7 @@ export class KpiReproductionService {
 
     // Viabilité et Survie
     const viabiliteImmediate = totalNaissances > 0 ? Math.round((totalNesVivants / totalNaissances) * 100) : 0;
-
-    let totalSevres = 0;
-    let totalNesSevrage = 0;
-    for (const sev of sevrages) {
-      const mb = misesBas.find((m: MiseBas) => m.id === sev.miseBasId);
-      if (mb && mb.vivants > 0) {
-        totalNesSevrage += mb.vivants;
-        totalSevres += sev.sevres || 0;
-      }
-    }
     const tauxSurvieAllaitement = totalNesSevrage > 0 ? Math.round((totalSevres / totalNesSevrage) * 100) : 0;
-    // Fix P0 #3 : constante nommée et documentée (fallback) tant qu'aucun flux Engraissement n'est exposé.
-    // À remplacer par Σ(effectifFinal) / Σ(mortalite + effectifFinal) quand la collection `engraissements` sera flowifiée (P1 hors périmètre).
     const tauxSurvieEngraissement = TAUX_SURVIE_ENGRAIS_FALLBACK;
 
     // Productivité par mâle
@@ -207,13 +204,18 @@ export class KpiReproductionService {
   private calcAlertesMiseBas(saillies: Saillie[], misesBas: MiseBas[], dureeGestation: number): AlerteMiseBas[] {
     const alertes: AlerteMiseBas[] = [];
     const today = new Date();
+    const todayMidnight = new Date(today);
+    todayMidnight.setHours(0, 0, 0, 0);
+
     saillies.forEach(s => {
       if (s.reussie !== false) {
         const hasMiseBas = misesBas.find(mb => mb.saillieId === s.id);
         if (!hasMiseBas) {
           const expectedMB = new Date(s.dateSaillie);
           expectedMB.setDate(expectedMB.getDate() + dureeGestation);
-          const diffDays = Math.floor((expectedMB.getTime() - today.getTime()) / (1000 * 3600 * 24));
+          expectedMB.setHours(0, 0, 0, 0);
+          
+          const diffDays = Math.round((expectedMB.getTime() - todayMidnight.getTime()) / (1000 * 3600 * 24));
           if (diffDays <= 7 && diffDays >= -3) {
             alertes.push({
               femelleId: s.femelleId,

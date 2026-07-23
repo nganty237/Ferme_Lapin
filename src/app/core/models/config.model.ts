@@ -5,7 +5,7 @@ export interface Configuration {
   nombreFemelles: number;
   nombreMales: number;
   nombreBandes: number;
-  nombreFemEllesParBande: number;
+  nombreFemellesParBande: number;
   dureeGestationJours: number;
   jourPalpation: number;
   dureeAllaitementMinJours: number;

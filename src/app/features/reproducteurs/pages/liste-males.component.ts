@@ -97,8 +97,11 @@ export class ListeMalesComponent {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';
     switch (etat) {
       case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
+      case 'Au repos': return `${base} bg-slate-100 text-slate-700`;
+      case 'Réformé':
+      case 'Réformée': return `${base} bg-amber-100 text-amber-800`;
       case 'Mort': return `${base} bg-red-100 text-red-800`;
-      default: return `${base} bg-amber-100 text-amber-800`;
+      default: return `${base} bg-slate-100 text-slate-700`;
     }
   }
 }

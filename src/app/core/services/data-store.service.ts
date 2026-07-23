@@ -56,10 +56,10 @@ export class DataStoreService {
     nombreFemelles: 33,
     nombreMales: 3,
     nombreBandes: 3,
-    nombreFemEllesParBande: 11,
+    nombreFemellesParBande: 11,
     dureeGestationJours: 31,
     jourPalpation: 15,
-    dureeAllaitementMinJours: 30,
+    dureeAllaitementMinJours: 35,
     dureeAllaitementMaxJours: 35,
     dureeSexageJours: 30,
     dureeEngraissementJours: 60,
@@ -124,6 +124,24 @@ export class DataStoreService {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((data) => {
       if (!data) return;
+
+      this.storageService.importData({
+        REPRODUCTEURS: data.reproducteurs,
+        SAILLIES: data.saillies,
+        MISES_BAS: data.misesBas,
+        SEVRAGES: data.sevrages,
+        VENTES: data.ventes,
+        DECES: data.deces,
+        CONFIGURATION: data.config,
+        BANDES: data.bandes,
+        CLAPIERS: data.clapiers,
+        PALPATIONS: data.palpations,
+        SEXAGES: data.sexages,
+        CYCLES_BANDE: data.cyclesBande,
+        REFERENTIEL_BANDES: data.refBandes,
+        REFERENTIEL_MALES: data.refMales,
+        REFERENTIEL_CALENDRIER: data.refCalendrier
+      });
 
       this._reproducteurs$.next(data.reproducteurs || []);
       this._saillies$.next(data.saillies || []);
@@ -196,59 +214,114 @@ export class DataStoreService {
   addSaillie(saillie: Saillie): void {
     const created = this.storageService.addSaillie(saillie);
     this._saillies$.next([...this._saillies$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createSaillie(created).subscribe({
+        error: (err) => this.logApiError('addSaillie', err)
+      });
+    }
   }
 
   addMiseBas(miseBas: MiseBas): void {
     const created = this.storageService.addMiseBas(miseBas);
     this._misesBas$.next([...this._misesBas$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createMiseBas(created).subscribe({
+        error: (err) => this.logApiError('addMiseBas', err)
+      });
+    }
   }
 
   addSevrage(sevrage: Sevrage): void {
     const created = this.storageService.addSevrage(sevrage);
     this._sevrages$.next([...this._sevrages$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createSevrage(created).subscribe({
+        error: (err) => this.logApiError('addSevrage', err)
+      });
+    }
   }
 
   addVente(vente: Vente): void {
     const created = this.storageService.addVente(vente);
     this._ventes$.next([...this._ventes$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createVente(created).subscribe({
+        error: (err) => this.logApiError('addVente', err)
+      });
+    }
   }
 
   addDeces(deces: Deces): void {
     const created = this.storageService.addDeces(deces);
     this._deces$.next([...this._deces$.getValue(), created]);
+    if (this.isBrowser()) {
+      this.dataApi.createDeces(created).subscribe({
+        error: (err) => this.logApiError('addDeces', err)
+      });
+    }
   }
 
   addCycleBande(cycle: CycleBande): void {
     this.storageService.addCycleBande(cycle);
     this._cyclesBande$.next([...this._cyclesBande$.getValue(), cycle]);
+    if (this.isBrowser()) {
+      this.dataApi.createCycleBande(cycle).subscribe({
+        error: (err) => this.logApiError('addCycleBande', err)
+      });
+    }
   }
 
   addPalpation(palpation: Palpation): void {
     this.storageService.addPalpation(palpation);
     this._palpations$.next([...this._palpations$.getValue(), palpation]);
+    if (this.isBrowser()) {
+      this.dataApi.createPalpation(palpation).subscribe({
+        error: (err) => this.logApiError('addPalpation', err)
+      });
+    }
   }
 
   addSexage(sexage: Sexage): void {
     this.storageService.addSexage(sexage);
     this._sexages$.next([...this._sexages$.getValue(), sexage]);
+    if (this.isBrowser()) {
+      this.dataApi.createSexage(sexage).subscribe({
+        error: (err) => this.logApiError('addSexage', err)
+      });
+    }
   }
 
   updateBande(id: string, partial: Partial<Bande>): void {
     this.storageService.updateBande(id, partial);
     const bandes = this._bandes$.getValue().map(b => b.id === id ? { ...b, ...partial } : b);
     this._bandes$.next(bandes);
+    if (this.isBrowser()) {
+      this.dataApi.patchBande(id, partial).subscribe({
+        error: (err) => this.logApiError('updateBande', err)
+      });
+    }
   }
 
   updateReproducteur(updated: Reproducteur): void {
     this.storageService.updateReproducteur(updated);
     const list = this._reproducteurs$.getValue().map(r => r.id === updated.id ? { ...r, ...updated } : r);
     this._reproducteurs$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.updateReproducteur(updated).subscribe({
+        error: (err) => this.logApiError('updateReproducteur', err)
+      });
+    }
   }
 
   deleteReproducteur(id: string): void {
     this.storageService.deleteReproducteur(id);
     const list = this._reproducteurs$.getValue().filter(r => r.id !== id);
     this._reproducteurs$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.deleteReproducteur(id).subscribe({
+        error: (err) => this.logApiError('deleteReproducteur', err)
+      });
+    }
   }
 
   updateConfiguration(configPartial: Partial<Configuration>): void {
@@ -256,5 +329,10 @@ export class DataStoreService {
     const updated = { ...currentConfig, ...configPartial };
     this.storageService.setConfiguration(updated);
     this._config$.next(updated);
+    if (this.isBrowser()) {
+      this.dataApi.updateConfiguration(updated).subscribe({
+        error: (err) => this.logApiError('updateConfiguration', err)
+      });
+    }
   }
 }

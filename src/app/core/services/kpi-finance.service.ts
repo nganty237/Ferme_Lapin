@@ -37,8 +37,8 @@ export class KpiFinanceService {
     const consommationAlimentEstimeeKg = (dureeEngraissementJours * 0.1); // ~100g d'aliment / jour / lapin
     const coutProductionParLapin = Math.round(consommationAlimentEstimeeKg * prixAlimentKg);
 
-    const totalSevres = sevrages.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
-    const coutTotalProduction = totalSevres * coutProductionParLapin;
+    const totalVendus = ventes.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
+    const coutTotalProduction = totalVendus * coutProductionParLapin;
 
     const margeBruteTotale = Math.max(0, chiffreAffairesTotal - coutTotalProduction);
 

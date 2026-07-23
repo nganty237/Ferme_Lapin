@@ -37,13 +37,9 @@ export class FicheReproducteurComponent {
   private destroyRef = inject(DestroyRef);
 
   reproducteurId = signal<string>('');
-  bandes = signal<any[]>([
-    { id: 'bande-a', name: 'Bande A' },
-    { id: 'bande-b', name: 'Bande B' },
-    { id: 'bande-c', name: 'Bande C' }
-  ]);
 
   reproducteurs = toSignal(this.calcService.reproducteurs$);
+  bandes = toSignal(this.calcService.bandes$);
   saillies = toSignal(this.calcService.saillies$);
   misesBas = toSignal(this.calcService.misesBas$);
   sevrages = toSignal(this.calcService.sevrages$);
@@ -76,9 +72,9 @@ export class FicheReproducteurComponent {
     if (!r) return '';
     const bandeId = 'bandeId' in r ? (r as any).bandeId : '';
     if (!bandeId) return '';
-    const bList = this.bandes();
+    const bList = this.bandes() || [];
     const band = bList.find((b: any) => b.id === bandeId);
-    return band ? band.name : bandeId;
+    return band ? band.nom : bandeId;
   });
 
   breederDeces = computed(() => {
@@ -209,7 +205,9 @@ export class FicheReproducteurComponent {
       case 'Actif': return `${base} bg-emerald-100 text-emerald-800`;
       case 'En gestation': return `${base} bg-purple-100 text-purple-800`;
       case 'En allaitement': return `${base} bg-blue-100 text-blue-800`;
-      case 'Réformé': return `${base} bg-amber-100 text-amber-800`;
+      case 'Au repos': return `${base} bg-slate-100 text-slate-700`;
+      case 'Réformé':
+      case 'Réformée': return `${base} bg-amber-100 text-amber-800`;
       case 'Mort': return `${base} bg-red-100 text-red-800`;
       default: return `${base} bg-slate-100 text-slate-700`;
     }

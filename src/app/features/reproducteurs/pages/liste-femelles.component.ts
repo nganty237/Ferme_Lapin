@@ -60,35 +60,47 @@ export class ListeFemellesComponent {
       const femellesMb = mbList.filter((m: any) => m.femelleId === f.id);
       const portees = femellesMb.length;
       const totalVivants = femellesMb.reduce((sum: number, m: any) => sum + (m.vivants || 0), 0);
-      const tailleMoyenne = portees > 0 ? Math.round(totalVivants / portees) : 0;
+      const tailleMoyenne = portees > 0 ? Math.round((totalVivants / portees) * 10) / 10 : 0;
 
-      let totalSevres = 0;
-      let cages = 0;
       const config = this.calcService.config;
       const density = config.densiteParCase || 3;
-      const totalVendus = this.calcService.ventes.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
+
+      // P0-9 : ne vendre une portée que sur les sevrages de LA MÊME femelle.
+      const femelleSevList = sevList
+        .filter((s: any) => femellesMb.some(mb => mb.id === s.miseBasId))
+        .sort((a, b) => new Date(a.dateSevrage).getTime() - new Date(b.dateSevrage).getTime());
+      // Ventes attribuées à cette femelle (par bandeId femelle si dispo).
+      const ventesFemelle = (this.calcService.ventes || []).filter((v: any) =>
+        v.bandeId === (f.bandeId || 'bande-a')
+      );
+      const totalVendusFemelle = ventesFemelle.reduce((sum: number, v: any) => sum + (v.vendus || 0), 0);
 
       const isWeaningSold = (weaning: any): boolean => {
-        const sortedSevrages = [...sevList].sort((a, b) => new Date(a.dateSevrage).getTime() - new Date(b.dateSevrage).getTime());
-        const idx = sortedSevrages.findIndex(item => item.id === weaning.id);
+        const idx = femelleSevList.findIndex(item => item.id === weaning.id);
         if (idx === -1) return false;
-        let cumulativeSevres = 0;
-        for (let i = 0; i <= idx; i++) {
-          cumulativeSevres += sortedSevrages[i].sevres || 0;
-        }
-        return totalVendus >= cumulativeSevres;
+        let cumulative = 0;
+        for (let i = 0; i <= idx; i++) cumulative += femelleSevList[i].sevres || 0;
+        return totalVendusFemelle >= cumulative;
       };
 
+      // P0-8 : survie harmonisée sur portées sevrées uniquement (cohérent avec fiche-reproducteur).
+      let totalSevres = 0;
+      let porteesSevrees = 0;
+      let cages = 0;
       for (const mb of femellesMb) {
         const sev = sevList.find((s: any) => s.miseBasId === mb.id);
         if (sev) {
           totalSevres += sev.sevres || 0;
+          porteesSevrees++;
           if (!isWeaningSold(sev)) {
             cages += Math.ceil((sev.sevres || 0) / density);
           }
         }
       }
-      const survie = totalVivants > 0 ? Math.round((totalSevres / totalVivants) * 100) : 0;
+      const totalVivantsSevres = femellesMb
+        .filter(mb => sevList.some(s => s.miseBasId === mb.id))
+        .reduce((sum, m) => sum + (m.vivants || 0), 0);
+      const survie = totalVivantsSevres > 0 ? Math.round((totalSevres / totalVivantsSevres) * 100) : 0;
 
       const maleResponsableId = f.maleResponsableId || this.referentielService.getMaleResponsable(f.id);
       const bandeId = f.bandeId || 'bande-a';
