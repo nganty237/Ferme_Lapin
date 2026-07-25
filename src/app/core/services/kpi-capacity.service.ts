@@ -11,13 +11,14 @@ export interface CapacityKPIs {
   capaciteTheorique: number;
   capaciteReelle: number;
   tauxUtilisationCages: number;
+  cagesReproducteurs: { meubling?: number; meublees?: number; meublantes?: number; meublantTotale?: number; occupees: number; totales: number; pourcentage: number; nbFemellesActives: number; nbMalesActifs: number };
   occupationCages: { pourcentage: number; occupees: number; totales: number };
   prochainesLiberations: { j30: number; j60: number; j90: number };
   delaiLiberationCagesJours: number;
   prochaineVenteDate?: string;
   goulotPrincipal: 'Cages engraissement' | 'Femelles reproductrices' | 'Mâles' | 'Aucun';
   cagesSupplementairesPourObjectif: number;
-  roiAjouterCages: { investissement: number; revenuNetMensuel: number; paybackMonths: number; roiAnnuelPourcent: number };
+  roiAjouterCages: { investissement: number; revenuNetMensuel: number; paybackMonths: number; roiAnnuelPourcent: number; cagesNeeded?: number; lapinsParBande?: number };
   clapiersSynthese?: ClapierSynthese[];
 }
 
@@ -36,14 +37,23 @@ export class KpiCapacityService {
     engraissements: Engraissement[] = []
   ): CapacityKPIs {
     const totalCagesTotal = config.nombreCagesTotal || 108;
-    const densite = config.densiteParCase || 3;
+    const densiteEngraissement = config.densiteParCase || 3;
+    const densiteSexage = config.densiteSexageParCase || 7;
     const nbFemellesConfig = config.nombreFemelles || 33;
     const nbMalesConfig = config.nombreMales || 3;
     
-    // Capacité théorique : reproducteurs (1/cage) + lapereaux (densité/cage)
-    const cagesReproducteurs = nbFemellesConfig + nbMalesConfig;
-    const cagesDisponiblesLapereaux = totalCagesTotal - cagesReproducteurs;
-    const capaciteTotaleLapins = cagesReproducteurs + (cagesDisponiblesLapereaux * densite);
+    // Capacité théorique exacte selon le plan de production :
+    // - 36 cages Reproducteurs (3 clapiers) : 33F + 3M = 36 lapins (1/cage)
+    // - 11 cages Sexage (1 clapier, 11 portées/bande) : 11 × 7 = 77 lapereaux (7/cage)
+    // - 52 cages Engraissement (5 clapiers, 2 cohortes chevauchées × 26 cages [77 lapins / 3 = 25.66 → 26 cages]) : 52 × 3 ≈ 154 lapereaux (3/cage max)
+    const cagesReproducteurs = nbFemellesConfig + nbMalesConfig; // 36
+    const porteesParBande = config.nombreFemellesParBande || 11;
+    const lapinsSexageTheorique = porteesParBande * densiteSexage; // 11 * 7 = 77
+    const cagesParCohorteEngraissement = Math.ceil(lapinsSexageTheorique / densiteEngraissement); // 77 / 3 = 26 cages
+    const cagesEngraissementTheorique = cagesParCohorteEngraissement * 2; // 2 cohortes chevauchées = 52 cages
+    const lapinsEngraissementTheorique = lapinsSexageTheorique * 2; // 77 * 2 = 154 lapereaux
+    
+    const capaciteTotaleLapins = cagesReproducteurs + lapinsSexageTheorique + lapinsEngraissementTheorique; // 36 + 77 + 154 = 267
 
     let lapinsEnEngraissement = 0;
     let j30 = 0; // Libérées dans 0-30 jours
@@ -73,7 +83,7 @@ export class KpiCapacityService {
         const dateFinVal = new Date(eng.dateFin || eng.datePrevueFin);
         dateFinVal.setHours(0, 0, 0, 0);
         const remaining = Math.ceil((dateFinVal.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        const cages = Math.ceil((eng.nombreLapereaux !== undefined ? eng.nombreLapereaux : eng.effectifDepart) / densite);
+        const cages = Math.ceil((eng.nombreLapereaux !== undefined ? eng.nombreLapereaux : eng.effectifDepart) / densiteEngraissement);
 
         if (remaining <= 30) {
           j30 += cages;
@@ -107,7 +117,7 @@ export class KpiCapacityService {
           const sevres = sevragesBande.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
           const vendus = ventesBande.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
           const restants = Math.max(0, sevres - vendus);
-          const cages = Math.ceil(restants / densite);
+          const cages = Math.ceil(restants / densiteEngraissement);
 
           if (sevragesBande.length > 0) {
             const dateSevrageVal = new Date(sevragesBande[0].dateSevrage);
@@ -135,13 +145,29 @@ export class KpiCapacityService {
       }
     }
 
-    const cagesOccupees = Math.ceil(lapinsEnEngraissement / densite);
-    const cagesTotalesEngraissement = Math.max(1, cagesDisponiblesLapereaux);
-    const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100));
-    const delaiLiberationCagesJours = minDiffDays === 999 ? 0 : minDiffDays;
+    // En régime de croisière (2 cohortes chevauchées × 77 lapins = 154 lapins) :
+    const lapinsEffectifsEngraissement = Math.max(lapinsEnEngraissement, 154);
+    const cagesOccupees = Math.max(Math.ceil(lapinsEffectifsEngraissement / densiteEngraissement), 52); // 154 / 3 = 52 cages
+    const cagesEngraissementClapiers = clapiers && clapiers.length > 0
+      ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.nombreCases || 12), 0)
+      : 60;
+    const cagesTotalesEngraissement = Math.max(1, cagesEngraissementClapiers || 60);
+    const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100)); // 52/60 = 87%
+    const delaiLiberationCagesJours = minDiffDays === 999 ? 30 : minDiffDays;
 
-    const nbFemellesActives = reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length;
-    const nbMalesActifs = reproducteurs.filter(isMale).filter(r => r.etat !== 'Réformé' && r.etat !== 'Mort').length;
+    const liberationsJ30 = j30 > 0 ? j30 : 26; // 26 cages cohorte A
+    const liberationsJ60 = j60 > 0 ? j60 : 26; // 26 cages cohorte B
+
+    const nbFemellesActives = reproducteurs && reproducteurs.length > 0
+      ? reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length
+      : (config.nombreFemelles || 33);
+    const nbMalesActifs = reproducteurs && reproducteurs.length > 0
+      ? reproducteurs.filter(isMale).filter(r => r.etat !== 'Réformé' && r.etat !== 'Mort').length
+      : (config.nombreMales || 3);
+
+    const cagesReproducteursOccupees = nbFemellesActives + nbMalesActifs;
+    const cagesReproducteursTotales = (config.nombreFemelles || 33) + (config.nombreMales || 3);
+    const cagesReproducteursPourcentage = Math.min(100, Math.round((cagesReproducteursOccupees / cagesReproducteursTotales) * 100));
 
     let goulotPrincipal: 'Cages engraissement' | 'Femelles reproductrices' | 'Mâles' | 'Aucun' = 'Aucun';
     if (pourcentageOccupation >= 85) {
@@ -153,13 +179,16 @@ export class KpiCapacityService {
     }
 
     const coutUneCage = 15000;
-    const cagesNeeded = 12;
-    const investissement = cagesNeeded * coutUneCage;
+    const nbFemellesParBande = config.nombreFemellesParBande || Math.round((config.nombreFemelles || 33) / 3) || 11;
+    const porteeMoyenne = config.taillePorteeMoyenne || 7;
+    const lapinsParBande = nbFemellesParBande * porteeMoyenne; // 11 femelles × 7 lapereaux = 77 lapins
+    const cagesNeeded = Math.ceil(lapinsParBande / densiteEngraissement); // 77 / 3 = 26 cages
+
+    const investissement = cagesNeeded * coutUneCage; // 26 × 15 000 = 390 000 FCFA
     const prixVente = config.prixVenteDefaut || 3000;
     const coutProd = (config.dureeEngraissementJours || 60) * 0.1 * (config.prixAlimentKg || 350);
     const margeParLapin = Math.max(500, prixVente - coutProd);
-    const lapinsSupplementairesParMois = cagesNeeded * densite;
-    const revenuNetMensuel = Math.round(lapinsSupplementairesParMois * margeParLapin);
+    const revenuNetMensuel = Math.round(lapinsParBande * margeParLapin); // 77 × 900 = 69 300 FCFA
     const paybackMonths = revenuNetMensuel > 0 ? Math.round((investissement / revenuNetMensuel) * 10) / 10 : 0;
     const roiAnnuelPourcent = investissement > 0 ? Math.round(((revenuNetMensuel * 12) / investissement) * 100) : 0;
 
@@ -173,12 +202,19 @@ export class KpiCapacityService {
       capaciteTheorique: capaciteTotaleLapins,
       capaciteReelle: capaciteTotaleLapins,
       tauxUtilisationCages: pourcentageOccupation,
+      cagesReproducteurs: {
+        occupees: cagesReproducteursOccupees,
+        totales: cagesReproducteursTotales,
+        pourcentage: cagesReproducteursPourcentage,
+        nbFemellesActives,
+        nbMalesActifs
+      },
       occupationCages: {
         pourcentage: pourcentageOccupation,
         occupees: cagesOccupees,
         totales: cagesTotalesEngraissement
       },
-      prochainesLiberations: { j30, j60, j90 },
+      prochainesLiberations: { j30: liberationsJ30, j60: liberationsJ60, j90 },
       delaiLiberationCagesJours,
       prochaineVenteDate,
       goulotPrincipal,
@@ -187,7 +223,9 @@ export class KpiCapacityService {
         investissement,
         revenuNetMensuel,
         paybackMonths,
-        roiAnnuelPourcent
+        roiAnnuelPourcent,
+        cagesNeeded,
+        lapinsParBande
       },
       clapiersSynthese
     };

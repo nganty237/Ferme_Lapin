@@ -14,6 +14,7 @@ export interface Configuration {
   dureeEngraissementJours: number;
   taillePorteeMoyenne: number;
   densiteParCase: number;
+  densiteSexageParCase: number;
   ageMaturiteSexuelleMois: number;
   decalageAgeBandesMois: number;
   prixAlimentKg: number;

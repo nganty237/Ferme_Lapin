@@ -65,8 +65,9 @@ export class DataStoreService {
     dureeAllaitementMaxJours: 35,
     dureeSexageJours: 30,
     dureeEngraissementJours: 60,
-    taillePorteeMoyenne: 6,
+    taillePorteeMoyenne: 7,
     densiteParCase: 3,
+    densiteSexageParCase: 7,
     ageMaturiteSexuelleMois: 5,
     decalageAgeBandesMois: 1,
     prixAlimentKg: 350,
@@ -252,6 +253,25 @@ export class DataStoreService {
   addVente(vente: Vente): void {
     const created = this.storageService.addVente(vente);
     this._ventes$.next([...this._ventes$.getValue(), created]);
+
+    // TK-09 : libérer les cages d'engraissement après une vente (3 lapins/cage)
+    const cagesLiberees = Math.ceil((vente.vendus || 0) / 3);
+    if (cagesLiberees > 0) {
+      const clapiers = [...this._clapiers$.getValue()];
+      const engraisIndexes = clapiers
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => c.type === 'Engraissement')
+        .sort((a, b) => (b.c.casesOccupees || 0) - (a.c.casesOccupees || 0));
+      let remaining = cagesLiberees;
+      for (const { c, i } of engraisIndexes) {
+        if (remaining <= 0) break;
+        const liberable = Math.min(remaining, c.casesOccupees || 0);
+        clapiers[i] = { ...c, casesOccupees: (c.casesOccupees || 0) - liberable };
+        remaining -= liberable;
+      }
+      this._clapiers$.next(clapiers);
+    }
+
     if (this.isBrowser()) {
       this.dataApi.createVente(created).subscribe({
         error: (err) => this.logApiError('addVente', err)
@@ -262,6 +282,20 @@ export class DataStoreService {
   addDeces(deces: Deces): void {
     const created = this.storageService.addDeces(deces);
     this._deces$.next([...this._deces$.getValue(), created]);
+
+    if (deces.reproducteurId) {
+      const list = this._reproducteurs$.getValue();
+      const idx = list.findIndex(r => r.id === deces.reproducteurId);
+      if (idx !== -1) {
+        const repro = list[idx];
+        const updated = {
+          ...repro,
+          etat: (repro.sexe === 'F' ? 'Morte' : 'Mort') as any
+        };
+        this.updateReproducteur(updated);
+      }
+    }
+
     if (this.isBrowser()) {
       this.dataApi.createDeces(created).subscribe({
         error: (err) => this.logApiError('addDeces', err)

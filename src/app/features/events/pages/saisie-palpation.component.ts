@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -54,11 +54,16 @@ export class SaisiePalpationComponent {
   sailliesAPalper = computed(() => {
     const allSaillies = this.saillies() || [];
     const allPalpations = this.palpations() || [];
+    const repros = this.reproducteurs() || [];
     const selectedBande = this.selectedBandeId();
 
     return allSaillies.filter(s => {
       const hasPalpation = allPalpations.some(p => p.saillieId === s.id);
-      return s.bandeId === selectedBande && !hasPalpation;
+      if (s.bandeId !== selectedBande || hasPalpation) return false;
+      // TK-03 : exclure les femelles mortes ou réformées
+      const repro = repros.find(r => r.id === s.femelleId);
+      if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
+      return true;
     });
   });
 
@@ -70,7 +75,21 @@ export class SaisiePalpationComponent {
       palpationsArray: this.fb.array([])
     });
 
-    this.initPalpationsForBande('bande-a');
+    // TK-05 : effet réactif — reconstruit le FormArray dès que les saillies disponibles changent
+    effect(() => {
+      const saillies = this.sailliesAPalper();
+      this.palpationsArray.clear();
+      saillies.forEach(s => {
+        const group = this.fb.group({
+          saillieId: [s.id],
+          femelleId: [s.femelleId],
+          dateSaillie: [s.dateSaillie],
+          resultat: ['Positive', Validators.required],
+          observations: ['']
+        });
+        this.palpationsArray.push(group);
+      });
+    });
   }
 
   get palpationsArray(): FormArray {
@@ -123,10 +142,12 @@ export class SaisiePalpationComponent {
       const arrayValues = this.palpationsArray.value;
 
       arrayValues.forEach((p: any) => {
+        // TK-06 : cycleId dynamique depuis la bande
+        const bande = (this.bandes() || []).find(b => b.id === val.bandeId);
         this.bandeService.enregistrerPalpation({
           id: `palp_${Date.now()}_${p.femelleId}`,
           saillieId: p.saillieId,
-          cycleId: `cycle-${val.bandeId}-1`,
+          cycleId: `cycle-${val.bandeId}-${bande?.numeroCycle || 1}`,
           femelleId: p.femelleId,
           bandeId: val.bandeId,
           datePalpation: val.datePalpation,

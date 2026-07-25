@@ -150,15 +150,19 @@ export class SaisieSexageComponent {
       const formValue = this.sexageForm.value;
       const dateSexage = new Date(formValue.dateCommune).toISOString();
 
+      // TK-06 : cycleId dynamique depuis la bande
+      const bande = (this.bandes() || []).find(b => b.id === formValue.bande);
+
       formValue.portees.forEach((p: any) => {
         this.bandeService.enregistrerSexage({
           id: `sex-${Date.now()}-${p.femelleId}`,
-          cycleId: `cycle-${formValue.bande}-1`,
+          cycleId: `cycle-${formValue.bande}-${bande?.numeroCycle || 1}`,
           bandeId: formValue.bande,
           dateSexage,
           nombreMales: Number(p.males) || 0,
           nombreFemelles: Number(p.femelles) || 0,
           totalSexes: (Number(p.males) || 0) + (Number(p.femelles) || 0),
+          retenus: Number(p.retenus) || 0,  // TK-11 : inclure les retenus pour renouvellement
           clapierSexageId: 'clap-s1'
         });
       });
@@ -167,7 +171,8 @@ export class SaisieSexageComponent {
       this.bandeService.transfererEngraissement(formValue.bande as BandeId, new Date(dateSexage));
 
       this.notifier.success('Sexage enregistré avec succès.');
-      this.sexageForm.reset({ dateCommune: new Date() });
+      // TK-07 : reset date en format ISO string
+      this.sexageForm.reset({ dateCommune: new Date().toISOString().substring(0, 10) });
       this.porteesFormArray.clear();
     } catch (e) {
       this.notifier.error('Erreur lors de la sauvegarde.');

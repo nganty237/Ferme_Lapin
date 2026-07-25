@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '@core/services';
+import { CalculationService, ReferentielService } from '@core/services';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { StatsReproducteurComponent } from './components/stats-reproducteur.component';
@@ -120,18 +120,37 @@ export class FicheReproducteurComponent {
       .sort((a: any, b: any) => new Date(b.dateMiseBas).getTime() - new Date(a.dateMiseBas).getTime());
   });
 
+  private referentielService = inject(ReferentielService);
+
+  assignedFemales = computed(() => {
+    const r = this.reproducteur();
+    if (!r || r.sexe !== 'M') return [];
+    const allRepros = this.reproducteurs() || [];
+    return allRepros.filter((f: any) => f.sexe === 'F' && (
+      f.maleResponsableId === r.id || 
+      this.referentielService.getMaleResponsable(f.id) === r.id
+    ));
+  });
+
   maleSaillies = computed(() => {
     const r = this.reproducteur();
     if (!r || r.sexe !== 'M') return [];
     const allSaillies = this.saillies() || [];
     const allRepros = this.reproducteurs() || [];
+    const allMisesBas = this.misesBas() || [];
+    const rIdLower = r.id.toLowerCase();
+
     return allSaillies
-      .filter((s: any) => s.maleId === r.id)
+      .filter((s: any) => s.maleId && s.maleId.toLowerCase() === rIdLower)
       .map((s: any) => {
-        const female = allRepros.find((f: any) => f.id === s.femelleId);
+        const female = allRepros.find((f: any) => f.id.toLowerCase() === (s.femelleId || '').toLowerCase());
+        const hasMiseBas = allMisesBas.some((mb: any) => mb.saillieId === s.id);
+        const reussieStatus = s.reussie !== undefined ? s.reussie : (hasMiseBas ? true : null);
+
         return {
           ...s,
-          femaleName: female ? female.nom : s.femelleId
+          femaleName: female ? female.nom : s.femelleId,
+          reussie: reussieStatus
         };
       })
       .sort((a: any, b: any) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
@@ -171,12 +190,12 @@ export class FicheReproducteurComponent {
 
     const sailliesList = this.maleSaillies();
     const totalSaillies = sailliesList.length;
-    const sailliesReussies = sailliesList.filter((s: any) => s.reussie).length;
-    const tauxFertilite = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 0;
-
     const allMisesBas = this.misesBas() || [];
     const saillieIds = new Set(sailliesList.map((s: any) => s.id));
     const porteesProduites = allMisesBas.filter((mb: any) => saillieIds.has(mb.saillieId)).length;
+
+    const sailliesReussies = sailliesList.filter((s: any) => s.reussie === true || saillieIds.has(s.id)).length;
+    const tauxFertilite = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 0;
 
     return {
       totalSaillies,

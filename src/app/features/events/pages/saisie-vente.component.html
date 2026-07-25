@@ -18,6 +18,22 @@
       </div>
 
       <form [formGroup]="venteForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+        <!-- TK-08 : Sélecteur de bande d'engraissement -->
+        <div>
+          <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+            Bande d'engraissement <span class="text-rose-500">*</span>
+          </label>
+          <select formControlName="bandeId" class="form-input w-full text-slate-800 text-sm">
+            <option value="">— Sélectionner une bande —</option>
+            @for (bande of bandesEngraissement(); track bande.id) {
+              <option [value]="bande.id">{{ bande.nom || bande.id }} ({{ bande.phase }})</option>
+            }
+          </select>
+          @if (venteForm.get('bandeId')?.invalid && venteForm.get('bandeId')?.touched) {
+            <p class="text-xs text-rose-500 mt-1">Sélectionnez la bande concernée.</p>
+          }
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Nombre de lapins vendus -->
           <div>

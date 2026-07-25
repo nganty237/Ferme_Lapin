@@ -18,9 +18,18 @@
               <div>
                 <span class="text-[10px] text-slate-400 font-bold uppercase block">Femelles Repro</span>
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ nbFemelles() }} femelles</strong>
-                <span class="text-[11px] text-slate-500 block mt-1">Capacité: {{ capacityFemelles() }} lapereaux / mois</span>
+                <span class="text-[11px] text-slate-500 block mt-1">
+                  Capacité: {{ capacityFemelles() }} lapereaux / mois
+                </span>
+                <span class="text-[11px] text-slate-400 block mt-0.5">
+                  {{ cagesReproducteursOccupees() }} / {{ cagesReproducteursTotales() }} cages occupées
+                </span>
               </div>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-emerald-100 text-emerald-800 mt-4 self-start">SATURÉE (100%)</span>
+              @if (cagesReproducteursPct() >= 95) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-emerald-100 text-emerald-800 mt-4 self-start">SATURÉE ({{ cagesReproducteursPct() }}%)</span>
+              } @else {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-amber-100 text-amber-800 mt-4 self-start">Partielle ({{ cagesReproducteursPct() }}%)</span>
+              }
             </div>
 
             <!-- Capacité Mâles -->
@@ -30,7 +39,13 @@
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ nbMales() }} mâles</strong>
                 <span class="text-[11px] text-slate-500 block mt-1">Rapport: {{ femalesPerMale() | number:'1.0-1' }} femelles/mâle</span>
               </div>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-slate-100 text-slate-700 mt-4 self-start">Marge OK (75% utilisé)</span>
+              @if (maleUtilisationPct() >= 90) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-rose-100 text-rose-800 mt-4 self-start">Critique ({{ maleUtilisationPct() }}% utilisé)</span>
+              } @else if (maleUtilisationPct() >= 70) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-slate-100 text-slate-700 mt-4 self-start">Marge OK ({{ maleUtilisationPct() }}% utilisé)</span>
+              } @else {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-emerald-100 text-emerald-800 mt-4 self-start">Disponible ({{ maleUtilisationPct() }}% utilisé)</span>
+              }
             </div>
 
             <!-- Capacité Cages Engraissement -->
@@ -38,9 +53,17 @@
               <div>
                 <span class="text-[10px] text-slate-400 font-bold uppercase block">Cages Engraissement</span>
                 <strong class="text-xl font-bold text-slate-700 block mt-1">{{ capacityEngraissement() }} cages</strong>
-                <span class="text-[11px] text-slate-500 block mt-1">Capacité max: {{ capacityTheorique() }} lapereaux</span>
+                <span class="text-[11px] text-slate-500 block mt-1">
+                  {{ cagesOccupeesEngraissement() }} occupées &mdash; Max: {{ capacityTheorique() }} lapins
+                </span>
               </div>
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-amber-100 text-amber-800 mt-4 self-start">Utilisation: {{ kpis()!.tauxUtilisationCages }}%</span>
+              @if (tauxOccupationEngraissement() >= 90) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-rose-100 text-rose-800 mt-4 self-start">Critique ({{ tauxOccupationEngraissement() }}%)</span>
+              } @else if (tauxOccupationEngraissement() >= 80) {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-amber-100 text-amber-800 mt-4 self-start">Utilisation: {{ tauxOccupationEngraissement() }}%</span>
+              } @else {
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-emerald-100 text-emerald-800 mt-4 self-start">Disponible ({{ tauxOccupationEngraissement() }}%)</span>
+              }
             </div>
           </div>
 
@@ -62,7 +85,7 @@
         <!-- Panel 2: ROI & Simulations d'extension -->
         <div class="bg-white border border-slate-200 rounded-xl p-6">
           <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-            <mat-icon class="text-emerald-700">show_chart</mat-icon> ROI : Ajouter 50 Cages
+            <mat-icon class="text-emerald-700">show_chart</mat-icon> ROI : Extension 1 Bande Entière ({{ kpis()!.roiAjouterCages.cagesNeeded || 26 }} Cages)
           </p>
 
           <div class="mt-4 flex flex-col gap-4">
@@ -73,7 +96,7 @@
 
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
               <span class="text-xs text-slate-500">Capacité de vente ajoutée</span>
-              <strong class="text-sm text-slate-800">+150 lapins / cycle</strong>
+              <strong class="text-sm text-slate-800">+{{ kpis()!.roiAjouterCages.lapinsParBande || 77 }} lapins / bande</strong>
             </div>
 
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
@@ -96,7 +119,7 @@
             <h5 class="font-bold text-slate-700 mb-1">Méthodologie de calcul :</h5>
             <ul class="list-disc pl-4 flex flex-col gap-1">
               <li>Marge par lapin = Prix unitaire standard ({{ config()!.prixVenteDefaut | number:'1.0-0' }} FCFA) - Coût de production ({{ kpis()!.coutProductionParLapin | number:'1.0-0' }} FCFA).</li>
-              <li>Extension basée sur 50 cages d'engraissement à 40 000 FCFA/unité.</li>
+              <li>Extension basée sur 1 bande complète ({{ kpis()!.roiAjouterCages.lapinsParBande || 77 }} lapins = {{ kpis()!.roiAjouterCages.cagesNeeded || 26 }} cages d'engraissement à 15 000 FCFA/cage).</li>
             </ul>
           </div>
         </div>

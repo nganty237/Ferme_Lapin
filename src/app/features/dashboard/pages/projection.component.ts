@@ -158,7 +158,7 @@ export class ProjectionComponent {
     sevrages: Sevrage[]
   ): number {
     const femellesParBande = configVal.nombreFemellesParBande || 11;
-    const portee = configVal.taillePorteeMoyenne || 6;
+    const portee = configVal.taillePorteeMoyenne || 7;
     const densite = configVal.densiteParCase || 3;
     const sevragesValides = sevrages.filter(s => s.sevres != null && s.miseBasId);
     const totalSevres = sevragesValides.reduce((sum, s) => sum + (s.sevres || 0), 0);

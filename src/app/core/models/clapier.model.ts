@@ -5,16 +5,17 @@ import type { BandeId } from './referentiel.model';
  * Reflète les phases du cycle d'élevage auxquelles chaque clapier peut être affecté.
  *
  * Infrastructure : 9 clapiers de 12 cases chacun = 108 cases au total.
- *   - 3 clapiers de Maternité (reproduction + mise bas + allaitement)
- *   - 1 clapier de Sexage (séparation mâles/femelles, 30 jours)
- *   - 5 clapiers d'Engraissement (croissance, 60 jours, 3 lapereaux/case)
+ *   - 3 clapiers de Maternité (reproduction + mise bas + allaitement, 36 cases)
+ *   - 1 clapier de Sexage (séparation mâles/femelles, 30 jours, 7 lapereaux/case, 12 cases)
+ *   - 5 clapiers d'Engraissement (croissance, 60 jours, 3 lapereaux/case max, 60 cases)
  *
- * Un clapier peut être "Vide" entre deux affectations.
+ * Un clapier peut être réaffecté à l'Infirmerie ou au Vide sanitaire si besoin.
  */
 export type TypeClapier =
   | 'Maternité'      // Clapiers des femelles reproductrices (saillie, gestation, allaitement)
   | 'Sexage'         // Clapier dédié à la séparation mâles/femelles post-sevrage
   | 'Engraissement'  // Clapiers d'engraissement (3 lapereaux/case)
+  | 'Infirmerie'     // Clapier réservé en cas de maladie ou de quarantaine
   | 'Vide';          // Clapier non affecté (vide sanitaire entre deux bandes)
 
 /**

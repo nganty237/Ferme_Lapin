@@ -62,6 +62,7 @@ export class SaisieMiseBasComponent {
     const allSaillies = this.saillies() || [];
     const allMB = this.misesBas() || [];
     const allPalpations = this.palpations() || [];
+    const repros = this.reproducteurs() || [];
 
     const result = allSaillies.filter(s => {
       if (s.bandeId !== bandeId) return false;
@@ -69,6 +70,9 @@ export class SaisieMiseBasComponent {
       if (dejaMB) return false;
       const palpationNegative = allPalpations.some(p => p.saillieId === s.id && p.resultat === 'Negative');
       if (palpationNegative) return false;
+      // TK-03 : exclure les femelles mortes ou réformées
+      const repro = repros.find(r => r.id === s.femelleId);
+      if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
       return true;
     });
 
@@ -146,7 +150,7 @@ export class SaisieMiseBasComponent {
         saillieId: [s.id],
         femelleId: [s.femelleId],
         dateSaillie: [s.dateSaillie],
-        vivants: [6, [Validators.required, Validators.min(0)]],
+        vivants: [7, [Validators.required, Validators.min(0)]], // TK-04 : portée par défaut = 7
         mortsNes: [0, [Validators.required, Validators.min(0)]],
         observations: ['']
       });
@@ -176,6 +180,10 @@ export class SaisieMiseBasComponent {
         const mortsNes = Number(p.mortsNes) || 0;
         const total = vivants + mortsNes;
         const viabilite = total > 0 ? Math.round((vivants / total) * 100) : 0;
+        // TK-06 : cycleId dynamique depuis la bande
+        const bande = (this.bandes() || []).find(b => b.id === val.bandeId);
+        // TK-04 : saillie source pour récupérer cycleId
+        const saillie = (this.saillies() || []).find(s => s.id === p.saillieId);
 
         return {
           id: `mb_${Date.now()}_${p.femelleId}`,
@@ -184,6 +192,9 @@ export class SaisieMiseBasComponent {
           dateMiseBas: val.dateMiseBas,
           vivants,
           mortsNes,
+          nes: vivants + mortsNes,                                         // TK-04 : total nés
+          cycleId: saillie?.cycleId ?? `cycle-${val.bandeId}-${bande?.numeroCycle || 1}`,  // TK-04 + TK-06
+          bandeId: val.bandeId,
           viabiliteCalculee: viabilite
         };
       });

@@ -135,7 +135,7 @@ export class KpiReproductionService {
     // Phases et état des bandes
     // Fix P0 #2 : phases dérivées de `bandes[].phase` (au lieu de valeurs hardcodées).
     const phasesBandes = this.calcPhasesBandes(bandes);
-    const etatBandes = this.calcEtatBandes(bandes);
+    const etatBandes = this.calcEtatBandes(bandes, config);
     const alertesPalpation = this.calcAlertesPalpation(saillies, palpations, bandes);
     const alertesMiseBas = this.calcAlertesMiseBas(saillies, misesBas, config.dureeGestationJours || 31, bandes);
     const productiviteParBande = this.calcProductiviteParBande(bandes, misesBas, sevrages);
@@ -164,14 +164,14 @@ export class KpiReproductionService {
     return { A: get('bande-a'), B: get('bande-b'), C: get('bande-c') };
   }
 
-  private calcEtatBandes(bandes: Bande[]): Record<string, EtatBandesInfo> {
+  private calcEtatBandes(bandes: Bande[], config?: Configuration): Record<string, EtatBandesInfo> {
     const res: Record<string, EtatBandesInfo> = {};
     if (!bandes || bandes.length === 0) return res;
     bandes.forEach(b => {
       const key = b.id.replace('bande-', '').toUpperCase();
       res[key] = {
         phase: b.phase,
-        nombreFemelles: 11,
+        nombreFemelles: config?.nombreFemellesParBande || 11,
         joursPhase: b.dateDemarragePhase ? Math.floor((new Date().getTime() - new Date(b.dateDemarragePhase).getTime()) / (1000 * 3600 * 24)) : 0,
         prochainEvenement: b.phase === 'Repos' ? 'Saillie' : b.phase === 'Saillie' ? 'Mise-bas' : 'Sevrage',
       };

@@ -36,7 +36,10 @@ export class SaisieDecesComponent {
 
   reproducteursVivants = computed(() => {
     const list = this.reproducteurs() || [];
-    return list.filter(r => r.etat !== 'Mort' && r.etat !== 'Réformé');
+    return list.filter(r =>
+      r.etat !== 'Mort' && r.etat !== 'Morte' &&
+      r.etat !== 'Réformé' && r.etat !== 'Réformée'
+    );
   });
 
   activeReproducteurs = this.reproducteursVivants;
@@ -98,7 +101,7 @@ export class SaisieDecesComponent {
   onReset(): void {
     this.decesForm.reset({
       reproducteurId: '',
-      date: new Date(),
+      date: new Date().toISOString().substring(0, 10),
       cause: '',
       observations: ''
     });

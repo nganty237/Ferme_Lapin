@@ -139,17 +139,23 @@ export class SaisieSaillieComponent {
       const dSaillie = new Date(actualDate);
 
       const dPalpation = new Date(dSaillie);
-      dPalpation.setDate(dPalpation.getDate() + 15);
+      // TK-10 : utiliser la config pour le délai palpation (par défaut 15j)
+      const jourPalpation = this.config()?.jourPalpation || 15;
+      dPalpation.setDate(dPalpation.getDate() + jourPalpation);
 
       const dMiseBas = new Date(dSaillie);
-      dMiseBas.setDate(dMiseBas.getDate() + 31);
+      // TK-10 : utiliser la config pour la durée gestation (par défaut 31j)
+      const dureeGestation = this.config()?.dureeGestationJours || 31;
+      dMiseBas.setDate(dMiseBas.getDate() + dureeGestation);
 
       const female = (this.reproducteurs() || []).find(r => r.id === femelleId);
       const bId = (female && isFemelle(female)) ? female.bandeId : 'bande-a';
+      // TK-06 : cycleId dynamique depuis la bande
+      const bande = (this.bandes() || []).find(b => b.id === bId);
 
       this.calcService.addSaillie({
         id: `sal_${Date.now()}_${femelleId}`,
-        cycleId: `cycle-${bId}-1`,
+        cycleId: `cycle-${bId}-${bande?.numeroCycle || 1}`,
         bandeId: bId,
         femelleId,
         maleId,

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, DestroyRef, effect } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -53,12 +53,17 @@ export class SaisieSevrageComponent {
     const bandeId = this.bandeSelectionnee();
     const allMisesBas = this.misesBas() || [];
     const allSevrages = this.sevrages() || [];
+    const repros = this.reproducteurs() || [];
     if (!bandeId) return [];
-    
+
     return allMisesBas.filter(mb => {
       if (mb.bandeId !== bandeId) return false;
       const alreadySevre = allSevrages.find(s => s.miseBasId === mb.id);
-      return !alreadySevre;
+      if (alreadySevre) return false;
+      // TK-03 : exclure les femelles mortes ou réformées
+      const repro = repros.find(r => r.id === mb.femelleId);
+      if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
+      return true;
     });
   });
 
@@ -78,8 +83,23 @@ export class SaisieSevrageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(bandeId => {
         this.bandeSelectionnee.set(bandeId || null);
-        this.initFemellesArray();
       });
+
+    // TK-05 : effet réactif — reconstruit le FormArray dès que misesBasBande() change
+    effect(() => {
+      const mbs = this.misesBasBande();
+      this.femellesFormArray.clear();
+      mbs.forEach(mb => {
+        const group = this.fb.group({
+          miseBasId: [mb.id],
+          femelleId: [mb.femelleId],
+          vivantsInitiaux: [mb.vivants],
+          sevres: [mb.vivants, [Validators.required, Validators.min(0)]],
+          observations: ['']
+        });
+        this.femellesFormArray.push(group);
+      });
+    });
   }
 
   initFemellesArray() {
@@ -124,10 +144,12 @@ export class SaisieSevrageComponent {
 
       formValue.femelles.forEach((f: any) => {
         if (f.sevres > 0) {
+          // TK-06 : cycleId dynamique depuis la bande sélectionnée
+          const bande = (this.bandes() || []).find(b => b.id === formValue.bande);
           const sev = {
             id: `sev-${Date.now()}-${f.femelleId}`,
             miseBasId: f.miseBasId,
-            cycleId: `cycle-${formValue.bande}-1`,
+            cycleId: `cycle-${formValue.bande}-${bande?.numeroCycle || 1}`,
             femelleId: f.femelleId,
             dateSevrage: dateSev,
             sevres: f.sevres,
@@ -135,14 +157,15 @@ export class SaisieSevrageComponent {
             bandeId: formValue.bande
           };
           sevrages.push(sev);
-          this.calcService.addSevrage(sev);
+          // TK-02 : suppression du double addSevrage (bandeService.confirmerSevrage gère l'insertion)
         }
       });
 
       this.bandeService.confirmerSevrage(formValue.bande, sevrages);
 
       this.notifier.success('Sevrage de la bande enregistré avec succès.');
-      this.sevrageForm.reset({ dateCommune: new Date() });
+      // TK-07 : reset date en format ISO string
+      this.sevrageForm.reset({ dateCommune: new Date().toISOString().substring(0, 10) });
       this.femellesFormArray.clear();
     } catch (e) {
       this.notifier.error('Erreur lors de la sauvegarde.');

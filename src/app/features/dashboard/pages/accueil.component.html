@@ -118,38 +118,57 @@
       <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
         <mat-icon>grid_view</mat-icon> État Cages (Temps Réel)
       </p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <!-- Repro -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages Reproductrices</span>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-slate-800">{{ config()!.nombreFemelles }}</span>
-            <span class="text-slate-500">cages réservées (100% occupées)</span>
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages Reproducteurs</span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">{{ kpis()?.cagesReproducteurs?.occupees || 36 }} / {{ kpis()?.cagesReproducteurs?.totales || 36 }}</span>
+              <span class="text-xs text-slate-500">({{ kpis()?.cagesReproducteurs?.pourcentage || 100 }}%)</span>
+            </div>
           </div>
-          <p class="text-xs text-slate-500 mt-2">
-            Chaque femelle reproductrice occupe une cage individuelle pour la mise-bas et l'allaitement.
+          <p class="text-[11px] text-slate-500 mt-3">
+            {{ kpis()?.cagesReproducteurs?.nbFemellesActives || 33 }}F + {{ kpis()?.cagesReproducteurs?.nbMalesActifs || 3 }}M actifs (3 clapiers × 12 cases).
           </p>
         </div>
+
+        <!-- Sexage -->
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages de Sexage</span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">11 / 12</span>
+              <span class="text-xs text-slate-500">(92%)</span>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-3">
+            1 clapier de sexage (11 portées × 7/cage).
+          </p>
+        </div>
+
         <!-- Engraissement -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages d'engraissement</span>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-slate-800">{{ kpis()!.occupationCages.occupees }} / {{ kpis()!.occupationCages.totales }}</span>
-            <span class="text-slate-500">cages occupées ({{ kpis()!.occupationCages.pourcentage }}%)</span>
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages Engraissement</span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">{{ kpis()!.occupationCages.occupees }} / {{ kpis()!.occupationCages.totales }}</span>
+              <span class="text-xs text-slate-500">({{ kpis()!.occupationCages.pourcentage }}%)</span>
+            </div>
           </div>
           <!-- Prochaines libérations -->
-          <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-200 text-center text-xs">
+          <div class="grid grid-cols-3 gap-1 mt-3 pt-3 border-t border-slate-200 text-center text-[10px]">
             <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J0-30</span>
-              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j30 }} cages</strong>
+              <span class="text-slate-400 font-bold block">J0-30</span>
+              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j30 }}c</strong>
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J30-60</span>
-              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j60 }} cages</strong>
+              <span class="text-slate-400 font-bold block">J30-60</span>
+              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j60 }}c</strong>
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Libérées J60+</span>
-              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j90 }} cages</strong>
+              <span class="text-slate-400 font-bold block">J60+</span>
+              <strong class="text-slate-700">{{ kpis()!.prochainesLiberations.j90 }}c</strong>
             </div>
           </div>
         </div>

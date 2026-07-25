@@ -34,6 +34,7 @@ export class ConfigComponent implements OnInit {
       nombreCagesTotal: [config.nombreCagesTotal || 108, [Validators.required, Validators.min(1)]],
       nombreFemelles: [config.nombreFemelles || 33, [Validators.required, Validators.min(0)]],
       densiteParCase: [config.densiteParCase || 3, [Validators.required, Validators.min(1)]],
+      densiteSexageParCase: [config.densiteSexageParCase || 7, [Validators.required, Validators.min(1)]],
       prixAlimentKg: [config.prixAlimentKg || 350, [Validators.required, Validators.min(0)]],
       prixVenteDefaut: [config.prixVenteDefaut || 3000, [Validators.required, Validators.min(0)]]
     });
@@ -60,6 +61,7 @@ export class ConfigComponent implements OnInit {
       nombreCagesTotal: config.nombreCagesTotal || 108,
       nombreFemelles: config.nombreFemelles || 33,
       densiteParCase: config.densiteParCase || 3,
+      densiteSexageParCase: config.densiteSexageParCase || 7,
       prixAlimentKg: config.prixAlimentKg || 350,
       prixVenteDefaut: config.prixVenteDefaut || 3000
     });

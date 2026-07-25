@@ -45,6 +45,7 @@ export function isMale(r: Reproducteur): r is Male {
 export type EtatBande =
   | 'Repos'
   | 'Saillie'
+  | 'Gestation'
   | 'Allaitement'
   | 'Sexage'
   | 'Engraissement'
