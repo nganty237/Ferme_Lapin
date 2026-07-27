@@ -14,13 +14,13 @@
               Bande en gestation
             </label>
             <select 
-              class="form-select"
+              class="form-select font-medium"
               [ngModel]="selectedBandeId()"
               [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onBandeChange($event)">
-              @for (b of bandesDisponibles(); track b.id) {
+              @for (b of bandesAvecStatut(); track b.id) {
                 <option [value]="b.id">
-                  {{ b.nom }} — Phase : {{ b.phase || 'Repos' }}
+                  {{ b.nom }} — {{ b.statutLabel }}
                 </option>
               }
             </select>
@@ -43,7 +43,7 @@
           </span>
           <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
             <mat-icon class="text-emerald-600 text-[16px] w-[16px] h-[16px] mr-1.5">child_friendly</mat-icon>
-            {{ sessionsGestation().length }} / 11 femelle(s) gestante(s)
+            {{ sessionsGestation().length }} femelle(s) prêtes
           </span>
         </div>
       </div>
@@ -51,9 +51,8 @@
 
     <!-- Content Section -->
     <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
-      @if ($any(selectedBande()?.phase) === 'Gestation' || selectedBande()?.phase === 'Saillie') {
-        @if (sessionsGestation().length > 0) {
-          <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+      @if (sessionsGestation().length > 0) {
+        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
             <div>
               <h3 class="font-bold text-slate-800 text-base">Liste des mises-bas (Lapines gestantes)</h3>
               <p class="text-xs text-slate-500 mt-0.5">Saisissez les résultats de mise-bas pour chaque lapine gestante de la bande (effectif fixe : 11 lapines par bande)</p>
@@ -142,24 +141,12 @@
         } @else {
           <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
             <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">child_friendly</mat-icon>
-            <h4 class="font-bold text-slate-700 text-base mb-1">Aucune femelle gestante trouvée</h4>
+            <h4 class="font-bold text-slate-700 text-base mb-1">Aucune lapine trouvée pour cette bande</h4>
             <p class="text-xs text-slate-500 max-w-md">
-              Bien que cette bande soit marquée en phase de Gestation, aucune saillie active n'a été détectée. Veuillez d'abord enregistrer une session de saillie.
+              Veuillez sélectionner une bande active en gestation pour enregistrer ses naissances.
             </p>
           </div>
         }
-      } @else {
-        <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
-          <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">block</mat-icon>
-          <h4 class="font-bold text-slate-700 text-base mb-1">
-            La {{ selectedBande()?.nom || 'bande sélectionnée' }} n'est pas en phase de gestation
-          </h4>
-          <p class="text-xs text-slate-500 max-w-md">
-            La phase actuelle de cette bande est : <strong class="text-slate-700">{{ selectedBande()?.phase || 'Repos' }}</strong>.<br>
-            Pour pouvoir enregistrer des mises-bas, la bande doit d'abord être en phase de Gestation.
-          </p>
-        </div>
-      }
     </div>
   </form>
 </div>

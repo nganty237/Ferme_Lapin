@@ -188,14 +188,30 @@ export class FicheReproducteurComponent {
     const r = this.reproducteur();
     if (!r || r.sexe !== 'M') return null;
 
-    const sailliesList = this.maleSaillies();
-    const totalSaillies = sailliesList.length;
-    const allMisesBas = this.misesBas() || [];
-    const saillieIds = new Set(sailliesList.map((s: any) => s.id));
-    const porteesProduites = allMisesBas.filter((mb: any) => saillieIds.has(mb.saillieId)).length;
+    const explicitSaillies = this.maleSaillies();
+    
+    // Synchronisation du nombre de saillies selon les bandes actives (Gestation / Saillie)
+    const refBandes = this.referentielService.getReferentielBandes();
+    const activeBandes = (this.bandes() || []).filter((b: any) => b.phase === 'Saillie' || b.phase === 'Gestation');
 
-    const sailliesReussies = sailliesList.filter((s: any) => s.reussie === true || saillieIds.has(s.id)).length;
-    const tauxFertilite = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 0;
+    let syncSailliesCount = 0;
+    activeBandes.forEach((b: any) => {
+      const refB = refBandes.find(rb => rb.id === b.id);
+      if (refB) {
+        const maleGroup = refB.groupesParMale.find(g => g.maleId === r.id);
+        if (maleGroup) {
+          syncSailliesCount += maleGroup.femellesIds.length;
+        }
+      }
+    });
+
+    const totalSaillies = Math.max(explicitSaillies.length, syncSailliesCount);
+    const allMisesBas = this.misesBas() || [];
+    const saillieIds = new Set(explicitSaillies.map((s: any) => s.id));
+    const porteesProduites = allMisesBas.filter((mb: any) => saillieIds.has(mb.saillieId) || mb.maleId === r.id).length;
+
+    const sailliesReussies = Math.max(explicitSaillies.filter((s: any) => s.reussie === true).length, porteesProduites, totalSaillies);
+    const tauxFertilite = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 100;
 
     return {
       totalSaillies,

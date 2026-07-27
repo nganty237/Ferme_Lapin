@@ -49,20 +49,23 @@ export class SaisieSexageComponent {
   bandesDisponibles = computed(() => this.bandes() || []);
   selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
 
+  bandesAvecStatut = computed(() => {
+    const allBandes = this.bandes() || [];
+    return allBandes.map(b => {
+      const estEnSexage = b.phase === 'Sexage' || b.phase === 'Engraissement' || b.phase === 'Allaitement';
+      return {
+        ...b,
+        statutLabel: estEnSexage ? `Phase ${b.phase} — Prête au sexage` : `Au repos (${b.phase})`
+      };
+    });
+  });
+
   sevragesBande = computed(() => {
     const bandeId = this.bandeSelectionnee();
-    const allSevrages = this.sevrages() || [];
-    const allSexages = this.sexages() || [];
     if (!bandeId) return [];
 
-    const list = allSevrages.filter(s => {
-      if (s.bandeId !== bandeId) return false;
-      const dejaSexe = allSexages.some(sex => sex.bandeId === bandeId);
-      if (dejaSexe) return false;
-      return true;
-    });
-
-    return list.slice(0, 11);
+    const allSevrages = this.sevrages() || [];
+    return allSevrages.filter(s => s.bandeId === bandeId).slice(0, 11);
   });
 
   get porteesFormArray() {
@@ -90,7 +93,7 @@ export class SaisieSexageComponent {
       if (allBandes.length > 0) {
         const activeBande = allBandes.find(b => {
           const sevs = allSevrages.filter(s => s.bandeId === b.id);
-          return sevs.length > 0 || b.phase === 'Sexage';
+          return sevs.length > 0 || b.phase === 'Sexage' || b.phase === 'Engraissement';
         }) || allBandes[0];
 
         if (activeBande && this.bandeSelectionnee() !== activeBande.id) {
@@ -100,7 +103,7 @@ export class SaisieSexageComponent {
       }
     }, { allowSignalWrites: true });
 
-    // Synchronisation réactive auto du tableau des portées à sexer
+    // Synchronisation réactive auto du tableau des portées à sexer avec pré-remplissage
     effect(() => {
       const sevs = this.sevragesBande();
       this.updatePorteesArray(sevs);
@@ -116,15 +119,22 @@ export class SaisieSexageComponent {
     }
     this.lastSevragesHash = hash;
 
+    const allSexages = this.sexages() || [];
+
     this.porteesFormArray.clear();
     sevs.forEach(sev => {
+      const existingSex = allSexages.find(sex => sex.bandeId === sev.bandeId);
+      const malesVal = existingSex ? existingSex.nombreMales : Math.floor((sev.sevres || 0) / 2);
+      const femellesVal = existingSex ? existingSex.nombreFemelles : Math.ceil((sev.sevres || 0) / 2);
+      const retenusVal = existingSex ? (existingSex.retenus || 0) : 0;
+
       const group = this.fb.group({
         sevrageId: [sev.id],
         femelleId: [sev.femelleId],
         totalSevres: [sev.sevres],
-        males: [Math.floor((sev.sevres || 0) / 2), [Validators.required, Validators.min(0)]],
-        femelles: [Math.ceil((sev.sevres || 0) / 2), [Validators.required, Validators.min(0)]],
-        retenus: [0, [Validators.min(0)]]
+        males: [malesVal, [Validators.required, Validators.min(0)]],
+        femelles: [femellesVal, [Validators.required, Validators.min(0)]],
+        retenus: [retenusVal, [Validators.min(0)]]
       });
       this.porteesFormArray.push(group);
     });
