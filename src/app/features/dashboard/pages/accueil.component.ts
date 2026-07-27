@@ -69,8 +69,31 @@ export class AccueilComponent {
   async renderCharts(): Promise<void> {
     if (typeof window === 'undefined' || !this.lineChartCanvas) return;
 
-    const { Chart, registerables } = await import('chart.js');
-    Chart.register(...registerables);
+    const {
+      Chart,
+      LineController,
+      BarController,
+      LineElement,
+      BarElement,
+      PointElement,
+      LinearScale,
+      CategoryScale,
+      Tooltip,
+      Legend,
+      Filler
+    } = await import('chart.js');
+    Chart.register(
+      LineController,
+      BarController,
+      LineElement,
+      BarElement,
+      PointElement,
+      LinearScale,
+      CategoryScale,
+      Tooltip,
+      Legend,
+      Filler
+    );
 
     const existingLineChart = Chart.getChart(this.lineChartCanvas.nativeElement);
     if (existingLineChart) {

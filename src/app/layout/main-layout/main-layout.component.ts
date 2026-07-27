@@ -21,13 +21,9 @@ import { SidebarComponent } from '@layout/sidebar/sidebar.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainLayoutComponent {
-  sidebarCollapsed = signal(false);
-
-  constructor() {
-    afterNextRender(() => {
-      this.checkScreenSize();
-    });
-  }
+  sidebarCollapsed = signal(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
 
   @HostListener('window:resize')
   onResize() {
