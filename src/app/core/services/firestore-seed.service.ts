@@ -125,10 +125,13 @@ export class FirestoreSeedService {
       ];
       males.forEach(m => batch.set(doc(db, 'reproducteurs', m.id), m));
 
-      // Femelles (33)
+      // Femelles (33) distribuées selon la matrice officielle des bandes
+      const bandeAIds = ['F001','F002','F003','F004','F012','F013','F014','F015','F023','F024','F025'];
+      const bandeBIds = ['F005','F006','F007','F008','F016','F017','F018','F019','F026','F027','F028'];
+
       for (let i = 1; i <= 33; i++) {
         const id = `F${String(i).padStart(3, '0')}`;
-        const bandeId = i <= 11 ? 'bande-a' : i <= 22 ? 'bande-b' : 'bande-c';
+        const bandeId = bandeAIds.includes(id) ? 'bande-a' : bandeBIds.includes(id) ? 'bande-b' : 'bande-c';
         const maleResponsableId = i <= 11 ? 'M01' : i <= 22 ? 'M02' : 'M03';
         const etat = bandeId === 'bande-a' ? 'En gestation' : 'Au repos';
         batch.set(doc(db, 'reproducteurs', id), {
@@ -140,6 +143,7 @@ export class FirestoreSeedService {
           etat
         });
       }
+
       await batch.commit();
       console.log('[FirestoreSeedService] Reproducteurs initialisés.');
     }

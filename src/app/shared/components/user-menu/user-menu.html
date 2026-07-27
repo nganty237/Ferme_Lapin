@@ -1,4 +1,4 @@
-<div class="flex items-center gap-2 cursor-pointer select-none px-2 py-1 rounded-lg hover:bg-slate-50 transition-colors" [matMenuTriggerFor]="menu">
+<button type="button" class="flex items-center gap-2 cursor-pointer select-none px-2 py-1 rounded-lg hover:bg-slate-50 transition-colors border-0 bg-transparent" [matMenuTriggerFor]="menu">
   <div class="relative">
     <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs overflow-hidden">
       ER
@@ -9,7 +9,8 @@
   <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #64748b; display: flex; align-items: center; justify-content: center;">
     keyboard_arrow_down
   </mat-icon>
-</div>
+</button>
+
 
 <mat-menu #menu="matMenu" xPosition="before" class="modern-profile-menu">
   <!-- En-tête de profil -->

@@ -7,6 +7,7 @@ import {
   GroupeFemellsParMale 
 } from '../models';
 import { StorageService } from './storage.service';
+import { DEFAULT_REFERENTIEL_BANDES } from '../constants/farm-referentiels.defaults';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class ReferentielService {
   private storageService = inject(StorageService);
 
   getReferentielBandes(): ReferentielBande[] {
-    return this.storageService.getReferentielBandes();
+    const loaded = this.storageService.getReferentielBandes();
+    return loaded && loaded.length > 0 ? loaded : DEFAULT_REFERENTIEL_BANDES;
   }
 
   getCompositionBande(bandeId: BandeId): ReferentielBande | undefined {
@@ -41,9 +43,22 @@ export class ReferentielService {
     return males.length > 0 ? males[0].id : 'M01';
   }
 
+  getBandeDeFemelle(femelleId: string): BandeId {
+    const bandes = this.getReferentielBandes();
+    for (const b of bandes) {
+      if (b.groupesParMale) {
+        const fIds = b.groupesParMale.flatMap(g => g.femellesIds);
+        if (fIds.includes(femelleId)) {
+          return b.id;
+        }
+      }
+    }
+    return 'bande-a';
+  }
 
   getCalendrierSaillieStatique(bandeId: BandeId): CalendrierSaillieItem[] {
     const items = this.storageService.getReferentielCalendrierSaillie();
     return items.filter(item => item.bandeId === bandeId);
   }
 }
+

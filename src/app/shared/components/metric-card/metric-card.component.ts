@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
     <div class="h-full flex flex-col justify-between p-5 bg-white border border-slate-200/80 rounded-xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-150">
       <div class="flex justify-between items-start gap-3">
         <div>
-          <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ label() }}</p>
+          <p class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2">{{ label() }}</p>
           <p class="text-2xl font-bold text-slate-800 tracking-tight">{{ value() }}</p>
         </div>
         <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" [style.background]="iconBg()" [style.color]="iconColor()">
@@ -19,8 +19,9 @@ import { MatIconModule } from '@angular/material/icon';
         </div>
       </div>
       @if (hint()) {
-        <p class="text-[11px] text-slate-400 mt-1.5">{{ hint() }}</p>
+        <p class="text-[11px] text-slate-600 mt-1.5">{{ hint() }}</p>
       }
+
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush

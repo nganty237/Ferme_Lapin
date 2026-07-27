@@ -103,8 +103,10 @@ export class ListeFemellesComponent {
       const survie = totalVivantsSevres > 0 ? Math.round((totalSevres / totalVivantsSevres) * 100) : 0;
 
       const maleResponsableId = f.maleResponsableId || this.referentielService.getMaleResponsable(f.id);
-      const bandeId = f.bandeId || 'bande-a';
+      const bandeId = f.bandeId || this.referentielService.getBandeDeFemelle(f.id);
       const bandeLabel = bandeId === 'bande-a' ? 'Bande A' : bandeId === 'bande-b' ? 'Bande B' : 'Bande C';
+
+
 
       return {
         id: f.id,
