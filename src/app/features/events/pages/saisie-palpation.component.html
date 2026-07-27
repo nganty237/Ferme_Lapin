@@ -18,7 +18,7 @@
             (ngModelChange)="onBandeChange($event)">
             @for (b of bandesDisponibles(); track b.id) {
               <option [value]="b.id">
-                {{ b.nom }} (11 lapines)
+                {{ b.nom }} — {{ b.statutLabel }}
               </option>
             }
           </select>
@@ -33,13 +33,36 @@
             class="form-input"
             [formControl]="$any(palpationForm.get('datePalpation'))" />
         </div>
+
+        <div class="flex items-center self-end pb-1">
+          <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-lg border border-slate-200 transition-colors">
+            <input 
+              type="checkbox"
+              [checked]="uniquementAPalper()"
+              (change)="toggleFiltreSeulementAPalper()"
+              class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+            Uniquement bandes à palper
+          </label>
+        </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
-          <mat-icon class="text-emerald-600 text-[16px] w-[16px] h-[16px] mr-1.5">pets</mat-icon>
-          {{ sessionsBande().length }} femelle(s) à palper
-        </span>
+        @if (selectedBandeStatut()?.estEligiblePalpation) {
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60">
+            <mat-icon class="text-amber-600 text-[16px] w-[16px] h-[16px] mr-1.5">pending_actions</mat-icon>
+            {{ sessionsBande().length }} femelle(s) à palper
+          </span>
+        } @else if ((selectedBandeStatut()?.nbGestantes || 0) > 0) {
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+            <mat-icon class="text-emerald-600 text-[16px] w-[16px] h-[16px] mr-1.5">check_circle</mat-icon>
+            {{ selectedBandeStatut()?.nbGestantes }}/{{ selectedBandeStatut()?.totalFemelles }} Gestantes (100% Positif)
+          </span>
+        } @else {
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            <mat-icon class="text-slate-500 text-[16px] w-[16px] h-[16px] mr-1.5">info</mat-icon>
+            Bande au repos
+          </span>
+        }
       </div>
     </div>
   </div>
@@ -154,17 +177,32 @@
           </button>
         </div>
       } @else {
-        <!-- Empty State -->
-        <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
-          <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
-            <mat-icon class="text-[24px]">check_circle_outline</mat-icon>
+        <!-- Empty State / Status Confirmation -->
+        @if ((selectedBandeStatut()?.nbGestantes || 0) > 0 && (selectedBandeStatut()?.nbGestantes === selectedBandeStatut()?.totalFemelles)) {
+          <div class="p-10 text-center bg-emerald-50/50 border border-emerald-200 rounded-xl">
+            <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center mb-3.5 shadow-xs">
+              <mat-icon class="text-[30px] w-[30px] h-[30px]">verified</mat-icon>
+            </div>
+            <h4 class="font-bold text-emerald-900 text-lg mb-1">
+              Diagnostic 100% Positif — {{ selectedBandeStatut()?.nom }}
+            </h4>
+            <p class="text-sm text-emerald-800 max-w-lg mx-auto leading-relaxed">
+              Toutes les lapines ({{ selectedBandeStatut()?.nbGestantes }}/{{ selectedBandeStatut()?.totalFemelles }}) de la {{ selectedBandeStatut()?.nom }} ont été confirmées <strong>En gestation</strong>. Aucune palpation supplémentaire n'est en attente pour cette bande.
+            </p>
           </div>
-          <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie à palper</h4>
-          <p class="text-sm text-slate-500 max-w-md mx-auto">
-            Toutes les lapines de cette bande ont déjà un diagnostic enregistré ou aucune saillie récente n'est en attente de palpation.
-          </p>
-        </div>
+        } @else {
+          <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
+            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
+              <mat-icon class="text-[24px]">check_circle_outline</mat-icon>
+            </div>
+            <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie à palper</h4>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">
+              Toutes les lapines de cette bande ont déjà un diagnostic enregistré ou aucune saillie récente n'est en attente de palpation.
+            </p>
+          </div>
+        }
       }
     </form>
   </div>
 </div>
+

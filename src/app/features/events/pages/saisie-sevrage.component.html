@@ -13,13 +13,13 @@
             Bande en allaitement
           </label>
           <select 
-            class="form-select"
+            class="form-select font-medium"
             [ngModel]="bandeSelectionnee()"
             (ngModelChange)="sevrageForm.get('bande')?.setValue($event)">
             <option [value]="null" disabled>Sélectionner la bande</option>
-            @for (b of bandesDisponibles(); track b.id) {
+            @for (b of bandesAvecStatut(); track b.id) {
               <option [value]="b.id">
-                {{ b.nom }} (11 lapines)
+                {{ b.nom }} — {{ b.statutLabel }}
               </option>
             }
           </select>

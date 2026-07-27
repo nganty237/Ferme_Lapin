@@ -44,63 +44,90 @@ export class SaisieMiseBasComponent {
   form: FormGroup;
   get miseBasForm(): FormGroup { return this.form; }
 
-  selectedBandeId = signal<string>('bande-b');
+  selectedBandeId = signal<string>('bande-a');
   bandeSelectionnee = this.selectedBandeId;
   bandesDisponibles = computed(() => this.bandes() || []);
   selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.selectedBandeId()));
   isSubmitting = signal<boolean>(false);
 
   /**
-   * Filtrage strict des saillies éligibles à la mise-bas pour la bande sélectionnée :
-   * - Strictement rattachées à la bande sélectionnée (s.bandeId === bandeId)
-   * - Pas de mise-bas déjà enregistrée (saillie non clôturée)
-   * - Pas de palpation négative
-   * - Maximum 11 femelles (taille standard d'une bande)
+   * Statut et indicateurs détaillés de mise-bas pour chaque bande
+   */
+  bandesAvecStatut = computed(() => {
+    const allBandes = this.bandes() || [];
+    const allRepros = this.reproducteurs() || [];
+
+    return allBandes.map(b => {
+      const femellesBande = allRepros.filter(r => r.sexe === 'F' && r.bandeId === b.id && r.etat !== 'Morte' && r.etat !== 'Réformée');
+      const totalFemelles = femellesBande.length || 11;
+      const estEnPhaseAttente = b.phase === 'Gestation' || b.phase === 'Saillie' || b.phase === 'Allaitement' || (b.phase as string) === 'MiseBas';
+
+      let statutLabel = '';
+      if (estEnPhaseAttente) {
+        statutLabel = `Phase ${b.phase} — ${totalFemelles} lapines prêtes`;
+      } else {
+        statutLabel = `Au repos (${totalFemelles} lapines)`;
+      }
+
+      return {
+        ...b,
+        totalFemelles,
+        statutLabel,
+        estEligible: estEnPhaseAttente
+      };
+    });
+  });
+
+  /**
+   * Filtrage et préparation des 11 femelles de la bande sélectionnée pour la mise-bas
    */
   sailliesEligibles = computed(() => {
-    const bandeId = this.selectedBandeId();
+    const bandeId = this.selectedBandeId() as any;
+    if (!bandeId) return [];
+
     const allSaillies = this.saillies() || [];
-    const allMB = this.misesBas() || [];
-    const allPalpations = this.palpations() || [];
     const repros = this.reproducteurs() || [];
 
-    const result = allSaillies.filter(s => {
-      if (s.bandeId !== bandeId) return false;
-      const dejaMB = allMB.some(mb => mb.saillieId === s.id);
-      if (dejaMB) return false;
-      const palpationNegative = allPalpations.some(p => p.saillieId === s.id && p.resultat === 'Negative');
-      if (palpationNegative) return false;
-      // TK-03 : exclure les femelles mortes ou réformées
+    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === bandeId && r.etat !== 'Morte' && r.etat !== 'Réformée');
+    const staticSaillies = this.bandeService.getCalendrierSaillie(bandeId, new Date());
+
+    let listForBande = allSaillies.filter(s => s.bandeId === bandeId);
+
+    if (listForBande.length < femellesBande.length && staticSaillies.length > 0) {
+      staticSaillies.forEach(st => {
+        if (!listForBande.some(s => s.femelleId === st.femelleId)) {
+          listForBande.push(st);
+        }
+      });
+    }
+
+    if (listForBande.length === 0 && staticSaillies.length > 0) {
+      listForBande = staticSaillies;
+    }
+
+    return listForBande.filter(s => {
       const repro = repros.find(r => r.id === s.femelleId);
       if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
       return true;
     });
-
-    return result.slice(0, 11);
   });
 
   constructor() {
     this.form = this.fb.group({
-      bandeId: ['bande-b', Validators.required],
-      bande: ['bande-b'],
+      bandeId: ['bande-a', Validators.required],
+      bande: ['bande-a'],
       dateMiseBas: [new Date(), Validators.required],
       portees: this.fb.array([])
     });
 
-    // Auto-détection et pré-sélection de la bande actuellement en gestation / mise-bas
+    // Auto-détection et pré-sélection prioritaire de la bande en phase Gestation / Saillie / Allaitement
     effect(() => {
       const allBandes = this.bandes() || [];
-      const allSaillies = this.saillies() || [];
-      const allMB = this.misesBas() || [];
-
       if (allBandes.length > 0) {
-        const bandeGestation = allBandes.find(b => {
-          const pendings = allSaillies.filter(s => s.bandeId === b.id && !allMB.some(mb => mb.saillieId === s.id));
-          return pendings.length > 0 || b.phase === 'Saillie' || (b.phase as string) === 'Gestation';
-        });
-        if (bandeGestation && this.selectedBandeId() !== bandeGestation.id) {
-          this.selectedBandeId.set(bandeGestation.id);
-          this.form.patchValue({ bandeId: bandeGestation.id, bande: bandeGestation.id });
+        const candidate = allBandes.find(b => b.phase === 'Gestation' || b.phase === 'Saillie' || b.phase === 'Allaitement');
+        if (candidate && this.selectedBandeId() !== candidate.id) {
+          this.selectedBandeId.set(candidate.id);
+          this.form.patchValue({ bandeId: candidate.id, bande: candidate.id });
         }
       }
     }, { allowSignalWrites: true });
@@ -144,15 +171,22 @@ export class SaisieMiseBasComponent {
     }
     this.lastEligiblesHash = hash;
 
+    const allMB = this.misesBas() || [];
+
     this.porteesArray.clear();
     eligibles.forEach(s => {
+      const existingMB = allMB.find(mb => mb.saillieId === s.id || mb.femelleId === s.femelleId);
+      const vivantsVal = existingMB ? existingMB.vivants : 7;
+      const mortsNesVal = existingMB ? existingMB.mortsNes : 0;
+      const obsVal = (existingMB as any)?.observations || '';
+
       const group = this.fb.group({
         saillieId: [s.id],
         femelleId: [s.femelleId],
         dateSaillie: [s.dateSaillie],
-        vivants: [7, [Validators.required, Validators.min(0)]], // TK-04 : portée par défaut = 7
-        mortsNes: [0, [Validators.required, Validators.min(0)]],
-        observations: ['']
+        vivants: [vivantsVal, [Validators.required, Validators.min(0)]],
+        mortsNes: [mortsNesVal, [Validators.required, Validators.min(0)]],
+        observations: [obsVal]
       });
       this.porteesArray.push(group);
     });
@@ -180,9 +214,7 @@ export class SaisieMiseBasComponent {
         const mortsNes = Number(p.mortsNes) || 0;
         const total = vivants + mortsNes;
         const viabilite = total > 0 ? Math.round((vivants / total) * 100) : 0;
-        // TK-06 : cycleId dynamique depuis la bande
         const bande = (this.bandes() || []).find(b => b.id === val.bandeId);
-        // TK-04 : saillie source pour récupérer cycleId
         const saillie = (this.saillies() || []).find(s => s.id === p.saillieId);
 
         return {
@@ -192,10 +224,11 @@ export class SaisieMiseBasComponent {
           dateMiseBas: val.dateMiseBas,
           vivants,
           mortsNes,
-          nes: vivants + mortsNes,                                         // TK-04 : total nés
-          cycleId: saillie?.cycleId ?? `cycle-${val.bandeId}-${bande?.numeroCycle || 1}`,  // TK-04 + TK-06
+          nes: vivants + mortsNes,
+          cycleId: saillie?.cycleId ?? `cycle-${val.bandeId}-${bande?.numeroCycle || 1}`,
           bandeId: val.bandeId,
-          viabiliteCalculee: viabilite
+          viabiliteCalculee: viabilite,
+          observations: p.observations || ''
         };
       });
 

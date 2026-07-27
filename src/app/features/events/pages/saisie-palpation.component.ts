@@ -13,6 +13,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatRadioModule } from '@angular/material/radio';
 import { provideNativeDateAdapter } from '@angular/material/core';
 
+export interface BandeStatutPalpation {
+  id: string;
+  nom: string;
+  phase: string;
+  totalFemelles: number;
+  nbPalpationsAttente: number;
+  nbGestantes: number;
+  nbAuRepos: number;
+  statutLabel: string;
+  estEligiblePalpation: boolean;
+}
+
 @Component({
   selector: 'app-saisie-palpation',
   providers: [provideNativeDateAdapter()],
@@ -48,19 +60,92 @@ export class SaisiePalpationComponent {
 
   selectedBandeId = signal<string>('bande-a');
   bandeSelectionnee = this.selectedBandeId;
-  bandesDisponibles = computed(() => this.bandes() || []);
+  uniquementAPalper = signal<boolean>(true); // Activé par défaut pour cibler directement la bande en gestation
   isSubmitting = signal<boolean>(false);
 
-  sailliesAPalper = computed(() => {
+  /**
+   * Statut et indicateurs détaillés de palpation pour chaque bande
+   */
+  bandesAvecStatut = computed<BandeStatutPalpation[]>(() => {
+    const allBandes = this.bandes() || [];
     const allSaillies = this.saillies() || [];
     const allPalpations = this.palpations() || [];
-    const repros = this.reproducteurs() || [];
-    const selectedBande = this.selectedBandeId();
+    const allRepros = this.reproducteurs() || [];
 
-    return allSaillies.filter(s => {
-      const hasPalpation = allPalpations.some(p => p.saillieId === s.id);
-      if (s.bandeId !== selectedBande || hasPalpation) return false;
-      // TK-03 : exclure les femelles mortes ou réformées
+    return allBandes.map(b => {
+      const femellesBande = allRepros.filter(r => r.sexe === 'F' && r.bandeId === b.id && r.etat !== 'Morte' && r.etat !== 'Réformée');
+      const totalFemelles = femellesBande.length || 11;
+      
+      const sailliesBande = allSaillies.filter(s => s.bandeId === b.id);
+      const pendings = sailliesBande.filter(s => !allPalpations.some(p => p.saillieId === s.id));
+      const nbPalpationsAttente = pendings.length;
+      
+      const nbGestantes = femellesBande.filter(f => f.etat === 'En gestation').length;
+      const nbAuRepos = femellesBande.filter(f => f.etat === 'Au repos').length;
+
+      const estEnPhaseGestation = b.phase === 'Gestation' || b.phase === 'Saillie';
+      const estEligiblePalpation = estEnPhaseGestation || nbPalpationsAttente > 0;
+
+      let statutLabel = '';
+      if (estEnPhaseGestation) {
+        statutLabel = `${totalFemelles} femelles (Phase ${b.phase})`;
+      } else {
+        statutLabel = `Au repos (${totalFemelles} lapines)`;
+      }
+
+      return {
+        id: b.id,
+        nom: b.nom,
+        phase: b.phase,
+        totalFemelles,
+        nbPalpationsAttente,
+        nbGestantes,
+        nbAuRepos,
+        statutLabel,
+        estEligiblePalpation
+      };
+    });
+  });
+
+  bandesDisponibles = computed(() => {
+    const list = this.bandesAvecStatut();
+    if (this.uniquementAPalper()) {
+      const filtered = list.filter(b => b.estEligiblePalpation);
+      return filtered.length > 0 ? filtered : list;
+    }
+    return list;
+  });
+
+  selectedBandeStatut = computed(() => {
+    const id = this.selectedBandeId();
+    return this.bandesAvecStatut().find(b => b.id === id);
+  });
+
+  sailliesAPalper = computed(() => {
+    const selectedBande = this.selectedBandeId() as BandeId;
+    if (!selectedBande) return [];
+
+    const allSaillies = this.saillies() || [];
+    const repros = this.reproducteurs() || [];
+
+    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === selectedBande && r.etat !== 'Morte' && r.etat !== 'Réformée');
+    const staticSaillies = this.bandeService.getCalendrierSaillie(selectedBande, new Date());
+
+    let listForBande = allSaillies.filter(s => s.bandeId === selectedBande);
+
+    if (listForBande.length < femellesBande.length && staticSaillies.length > 0) {
+      staticSaillies.forEach(st => {
+        if (!listForBande.some(s => s.femelleId === st.femelleId)) {
+          listForBande.push(st);
+        }
+      });
+    }
+
+    if (listForBande.length === 0 && staticSaillies.length > 0) {
+      listForBande = staticSaillies;
+    }
+
+    return listForBande.filter(s => {
       const repro = repros.find(r => r.id === s.femelleId);
       if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
       return true;
@@ -75,17 +160,34 @@ export class SaisiePalpationComponent {
       palpationsArray: this.fb.array([])
     });
 
-    // TK-05 : effet réactif — reconstruit le FormArray dès que les saillies disponibles changent
+    // Auto-détection et pré-sélection prioritaire de la bande en phase Gestation / Saillie
+    effect(() => {
+      const statusList = this.bandesAvecStatut();
+      if (statusList.length > 0) {
+        const candidate = statusList.find(b => b.phase === 'Gestation' || b.phase === 'Saillie' || b.estEligiblePalpation);
+        if (candidate && this.selectedBandeId() !== candidate.id) {
+          this.selectedBandeId.set(candidate.id);
+          this.form.patchValue({ bandeId: candidate.id, bande: candidate.id });
+        }
+      }
+    }, { allowSignalWrites: true });
+
+    // Reconstruction réactive des champs de palpation dès que les saillies éligibles changent
     effect(() => {
       const saillies = this.sailliesAPalper();
+      const allPalpations = this.palpations() || [];
       this.palpationsArray.clear();
       saillies.forEach(s => {
+        const existingPalp = allPalpations.find(p => p.saillieId === s.id || p.femelleId === s.femelleId);
+        const res = existingPalp ? existingPalp.resultat : 'Positive';
+        const obs = existingPalp ? (existingPalp.observations || '') : '';
+
         const group = this.fb.group({
           saillieId: [s.id],
           femelleId: [s.femelleId],
           dateSaillie: [s.dateSaillie],
-          resultat: ['Positive', Validators.required],
-          observations: ['']
+          resultat: [res, Validators.required],
+          observations: [obs]
         });
         this.palpationsArray.push(group);
       });
@@ -106,6 +208,10 @@ export class SaisiePalpationComponent {
     this.selectedBandeId.set(bandeId);
     this.form.patchValue({ bandeId, bande: bandeId });
     this.initPalpationsForBande(bandeId);
+  }
+
+  toggleFiltreSeulementAPalper(): void {
+    this.uniquementAPalper.update(v => !v);
   }
 
   private initPalpationsForBande(bandeId: string): void {
@@ -142,7 +248,6 @@ export class SaisiePalpationComponent {
       const arrayValues = this.palpationsArray.value;
 
       arrayValues.forEach((p: any) => {
-        // TK-06 : cycleId dynamique depuis la bande
         const bande = (this.bandes() || []).find(b => b.id === val.bandeId);
         this.bandeService.enregistrerPalpation({
           id: `palp_${Date.now()}_${p.femelleId}`,
@@ -155,7 +260,6 @@ export class SaisiePalpationComponent {
           observations: p.observations
         });
 
-        // Fix P0 #5 : palpation négative → replanification immédiate d'une saillie.
         if (p.resultat === 'Negative') {
           const dateReSaillie = new Date(val.datePalpation);
           dateReSaillie.setDate(dateReSaillie.getDate() + 2);
@@ -171,10 +275,13 @@ export class SaisiePalpationComponent {
   }
 
   onReset(): void {
+    const defaultId = this.bandesDisponibles()[0]?.id || 'bande-a';
     this.form.reset({
-      bandeId: 'bande-a',
+      bandeId: defaultId,
       datePalpation: new Date()
     });
-    this.initPalpationsForBande('bande-a');
+    this.selectedBandeId.set(defaultId);
+    this.initPalpationsForBande(defaultId);
   }
 }
+

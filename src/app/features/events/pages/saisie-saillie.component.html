@@ -1,14 +1,127 @@
 <div class="page-container">
   <app-page-header
     title="Assistant de Saillie & Reproduction"
-    subtitle="Enregistrer une saillie individuelle">
+    subtitle="Saillie rapide par bande (1-clic) ou enregistrement individuel">
   </app-page-header>
+
+  <!-- Sélecteur de mode de saillie -->
+  <div class="flex items-center gap-3 mb-6 bg-white p-2 border border-slate-200 rounded-xl w-fit shadow-xs">
+    <button 
+      type="button" 
+      (click)="modeSaisie.set('bande')"
+      [class]="modeSaisie() === 'bande' ? 'px-4 py-2 text-xs font-bold rounded-lg bg-emerald-700 text-white shadow-xs flex items-center gap-2 cursor-pointer transition-all' : 'px-4 py-2 text-xs font-semibold rounded-lg bg-transparent text-slate-600 hover:bg-slate-100 flex items-center gap-2 cursor-pointer transition-all'">
+      <mat-icon class="text-[18px] w-[18px] h-[18px]">groups</mat-icon>
+      Saillie Globale par Bande (1-Clic)
+    </button>
+    <button 
+      type="button" 
+      (click)="modeSaisie.set('individuel')"
+      [class]="modeSaisie() === 'individuel' ? 'px-4 py-2 text-xs font-bold rounded-lg bg-emerald-700 text-white shadow-xs flex items-center gap-2 cursor-pointer transition-all' : 'px-4 py-2 text-xs font-semibold rounded-lg bg-transparent text-slate-600 hover:bg-slate-100 flex items-center gap-2 cursor-pointer transition-all'">
+      <mat-icon class="text-[18px] w-[18px] h-[18px]">person</mat-icon>
+      Saillie Individuelle
+    </button>
+  </div>
 
   <!-- Layout Principal (2 colonnes) -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Formulaire principal (2 cols sur large screen) -->
     <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs lg:col-span-2">
-      <!-- Form Saisie Individuelle -->
+      
+      @if (modeSaisie() === 'bande') {
+        <!-- Mode 1-Clic : Saillie Globale par Bande -->
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">flash_on</mat-icon>
+              Saillie Globale d'une Bande Entière (1-Clic)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">Associe automatiquement toutes les lapines de la bande à leurs mâles responsables attribués</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Sélection de la Bande -->
+            <div>
+              <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+                Bande à saillir <span class="text-rose-500">*</span>
+              </label>
+              <select 
+                class="form-select w-full font-medium"
+                [ngModel]="selectedBandeId()"
+                (ngModelChange)="selectedBandeId.set($event)">
+                @for (b of bandesAvecValidation(); track b.id) {
+                  <option [value]="b.id" [disabled]="b.bloque">
+                    {{ b.nom }} — Phase {{ b.phase }} @if (b.bloque) { ({{ b.motifBloquant }}) }
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- Date de la Saillie -->
+            <div>
+              <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
+                Date de mise en saillie <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                type="date"
+                class="form-input w-full"
+                [ngModel]="dateSaillieBande()"
+                (ngModelChange)="dateSaillieBande.set($event)" />
+            </div>
+          </div>
+
+          <!-- Bannière d'avertissement si la saillie est bloquée -->
+          @if (!validationSaillieBande().autorise) {
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl my-1 flex items-start gap-3 shadow-2xs">
+              <mat-icon class="text-amber-600 text-[22px] w-[22px] h-[22px] mt-0.5">lock</mat-icon>
+              <div>
+                <h4 class="font-bold text-amber-900 text-xs uppercase tracking-wide">Saillie Impossible (Rotation Zootechnique Verrouillée)</h4>
+                <p class="text-xs text-amber-800 mt-1 leading-relaxed">{{ validationSaillieBande().raison }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Carte de résumé du plan de saillie -->
+          <div class="bg-emerald-50/60 border border-emerald-200/70 rounded-xl p-4 my-1">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs">
+                  {{ planSaillieBande().length }}
+                </span>
+                <span class="font-bold text-slate-800 text-sm">Lapines prêtes pour l'accouplement</span>
+              </div>
+              <span class="text-xs text-emerald-800 font-semibold bg-emerald-100 px-2.5 py-1 rounded-full">
+                3 Mâles attribués
+              </span>
+            </div>
+
+            <!-- Grille d'association femelle <-> mâle -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-48 overflow-y-auto pr-1">
+              @for (item of planSaillieBande(); track item.femelleId) {
+                <div class="bg-white p-2.5 border border-slate-200 rounded-lg flex items-center justify-between text-xs shadow-2xs">
+                  <span class="font-mono font-bold text-slate-800">♀ {{ item.femelleId }}</span>
+                  <span class="text-slate-400 font-bold">➔</span>
+                  <span class="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">♂ {{ item.maleId }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action 1-Clic -->
+          <div class="flex items-center justify-end gap-4 pt-4 border-t border-slate-100">
+            <button 
+              type="button"
+              (click)="onLancerSaillieBande()"
+              [disabled]="isSubmitting() || planSaillieBande().length === 0 || !validationSaillieBande().autorise"
+              class="w-full sm:w-auto px-6 py-3 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <mat-icon class="text-[20px] w-[20px] h-[20px]">bolt</mat-icon>
+              Lancer la saillie globale ({{ planSaillieBande().length }} lapines en 1-clic)
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Form Saisie Individuelle -->
         <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
           <div>
             <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
@@ -27,12 +140,13 @@
                 Femelle <span class="text-rose-500">*</span>
               </label>
               <select 
-                class="form-select w-full" 
-                formControlName="femelleId">
+                class="form-select w-full font-medium" 
+                formControlName="femelleId"
+                (change)="selectedFemelleId.set($any($event.target).value)">
                 <option value="" disabled selected>Sélectionner une femelle</option>
-                @for (f of femellesActives(); track f.id) {
-                  <option [value]="f.id">
-                    {{ f.id }} ({{ f.bandeId || 'Sans bande' }})
+                @for (f of femellesAvecValidation(); track f.id) {
+                  <option [value]="f.id" [disabled]="f.bloque">
+                    {{ f.id }} ({{ f.bandeId || 'Sans bande' }}) @if (f.bloque) { — {{ f.motifBloquant }} }
                   </option>
                 }
               </select>
@@ -68,6 +182,17 @@
             </div>
           </div>
 
+          <!-- Bannière d'avertissement individuelle si la saillie est bloquée -->
+          @if (!validationSaillieIndividuelle().autorise) {
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl my-1 flex items-start gap-3 shadow-2xs">
+              <mat-icon class="text-amber-600 text-[22px] w-[22px] h-[22px] mt-0.5">lock</mat-icon>
+              <div>
+                <h4 class="font-bold text-amber-900 text-xs uppercase tracking-wide">Saillie Individuelle Impossible (Verrou Zootechnique)</h4>
+                <p class="text-xs text-amber-800 mt-1 leading-relaxed">{{ validationSaillieIndividuelle().raison }}</p>
+              </div>
+            </div>
+          }
+
           <!-- Observations -->
           <div>
             <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
@@ -84,7 +209,7 @@
           <div class="flex items-center justify-between gap-4 pt-4 border-t border-slate-100">
             <button 
               type="button" 
-              (click)="saillieIndivForm.reset({ date: dateActuelle() })" 
+              (click)="saillieIndivForm.reset({ date: dateActuelle() }); selectedFemelleId.set('');" 
               class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer">
               <mat-icon class="text-[16px] w-[16px] h-[16px]">refresh</mat-icon>
               Réinitialiser
@@ -92,13 +217,14 @@
 
             <button 
               type="submit" 
-              [disabled]="saillieIndivForm.invalid || isSubmitting()" 
-              class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
+              [disabled]="saillieIndivForm.invalid || isSubmitting() || !validationSaillieIndividuelle().autorise" 
+              class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer">
               <mat-icon class="text-[18px] w-[18px] h-[18px]">check_circle</mat-icon>
               Enregistrer la saillie
             </button>
           </div>
         </form>
+      }
     </div>
 
     <!-- Timeline des prévisions biologiques (Colonne Droite) -->

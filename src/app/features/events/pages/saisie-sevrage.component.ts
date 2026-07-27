@@ -44,23 +44,32 @@ export class SaisieSevrageComponent {
     return this.bandes() || [];
   });
 
+  bandesAvecStatut = computed(() => {
+    const allBandes = this.bandes() || [];
+    return allBandes.map(b => {
+      const estEnAllaitement = b.phase === 'Allaitement' || b.phase === 'Sexage' || (b.phase as string) === 'MiseBas';
+      return {
+        ...b,
+        statutLabel: estEnAllaitement ? `Phase ${b.phase} — Prête au sevrage` : `Au repos (${b.phase})`
+      };
+    });
+  });
+
   sevrageForm: FormGroup;
-  bandeSelectionnee = signal<string | null>(null);
+  bandeSelectionnee = signal<string | null>('bande-a');
   selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
   isSubmitting = signal(false);
 
   misesBasBande = computed(() => {
     const bandeId = this.bandeSelectionnee();
-    const allMisesBas = this.misesBas() || [];
-    const allSevrages = this.sevrages() || [];
-    const repros = this.reproducteurs() || [];
     if (!bandeId) return [];
 
-    return allMisesBas.filter(mb => {
-      if (mb.bandeId !== bandeId) return false;
-      const alreadySevre = allSevrages.find(s => s.miseBasId === mb.id);
-      if (alreadySevre) return false;
-      // TK-03 : exclure les femelles mortes ou réformées
+    const allMisesBas = this.misesBas() || [];
+    const repros = this.reproducteurs() || [];
+
+    const list = allMisesBas.filter(mb => mb.bandeId === bandeId);
+    
+    return list.filter(mb => {
       const repro = repros.find(r => r.id === mb.femelleId);
       if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
       return true;
@@ -74,7 +83,7 @@ export class SaisieSevrageComponent {
   constructor() {
     const todayStr = new Date().toISOString().substring(0, 10);
     this.sevrageForm = this.fb.group({
-      bande: ['', Validators.required],
+      bande: ['bande-a', Validators.required],
       dateCommune: [todayStr, Validators.required],
       femelles: this.fb.array([])
     });
@@ -85,16 +94,32 @@ export class SaisieSevrageComponent {
         this.bandeSelectionnee.set(bandeId || null);
       });
 
-    // TK-05 : effet réactif — reconstruit le FormArray dès que misesBasBande() change
+    // Auto-sélection prioritaire de la bande actuellement en phase Allaitement / MiseBas / Sexage
+    effect(() => {
+      const allBandes = this.bandes() || [];
+      if (allBandes.length > 0) {
+        const candidate = allBandes.find(b => b.phase === 'Allaitement' || (b.phase as string) === 'MiseBas' || b.phase === 'Sexage');
+        if (candidate && this.bandeSelectionnee() !== candidate.id) {
+          this.bandeSelectionnee.set(candidate.id);
+          this.sevrageForm.patchValue({ bande: candidate.id }, { emitEvent: false });
+        }
+      }
+    }, { allowSignalWrites: true });
+
+    // Reconstruction réactive auto du tableau des portées à sevrer avec pré-remplissage des sevrages existants
     effect(() => {
       const mbs = this.misesBasBande();
+      const allSevrages = this.sevrages() || [];
       this.femellesFormArray.clear();
       mbs.forEach(mb => {
+        const existingSev = allSevrages.find(s => s.miseBasId === mb.id || s.femelleId === mb.femelleId);
+        const sevresVal = existingSev ? existingSev.sevres : (mb.vivants || 7);
+
         const group = this.fb.group({
           miseBasId: [mb.id],
           femelleId: [mb.femelleId],
-          vivantsInitiaux: [mb.vivants],
-          sevres: [mb.vivants, [Validators.required, Validators.min(0)]],
+          vivantsInitiaux: [mb.vivants || 7],
+          sevres: [sevresVal, [Validators.required, Validators.min(0)]],
           observations: ['']
         });
         this.femellesFormArray.push(group);

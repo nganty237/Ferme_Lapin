@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService } from '@core/services';
+import { CalculationService, BandeService, ReferentielService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
-import { isMale } from '@core/models';
+import { isMale, Bande } from '@core/models';
 
 interface MaleRow {
   id: string;
@@ -26,11 +26,14 @@ interface MaleRow {
 })
 export class ListeMalesComponent {
   private calcService = inject(CalculationService);
+  private bandeService = inject(BandeService);
+  private referentielService = inject(ReferentielService);
   private router = inject(Router);
 
   reproducteurs = toSignal(this.calcService.reproducteurs$);
   sailliesList = toSignal(this.calcService.saillies$);
   misesBasList = toSignal(this.calcService.misesBas$);
+  bandesList = toSignal(this.bandeService.bandes$);
 
   filtreEtat = '';
   sortCol = 'id';
@@ -47,17 +50,36 @@ export class ListeMalesComponent {
     const repros = (this.reproducteurs() || []).filter(isMale);
     const saillies = this.sailliesList() || [];
     const misesBas = this.misesBasList() || [];
+    const bandes = this.bandesList() || [];
 
     let rows: MaleRow[] = repros.map(m => {
-      const maleSaillies = saillies.filter((s: any) => s.maleId === m.id);
-      const saillieIds = new Set(maleSaillies.map((s: any) => s.id));
-      const porteesProduites = misesBas.filter((mb: any) => saillieIds.has(mb.saillieId)).length;
+      const explicitSaillies = saillies.filter((s: any) => s.maleId === m.id);
+
+      // Synchronisation du nombre de saillies selon les bandes actives (Gestation / Saillie)
+      const refBandes = this.referentielService.getReferentielBandes();
+      const activeBandes = bandes.filter((b: Bande) => b.phase === 'Saillie' || b.phase === 'Gestation');
+
+      let syncSailliesCount = 0;
+      activeBandes.forEach((b: Bande) => {
+        const refB = refBandes.find(rb => rb.id === b.id);
+        if (refB) {
+          const maleGroup = refB.groupesParMale.find(g => g.maleId === m.id);
+          if (maleGroup) {
+            syncSailliesCount += maleGroup.femellesIds.length;
+          }
+        }
+      });
+
+      const totalSaillies = Math.max(explicitSaillies.length, syncSailliesCount);
+
+      const saillieIds = new Set(explicitSaillies.map((s: any) => s.id));
+      const porteesProduites = misesBas.filter((mb: any) => saillieIds.has(mb.saillieId) || mb.maleId === m.id).length;
 
       return {
         id: m.id,
         nom: m.nom || m.id,
         bandeId: 'Toutes (A, B, C)',
-        saillies: maleSaillies.length,
+        saillies: totalSaillies,
         porteesProduites,
         etat: m.etat || 'Actif'
       };

@@ -48,8 +48,124 @@ export class SaisieSaillieComponent {
     return this.bandes() || [];
   });
 
+  bandeEnGestationActive = computed(() => {
+    const list = this.bandes() || [];
+    return list.find(b => b.phase === 'Gestation' || b.phase === 'Saillie');
+  });
+
+  validationSaillieBande = computed(() => {
+    const bId = this.selectedBandeId();
+    const allBandes = this.bandes() || [];
+    const currentBande = allBandes.find(b => b.id === bId);
+    const gestatingBande = this.bandeEnGestationActive();
+
+    if (!currentBande) {
+      return { autorise: false, raison: 'Aucune bande sélectionnée.' };
+    }
+
+    // Règle 1 : La bande sélectionnée ne doit pas déjà être en gestation/saillie
+    if (currentBande.phase === 'Gestation' || currentBande.phase === 'Saillie') {
+      return {
+        autorise: false,
+        raison: `La ${currentBande.nom} est déjà actuellement en phase ${currentBande.phase}. Impossible de la saillir à nouveau tant que les mises-bas n'ont pas eu lieu.`
+      };
+    }
+
+    // Règle 2 : Aucune autre bande ne doit être en gestation (exclusivité du cycle 3-bandes)
+    if (gestatingBande && gestatingBande.id !== bId) {
+      return {
+        autorise: false,
+        raison: `Saillie bloquée : la ${gestatingBande.nom} est actuellement en cours de Gestation/Saillie. Dans la rotation cunicole à 3 bandes, une seule bande peut être en gestation à la fois.`
+      };
+    }
+
+    return { autorise: true, raison: '' };
+  });
+
+  bandesAvecValidation = computed(() => {
+    const list = this.bandes() || [];
+    const gestatingBande = this.bandeEnGestationActive();
+
+    return list.map(b => {
+      const estEnGestation = b.phase === 'Gestation' || b.phase === 'Saillie';
+      const conflitAutreBande = gestatingBande && gestatingBande.id !== b.id;
+      const bloque = estEnGestation || conflitAutreBande;
+
+      let motifBloquant = '';
+      if (estEnGestation) {
+        motifBloquant = `Déjà en ${b.phase}`;
+      } else if (conflitAutreBande) {
+        motifBloquant = `Indisponible (${gestatingBande.nom} en Gestation)`;
+      }
+
+      return {
+        ...b,
+        bloque,
+        motifBloquant
+      };
+    });
+  });
+
   femellesActives = computed(() => {
     return (this.reproducteurs() || []).filter(isFemelle).filter(r => r.etat !== 'Morte' && r.etat !== 'Réformée');
+  });
+
+  selectedFemelleId = signal<string>('');
+
+  femellesAvecValidation = computed(() => {
+    const repros = (this.reproducteurs() || []).filter(isFemelle).filter(r => r.etat !== 'Morte' && r.etat !== 'Réformée');
+    const allBandes = this.bandes() || [];
+    const gestatingBande = this.bandeEnGestationActive();
+
+    return repros.map(f => {
+      const bId = f.bandeId || 'bande-a';
+      const targetBande = allBandes.find(b => b.id === bId);
+      const estEnGestation = targetBande && (targetBande.phase === 'Gestation' || targetBande.phase === 'Saillie');
+      const conflitAutreBande = gestatingBande && gestatingBande.id !== bId;
+      const bloque = estEnGestation || conflitAutreBande;
+
+      let motifBloquant = '';
+      if (estEnGestation) {
+        motifBloquant = `Sa bande (${targetBande?.nom}) est en ${targetBande?.phase}`;
+      } else if (conflitAutreBande) {
+        motifBloquant = `Indisponible (${gestatingBande.nom} en Gestation)`;
+      }
+
+      return {
+        ...f,
+        bloque,
+        motifBloquant
+      };
+    });
+  });
+
+  validationSaillieIndividuelle = computed(() => {
+    const fId = this.selectedFemelleId();
+    if (!fId) return { autorise: true, raison: '' };
+
+    const female = (this.reproducteurs() || []).find(r => r.id === fId);
+    if (!female) return { autorise: true, raison: '' };
+
+    const allBandes = this.bandes() || [];
+    const bId = ('bandeId' in female) ? (female as any).bandeId : 'bande-a';
+    const targetBande = allBandes.find(b => b.id === bId);
+    const gestatingBande = this.bandeEnGestationActive();
+
+    if (targetBande && (targetBande.phase === 'Gestation' || targetBande.phase === 'Saillie')) {
+      return {
+        autorise: false,
+        raison: `Impossible de saillir la femelle ${female.id} : sa bande (${targetBande.nom}) est déjà actuellement en phase ${targetBande.phase}.`
+      };
+    }
+
+    if (gestatingBande && gestatingBande.id !== bId) {
+      return {
+        autorise: false,
+        raison: `Saillie bloquée : la ${gestatingBande.nom} est actuellement en cours de Gestation/Saillie. Dans la rotation cunicole à 3 bandes, aucune lapine de la ${targetBande?.nom || bId} ne peut être saillie tant que la gestation en cours n'est pas terminée.`
+      };
+    }
+
+    return { autorise: true, raison: '' };
   });
 
   malesActifs = computed(() => {
@@ -60,19 +176,49 @@ export class SaisieSaillieComponent {
   dateActuelle = signal<Date>(new Date());
   selectedFemelleMaleResponsable = signal<string>('');
 
+  // Mode de saisie : 'bande' (1-Clic par bande) ou 'individuel'
+  modeSaisie = signal<'bande' | 'individuel'>('bande');
+  selectedBandeId = signal<BandeId>('bande-b');
+  dateSaillieBande = signal<string>(new Date().toISOString().substring(0, 10));
+
+  planSaillieBande = computed(() => {
+    const bId = this.selectedBandeId();
+    if (!bId) return [];
+    const refBandes = this.referentielService.getReferentielBandes();
+    const refB = refBandes.find(b => b.id === bId);
+    if (!refB) return [];
+
+    const result: { maleId: string; femelleId: string; femelleNom: string }[] = [];
+    const repros = this.reproducteurs() || [];
+
+    refB.groupesParMale.forEach(grp => {
+      grp.femellesIds.forEach(fId => {
+        const repro = repros.find(r => r.id === fId);
+        if (!repro || (repro.etat !== 'Morte' && repro.etat !== 'Réformée')) {
+          result.push({
+            maleId: grp.maleId,
+            femelleId: fId,
+            femelleNom: repro ? repro.nom : fId
+          });
+        }
+      });
+    });
+
+    return result;
+  });
+
   formIndividuelle: FormGroup;
 
   get saillieIndivForm(): FormGroup { return this.formIndividuelle; }
 
   previsions = computed(() => {
-    const val = this.formIndividuelle?.value;
-    const rawDate = val?.dateSaillie || val?.date;
+    const isBandeMode = this.modeSaisie() === 'bande';
+    const rawDate = isBandeMode ? this.dateSaillieBande() : (this.formIndividuelle?.value?.dateSaillie || this.formIndividuelle?.value?.date);
     if (!rawDate) return null;
 
     const dateSaillie = new Date(rawDate);
     if (isNaN(dateSaillie.getTime())) return null;
 
-    // Fix P0 #7 : durées issues de la configuration (au lieu de +15/+31/+31 hardcodés).
     const cfg = this.config();
     const palp = cfg?.jourPalpation ?? 15;
     const gest = cfg?.dureeGestationJours ?? 31;
@@ -121,6 +267,30 @@ export class SaisieSaillieComponent {
       });
   }
 
+  onLancerSaillieBande(): void {
+    const val = this.validationSaillieBande();
+    if (!val.autorise) {
+      this.notifier.error(val.raison);
+      return;
+    }
+
+    const bId = this.selectedBandeId();
+    if (!bId) {
+      this.notifier.error('Veuillez sélectionner une bande.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    try {
+      const dateDebut = new Date(this.dateSaillieBande());
+      const nbFemelles = this.planSaillieBande().length;
+      this.bandeService.demarrerCycle(bId, dateDebut);
+      this.notifier.success(`Saillie globale enregistrée en 1 clic pour la ${bId.toUpperCase()} (${nbFemelles} lapines saillies avec leurs mâles responsables !).`);
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
   onSubmitIndividuelle(): void {
     this.onSubmitIndiv();
   }
@@ -130,6 +300,23 @@ export class SaisieSaillieComponent {
       this.notifier.error('Veuillez remplir correctement la femelle.');
       return;
     }
+
+    const { femelleId } = this.formIndividuelle.value;
+    const female = (this.reproducteurs() || []).find(r => r.id === femelleId);
+    const bId = (female && isFemelle(female)) ? female.bandeId : 'bande-a';
+    const targetBande = (this.bandes() || []).find(b => b.id === bId);
+    const gestatingBande = this.bandeEnGestationActive();
+
+    if (targetBande && (targetBande.phase === 'Gestation' || targetBande.phase === 'Saillie')) {
+      this.notifier.error(`Impossible de saillir ${femelleId} : la ${targetBande.nom} est déjà en phase Gestation/Saillie.`);
+      return;
+    }
+
+    if (gestatingBande && gestatingBande.id !== bId) {
+      this.notifier.error(`Saillie bloquée : la ${gestatingBande.nom} est actuellement en cours de Gestation. Dans la rotation cunicole à 3 bandes, une seule bande peut être en gestation à la fois.`);
+      return;
+    }
+
     this.isSubmitting.set(true);
 
     try {
@@ -139,18 +326,15 @@ export class SaisieSaillieComponent {
       const dSaillie = new Date(actualDate);
 
       const dPalpation = new Date(dSaillie);
-      // TK-10 : utiliser la config pour le délai palpation (par défaut 15j)
       const jourPalpation = this.config()?.jourPalpation || 15;
       dPalpation.setDate(dPalpation.getDate() + jourPalpation);
 
       const dMiseBas = new Date(dSaillie);
-      // TK-10 : utiliser la config pour la durée gestation (par défaut 31j)
       const dureeGestation = this.config()?.dureeGestationJours || 31;
       dMiseBas.setDate(dMiseBas.getDate() + dureeGestation);
 
       const female = (this.reproducteurs() || []).find(r => r.id === femelleId);
       const bId = (female && isFemelle(female)) ? female.bandeId : 'bande-a';
-      // TK-06 : cycleId dynamique depuis la bande
       const bande = (this.bandes() || []).find(b => b.id === bId);
 
       this.calcService.addSaillie({
