@@ -31,6 +31,15 @@ export class BandeRepository extends StorageBaseRepository {
     return this.getItems<Clapier>(STORAGE_KEYS.CLAPIERS);
   }
 
+  updateClapier(id: string, partial: Partial<Clapier>): void {
+    const all = this.getAllClapiers().map(c => c.id === id ? { ...c, ...partial } : c);
+    this.setItems<Clapier>(STORAGE_KEYS.CLAPIERS, all);
+  }
+
+  saveClapiers(clapiers: Clapier[]): void {
+    this.setItems<Clapier>(STORAGE_KEYS.CLAPIERS, clapiers);
+  }
+
   getReferentielBandes(): ReferentielBande[] {
     return this.getItems<ReferentielBande>(STORAGE_KEYS.REFERENTIEL_BANDES);
   }

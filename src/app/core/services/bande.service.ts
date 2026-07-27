@@ -17,6 +17,7 @@ import { StorageService } from './storage.service';
 import { NotificationService } from './notification.service';
 import { ReferentielService } from './referentiel.service';
 import { DataStoreService } from './data-store.service';
+import { BandeLifecycleService } from './bande-lifecycle.service';
 
 @Injectable({
   providedIn: 'root'
@@ -184,8 +185,17 @@ export class BandeService {
     this.notifier.info(`Re-saillie planifiée pour ${femelleId} le ${dateSaillie.toLocaleDateString()}.`);
   }
 
+  private lifecycleService = inject(BandeLifecycleService);
+
   changerPhase(bandeId: BandeId, phase: EtatBande, datePhase: Date = new Date()): void {
     this.dataStore.updateBande(bandeId, { phase, dateDemarragePhase: datePhase.toISOString() });
+    
+    // Déclenchement automatique de la réactualisation des cases et clapiers occupés
+    const bandes = this.dataStore.bandes || [];
+    const sevrages = this.dataStore.sevrages || [];
+    const sexages = this.dataStore.sexages || [];
+    const ventes = this.dataStore.ventes || [];
+    this.lifecycleService.actualiserClapiersEtCages(bandes, sevrages, sexages, ventes);
   }
 
   getEtatBandes(): { A: EtatBande; B: EtatBande; C: EtatBande } {

@@ -378,14 +378,33 @@ export class DataStoreService {
   }
 
   updateBande(id: string, partial: Partial<Bande>): void {
-    this.storageService.updateBande(id, partial);
-    const bandes = this._bandes$.getValue().map(b => b.id === id ? { ...b, ...partial } : b);
-    this._bandes$.next(bandes);
-    if (this.isBrowser()) {
-      this.dataApi.patchBande(id, partial).subscribe({
-        error: (err) => this.logApiError('updateBande', err)
-      });
+    const bandes = [...this._bandes$.getValue()];
+    const idx = bandes.findIndex(b => b.id === id);
+    if (idx !== -1) {
+      bandes[idx] = { ...bandes[idx], ...partial };
+      this._bandes$.next(bandes);
+      this.storageService.saveBandes(bandes);
+      if (this.isBrowser()) {
+        this.dataApi.patchBande(id, partial).subscribe({
+          error: (err: any) => this.logApiError('updateBande', err)
+        });
+      }
     }
+  }
+
+  updateClapier(id: string, partial: Partial<Clapier>): void {
+    const clapiers = [...this._clapiers$.getValue()];
+    const idx = clapiers.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      clapiers[idx] = { ...clapiers[idx], ...partial };
+      this._clapiers$.next(clapiers);
+      this.storageService.saveClapiers(clapiers);
+    }
+  }
+
+  updateAllClapiers(clapiersList: Clapier[]): void {
+    this._clapiers$.next([...clapiersList]);
+    this.storageService.saveClapiers(clapiersList);
   }
 
   updateReproducteur(updated: Reproducteur): void {
