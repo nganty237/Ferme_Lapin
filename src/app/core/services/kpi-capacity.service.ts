@@ -145,18 +145,18 @@ export class KpiCapacityService {
       }
     }
 
-    // En régime de croisière (2 cohortes chevauchées × 77 lapins = 154 lapins) :
-    const lapinsEffectifsEngraissement = Math.max(lapinsEnEngraissement, 154);
-    const cagesOccupees = Math.max(Math.ceil(lapinsEffectifsEngraissement / densiteEngraissement), 52); // 154 / 3 = 52 cages
+    // Occupation réelle d'engraissement basée sur les effectifs enregistrés
+    const lapinsEffectifsEngraissement = lapinsEnEngraissement;
+    const cagesOccupees = Math.ceil(lapinsEffectifsEngraissement / densiteEngraissement);
     const cagesEngraissementClapiers = clapiers && clapiers.length > 0
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.nombreCases || 12), 0)
       : 60;
     const cagesTotalesEngraissement = Math.max(1, cagesEngraissementClapiers || 60);
-    const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100)); // 52/60 = 87%
+    const pourcentageOccupation = Math.min(100, Math.round((cagesOccupees / cagesTotalesEngraissement) * 100));
     const delaiLiberationCagesJours = minDiffDays === 999 ? 30 : minDiffDays;
 
-    const liberationsJ30 = j30 > 0 ? j30 : 26; // 26 cages cohorte A
-    const liberationsJ60 = j60 > 0 ? j60 : 26; // 26 cages cohorte B
+    const liberationsJ30 = j30;
+    const liberationsJ60 = j60;
 
     const nbFemellesActives = reproducteurs && reproducteurs.length > 0
       ? reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length

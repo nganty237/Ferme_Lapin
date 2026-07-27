@@ -97,6 +97,12 @@ export class CalculationService {
   addSevrage(sevrage: Sevrage): void { this.dataStore.addSevrage(sevrage); }
   addVente(vente: Vente): void { this.dataStore.addVente(vente); }
   addDeces(deces: Deces): void { this.dataStore.addDeces(deces); }
+  updateVente(updated: Vente): void { this.dataStore.updateVente(updated); }
+  deleteVente(id: string): void { this.dataStore.deleteVente(id); }
+  updateMiseBas(updated: MiseBas): void { this.dataStore.updateMiseBas(updated); }
+  deleteMiseBas(id: string): void { this.dataStore.deleteMiseBas(id); }
+  updateSevrage(updated: Sevrage): void { this.dataStore.updateSevrage(updated); }
+  deleteSevrage(id: string): void { this.dataStore.deleteSevrage(id); }
   updateReproducteur(updated: Reproducteur): void { this.dataStore.updateReproducteur(updated); }
   deleteReproducteur(id: string): void { this.dataStore.deleteReproducteur(id); }
   updateConfiguration(config: Partial<Configuration>): void { this.dataStore.updateConfiguration(config); }

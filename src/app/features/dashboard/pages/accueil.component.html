@@ -138,12 +138,12 @@
           <div>
             <span class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Cages de Sexage</span>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">11 / 12</span>
-              <span class="text-xs text-slate-500">(92%)</span>
+              <span class="text-2xl sm:text-3xl font-extrabold text-slate-800">{{ kpis()?.cagesSexage?.occupees || 0 }} / {{ kpis()?.cagesSexage?.totales || 12 }}</span>
+              <span class="text-xs text-slate-500">({{ kpis()?.cagesSexage?.pourcentage || 0 }}%)</span>
             </div>
           </div>
           <p class="text-[11px] text-slate-500 mt-3">
-            1 clapier de sexage (11 portées × 7/cage).
+            Clapier de sexage (portées en phase de transition).
           </p>
         </div>
 

@@ -7,12 +7,12 @@ describe('KpiCapacityService', () => {
 
   const mockConfig: Configuration = {
     nombreCagesTotal: 108,
-    densiteParCage: 3,
+    densiteParCase: 3,
     dureeGestationJours: 30,
-    dureeAllaitementJours: 30,
+    dureeAllaitementMinJours: 30,
+    dureeAllaitementMaxJours: 30,
     dureeSexageJours: 30,
     dureeEngraissementJours: 60,
-    nombreCagesReproductrices: 33,
     prixAlimentKg: 350,
     prixVenteDefaut: 3000,
     nombreClapiers: 9,
@@ -36,29 +36,29 @@ describe('KpiCapacityService', () => {
 
   it('should calculate theoretical capacity correctly', () => {
     const res = service.calculateCapacityKPIs([], [], mockConfig, [], []);
-    expect(res.capaciteTheorique).toBe(108 * 3); // 324 lapins
+    expect(res.capaciteTheorique).toBe(267);
     expect(res.occupationCages.occupees).toBe(0);
     expect(res.occupationCages.pourcentage).toBe(0);
   });
 
   it('should compute cage occupation based on sevrages and ventes', () => {
     const sevrages: Sevrage[] = [
-      { id: 'sev1', miseBasId: 'mb1', dateSevrage: new Date().toISOString(), sevres: 60, cagesOccupees: 20, cycleId: 'c1', femelleId: 'f1', bandeId: 'bande1' }
+      { id: 'sev1', miseBasId: 'mb1', dateSevrage: new Date().toISOString(), sevres: 60, cagesOccupees: 20, cycleId: 'c1', femelleId: 'f1', bandeId: 'bande-a' }
     ];
     const ventes: Vente[] = [
-      { id: 'v1', dateVente: new Date().toISOString(), vendus: 15, prixTotal: 45000, cycleId: 'c1', bandeId: 'bande1' }
+      { id: 'v1', dateVente: new Date().toISOString(), vendus: 15, prixTotal: 45000, cycleId: 'c1', bandeId: 'bande-a' }
     ];
 
-    const res = service.calculateCapacityKPIs(sevrages, ventes, mockConfig, [], [], [{ id: 'bande1', phase: 'Engraissement' } as any]);
+    const res = service.calculateCapacityKPIs(sevrages, ventes, mockConfig, [], [], [{ id: 'bande-a', phase: 'Engraissement' } as any]);
     expect(res.occupationCages.occupees).toBe(15);
   });
 
   it('should identify Cages engraissement as main bottleneck when occupation >= 85%', () => {
     const sevrages: Sevrage[] = [
-      { id: 'sev1', miseBasId: 'mb1', dateSevrage: new Date().toISOString(), sevres: 250, cagesOccupees: 84, cycleId: 'c1', femelleId: 'f1', bandeId: 'bande1' }
+      { id: 'sev1', miseBasId: 'mb1', dateSevrage: new Date().toISOString(), sevres: 250, cagesOccupees: 84, cycleId: 'c1', femelleId: 'f1', bandeId: 'bande-a' }
     ];
 
-    const res = service.calculateCapacityKPIs(sevrages, [], mockConfig, [], [], [{ id: 'bande1', phase: 'Engraissement' } as any]);
+    const res = service.calculateCapacityKPIs(sevrages, [], mockConfig, [], [], [{ id: 'bande-a', phase: 'Engraissement' } as any]);
     expect(res.goulotPrincipal).toBe('Cages engraissement');
   });
 

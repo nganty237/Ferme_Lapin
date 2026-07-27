@@ -387,4 +387,34 @@ export class DataStoreService {
       });
     }
   }
+
+  updateVente(updated: Vente): void {
+    const list = this._ventes$.getValue().map(v => v.id === updated.id ? { ...v, ...updated } : v);
+    this._ventes$.next(list);
+  }
+
+  deleteVente(id: string): void {
+    const list = this._ventes$.getValue().filter(v => v.id !== id);
+    this._ventes$.next(list);
+  }
+
+  updateMiseBas(updated: MiseBas): void {
+    const list = this._misesBas$.getValue().map(m => m.id === updated.id ? { ...m, ...updated } : m);
+    this._misesBas$.next(list);
+  }
+
+  deleteMiseBas(id: string): void {
+    const list = this._misesBas$.getValue().filter(m => m.id !== id);
+    this._misesBas$.next(list);
+  }
+
+  updateSevrage(updated: Sevrage): void {
+    const list = this._sevrages$.getValue().map(s => s.id === updated.id ? { ...s, ...updated } : s);
+    this._sevrages$.next(list);
+  }
+
+  deleteSevrage(id: string): void {
+    const list = this._sevrages$.getValue().filter(s => s.id !== id);
+    this._sevrages$.next(list);
+  }
 }

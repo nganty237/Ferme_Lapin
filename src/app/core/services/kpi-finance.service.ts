@@ -37,14 +37,16 @@ export class KpiFinanceService {
     const totalSevres = sevrages.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
     const totalVendus = ventes.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
 
-    // Revenus réels des ventes + revenus projetés des sevrages non encore vendus
-    const actualRevenue = ventes.reduce((sum: number, v: Vente) => sum + (v.prixTotal || (v.vendus * prixVenteDefault) || 0), 0);
-    const projectedRevenue = Math.max(0, totalSevres - totalVendus) * prixVenteDefault;
+    // Revenus réels des ventes effectives
+    const actualRevenue = ventes.reduce((sum: number, v: Vente) => sum + (v.prixTotal || ((v.vendus || 0) * (v.prixUnitaire || prixVenteDefault)) || 0), 0);
+    const lapinsEnStock = Math.max(0, totalSevres - totalVendus);
+    const projectedRevenue = lapinsEnStock * prixVenteDefault;
     const chiffreAffairesTotal = actualRevenue + projectedRevenue;
 
-    const coutTotalProduction = totalSevres * coutProductionParLapin;
+    const coutTotalProduction = (totalVendus + lapinsEnStock) * coutProductionParLapin;
 
-    const margeBruteTotale = Math.max(0, chiffreAffairesTotal - coutTotalProduction);
+    // Marge brute réelle et valorisation stock (sans bloquer à 0 en cas de pertes)
+    const margeBruteTotale = chiffreAffairesTotal - coutTotalProduction;
 
     // Revenu moyen par portée sevrée (ou portée mise-bas par défaut)
     const nbPortees = Math.max(1, sevrages.length > 0 ? sevrages.length : misesBas.length);

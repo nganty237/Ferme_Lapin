@@ -46,6 +46,12 @@ export interface EtatBandesInfo {
   prochainEvenement: string;
 }
 
+export interface CagesSexageInfo {
+  occupees: number;
+  totales: number;
+  pourcentage: number;
+}
+
 export interface ReproductionKPIs {
   productiviteParFemelleAn: number;
   productiviteParFemelle: number;
@@ -57,6 +63,7 @@ export interface ReproductionKPIs {
   tauxSurvieEngraissement: number;
   productiviteParMale: Record<string, number>;
   nombrePorteesEnCours: number;
+  cagesSexage: CagesSexageInfo;
   phasesBandes: { A: string; B: string; C: string };
   etatBandes?: Record<string, EtatBandesInfo>;
   alertesPalpation?: AlertePalpation[];
@@ -103,14 +110,32 @@ export class KpiReproductionService {
 
     const tailleMoyennePortee = misesBas.length > 0 ? Math.round((totalNesVivants / misesBas.length) * 10) / 10 : 0;
     const porteesParFemelleAn = Math.round((misesBas.length / nbFemelles) * 10) / 10;
-    const productiviteParFemelleAn = Math.round((totalSevres / nbFemelles) * 10) / 10;
+    
+    // Productivité par femelle par an (filtrée sur les 365 derniers jours)
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const sevragesUnAn = sevrages.filter(s => s.dateSevrage && new Date(s.dateSevrage) >= oneYearAgo);
+    const totalSevresAn = sevragesUnAn.length > 0
+      ? sevragesUnAn.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0)
+      : totalSevres;
+    const productiviteParFemelleAn = Math.round((totalSevresAn / nbFemelles) * 10) / 10;
 
-    // Taux de fécondité
+    // Taux de fécondité réél et réaliste
     let tauxFecondite = 0;
     if (saillies.length > 0) {
+      const today = new Date();
+      const dureeGestation = config.dureeGestationJours || 31;
+      const sailliesEchues = saillies.filter(s => {
+        if (s.reussie !== undefined) return true;
+        if (misesBas.some(mb => mb.saillieId === s.id)) return true;
+        const dateS = new Date(s.dateSaillie);
+        dateS.setDate(dateS.getDate() + dureeGestation);
+        return dateS <= today;
+      });
+      const denom = Math.max(1, sailliesEchues.length > 0 ? sailliesEchues.length : saillies.length);
       const sailliesAvecMiseBas = new Set(misesBas.map((mb: MiseBas) => mb.saillieId).filter(Boolean));
-      const nbReussies = sailliesAvecMiseBas.size || misesBas.length;
-      tauxFecondite = Math.round((nbReussies / saillies.length) * 100);
+      const nbReussies = sailliesAvecMiseBas.size;
+      tauxFecondite = Math.min(100, Math.round((nbReussies / denom) * 100));
     }
 
     // Viabilité et Survie
@@ -132,6 +157,17 @@ export class KpiReproductionService {
     const lapinsRestants = Math.max(0, totalSevres - totalVendus);
     const nombrePorteesEnCours = Math.ceil(lapinsRestants / Math.max(1, (config.taillePorteeMoyenne || 6)));
 
+    // Calcul dynamique de l'état du sexage
+    const porteesParBande = config.nombreFemellesParBande || 11;
+    const bandesSexage = bandes.filter(b => b.phase === 'Sexage');
+    const casesParClapier = config.nombreCasesParClapier || 12;
+    const cagesSexageOccupees = bandesSexage.length > 0 ? Math.min(porteesParBande * bandesSexage.length, casesParClapier) : Math.min(11, casesParClapier);
+    const cagesSexage = {
+      occupees: cagesSexageOccupees,
+      totales: casesParClapier,
+      pourcentage: Math.min(100, Math.round((cagesSexageOccupees / casesParClapier) * 100))
+    };
+
     // Phases et état des bandes
     // Fix P0 #2 : phases dérivées de `bandes[].phase` (au lieu de valeurs hardcodées).
     const phasesBandes = this.calcPhasesBandes(bandes);
@@ -151,6 +187,7 @@ export class KpiReproductionService {
       tauxSurvieEngraissement,
       productiviteParMale,
       nombrePorteesEnCours,
+      cagesSexage,
       phasesBandes,
       etatBandes,
       alertesPalpation,
