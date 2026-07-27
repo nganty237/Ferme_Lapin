@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, computed, signal, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed, signal, DestroyRef, effect } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CalculationService, NotificationService, BandeService, ReferentielService } from '@core/services';
+import { CalculationService, NotificationService, BandeService, ReferentielService, BandeLifecycleService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -241,17 +241,31 @@ export class SaisieSaillieComponent {
     };
   });
 
+  private lifecycleService = inject(BandeLifecycleService);
+
   constructor() {
     const todayStr = new Date().toISOString().substring(0, 10);
 
     this.formIndividuelle = this.fb.group({
+      bandeId: ['bande-b', Validators.required],
       femelleId: ['', Validators.required],
-      maleId: [{ value: '', disabled: true }, Validators.required],
+      maleId: ['', Validators.required],
       dateSaillie: [todayStr, Validators.required],
       date: [todayStr],
-      notes: [''],
-      observations: ['']
+      moment: ['Matin', Validators.required]
     });
+
+    // Détection réactive intelligente de la prochaine bande déverrouillée et prête dans la rotation cunicole
+    effect(() => {
+      const allBandes = this.bandes() || [];
+      if (allBandes.length > 0) {
+        const prochaine = this.lifecycleService.getProchaineBandeASaillir(allBandes);
+        if (prochaine && this.selectedBandeId() !== prochaine.id) {
+          this.selectedBandeId.set(prochaine.id);
+          this.formIndividuelle.patchValue({ bandeId: prochaine.id });
+        }
+      }
+    }, { allowSignalWrites: true });
 
     this.formIndividuelle.get('femelleId')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -103,7 +103,10 @@ export class StorageService extends StorageBaseRepository {
   // --- Bandes, Clapiers & Affectations ---
   getAllBandes(): Bande[] { return this.bandeRepo.getAllBandes(); }
   updateBande(id: string, partial: Partial<Bande>): void { this.bandeRepo.updateBande(id, partial); }
+  saveBandes(bandes: Bande[]): void { this.setItems<Bande>(STORAGE_KEYS.BANDES, bandes); }
   getAllClapiers(): Clapier[] { return this.bandeRepo.getAllClapiers(); }
+  updateClapier(id: string, partial: Partial<Clapier>): void { this.bandeRepo.updateClapier(id, partial); }
+  saveClapiers(clapiers: Clapier[]): void { this.bandeRepo.saveClapiers(clapiers); }
   getAllAffectationMales(): Record<string, AffectationMaleGroup[]> { return this.bandeRepo.getAllAffectationMales(); }
 
   // --- Référentiel & Cycles ---

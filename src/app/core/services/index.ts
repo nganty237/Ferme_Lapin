@@ -10,5 +10,6 @@ export * from './firestore-seed.service';
 export * from './toast.service';
 
 export * from './bande.service';
+export * from './bande-lifecycle.service';
 export * from './referentiel.service';
 export * from './auth.service';
