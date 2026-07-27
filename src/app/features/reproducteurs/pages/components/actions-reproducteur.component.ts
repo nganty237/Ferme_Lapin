@@ -14,7 +14,8 @@ import { Reproducteur } from '@core/models';
           Modifier
         </button>
       }
-      @if (reproducteur()?.etat !== 'Réformé' && reproducteur()?.etat !== 'Réformée' && reproducteur()?.etat !== 'Mort') {
+      @if (reproducteur()?.etat !== 'Réformée' && reproducteur()?.etat !== 'Mort') {
+
         <button class="btn border border-red-200 text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5" (click)="withdrawTriggered.emit()">
           <mat-icon style="font-size: 16px; width: 16px; height: 16px;">do_not_disturb_on</mat-icon>
           Retirer de l'élevage

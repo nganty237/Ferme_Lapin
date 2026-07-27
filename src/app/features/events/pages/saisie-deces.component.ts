@@ -37,9 +37,9 @@ export class SaisieDecesComponent {
   reproducteursVivants = computed(() => {
     const list = this.reproducteurs() || [];
     return list.filter(r =>
-      r.etat !== 'Mort' && r.etat !== 'Morte' &&
-      r.etat !== 'Réformé' && r.etat !== 'Réformée'
+      r.etat !== 'Mort' && r.etat !== 'Morte' && r.etat !== 'Réformée'
     );
+
   });
 
   activeReproducteurs = this.reproducteursVivants;

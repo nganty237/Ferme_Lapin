@@ -37,11 +37,10 @@ export class ReferentielService {
     const found = males.find((m: ReferentielMale) => m.femellesIds.includes(femelleId));
     if (found) return found.id;
 
-    const num = parseInt(femelleId.replace('F', ''), 10);
-    if (num <= 11) return 'M01';
-    if (num <= 22) return 'M02';
-    return 'M03';
+    console.warn(`[ReferentielService] Aucun mâle associé trouvé pour la femelle "${femelleId}". Mâle par défaut (M01) retourné.`);
+    return males.length > 0 ? males[0].id : 'M01';
   }
+
 
   getCalendrierSaillieStatique(bandeId: BandeId): CalendrierSaillieItem[] {
     const items = this.storageService.getReferentielCalendrierSaillie();

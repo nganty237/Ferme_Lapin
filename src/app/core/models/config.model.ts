@@ -19,4 +19,9 @@ export interface Configuration {
   decalageAgeBandesMois: number;
   prixAlimentKg: number;
   prixVenteDefaut: number;
+  seuilOccupationCritique?: number;
+  seuilOccupationWarning?: number;
+  seuilFeconditeMin?: number;
+  seuilSurvieMin?: number;
 }
+

@@ -34,7 +34,8 @@ export class OptimisationComponent {
     const fromKpis = this.kpis()?.cagesReproducteurs?.nbMalesActifs;
     if (fromKpis !== undefined) return fromKpis;
     const list = this.reproducteurs() || [];
-    return list.filter(r => r.sexe === 'M' && r.etat !== 'Mort' && r.etat !== 'Réformé').length;
+    return list.filter(r => r.sexe === 'M' && r.etat !== 'Mort').length;
+
   });
 
   femalesPerMale = computed(() => {

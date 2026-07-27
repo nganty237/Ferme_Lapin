@@ -272,8 +272,9 @@ export class FicheReproducteurComponent {
       if (r.sexe === 'F') {
         this.calcService.updateReproducteur({ ...r, etat: 'Réformée' });
       } else {
-        this.calcService.updateReproducteur({ ...r, etat: 'Réformé' });
+        this.calcService.updateReproducteur({ ...r, etat: 'Mort' });
       }
+
       this.showDeleteConfirm = false;
       this.goBack();
     }

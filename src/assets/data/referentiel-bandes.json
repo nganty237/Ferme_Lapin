@@ -1,0 +1,65 @@
+[
+  {
+    "id": "bande-a",
+    "nom": "Bande A",
+    "couleur": "#4CAF50",
+    "nombreFemelles": 11,
+    "decalageAgeMois": 0,
+    "groupesParMale": [
+      {
+        "maleId": "M01",
+        "femellesIds": ["F001", "F002", "F003", "F004"]
+      },
+      {
+        "maleId": "M02",
+        "femellesIds": ["F012", "F013", "F014", "F015"]
+      },
+      {
+        "maleId": "M03",
+        "femellesIds": ["F023", "F024", "F025"]
+      }
+    ]
+  },
+  {
+    "id": "bande-b",
+    "nom": "Bande B",
+    "couleur": "#2196F3",
+    "nombreFemelles": 11,
+    "decalageAgeMois": 1,
+    "groupesParMale": [
+      {
+        "maleId": "M01",
+        "femellesIds": ["F005", "F006", "F007", "F008"]
+      },
+      {
+        "maleId": "M02",
+        "femellesIds": ["F016", "F017", "F018", "F019"]
+      },
+      {
+        "maleId": "M03",
+        "femellesIds": ["F026", "F027", "F028"]
+      }
+    ]
+  },
+  {
+    "id": "bande-c",
+    "nom": "Bande C",
+    "couleur": "#FF9800",
+    "nombreFemelles": 11,
+    "decalageAgeMois": 2,
+    "groupesParMale": [
+      {
+        "maleId": "M01",
+        "femellesIds": ["F009", "F010", "F011"]
+      },
+      {
+        "maleId": "M02",
+        "femellesIds": ["F020", "F021", "F022"]
+      },
+      {
+        "maleId": "M03",
+        "femellesIds": ["F029", "F030", "F031", "F032", "F033"]
+      }
+    ]
+  }
+]

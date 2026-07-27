@@ -113,19 +113,25 @@ export class NotificationService {
   ): void {
     const notifs: AppNotification[] = [];
 
+    const config = this.calcService.config;
+    const seuilOccCritique = config.seuilOccupationCritique ?? 95;
+    const seuilOccWarning = config.seuilOccupationWarning ?? 80;
+    const seuilFeconditeMin = config.seuilFeconditeMin ?? 70;
+    const seuilSurvieMin = config.seuilSurvieMin ?? 70;
+
     // 1. Alerte Taux d'occupation des cages d'engraissement (60 cages)
     const pctEngrais = kpis.occupationCages ? kpis.occupationCages.pourcentage : 87;
     const occEngrais = kpis.occupationCages ? kpis.occupationCages.occupees : 52;
     const totEngrais = kpis.occupationCages ? kpis.occupationCages.totales : 60;
 
-    if (pctEngrais > 95) {
+    if (pctEngrais > seuilOccCritique) {
       notifs.push(this.createNotif(
         'CRITIQUE',
         `Cages à ${pctEngrais}% d'occupation (${occEngrais}/${totEngrais}). Action urgente de vente requise !`,
         'error',
         'cages_critique'
       ));
-    } else if (pctEngrais >= 80) {
+    } else if (pctEngrais >= seuilOccWarning) {
       notifs.push(this.createNotif(
         'WARNING',
         `Cages à ${pctEngrais}% d'occupation (${occEngrais}/${totEngrais}). Planifier des ventes.`,
@@ -142,7 +148,7 @@ export class NotificationService {
     }
 
     // 2. Alerte Fécondité
-    if (kpis.tauxFecondite > 0 && kpis.tauxFecondite < 70) {
+    if (kpis.tauxFecondite > 0 && kpis.tauxFecondite < seuilFeconditeMin) {
       notifs.push(this.createNotif(
         'WARNING',
         `Taux de fécondité faible : ${kpis.tauxFecondite}%. Vérifier la santé des reproducteurs.`,
@@ -152,14 +158,14 @@ export class NotificationService {
     }
 
     // 3. Alerte Survie Allaitement
-    if (kpis.tauxSurvieAllaitement > 0 && kpis.tauxSurvieAllaitement < 70) {
+    if (kpis.tauxSurvieAllaitement > 0 && kpis.tauxSurvieAllaitement < seuilSurvieMin) {
       notifs.push(this.createNotif(
         'CRITIQUE',
         `Taux de survie allaitement critique : ${kpis.tauxSurvieAllaitement}%. Vérifier conditions d'élevage.`,
         'error',
         'survie_critique'
       ));
-    } else if (kpis.tauxSurvieAllaitement >= 70 && kpis.tauxSurvieAllaitement < 85) {
+    } else if (kpis.tauxSurvieAllaitement >= seuilSurvieMin && kpis.tauxSurvieAllaitement < 85) {
       notifs.push(this.createNotif(
         'WARNING',
         `Taux de survie allaitement en dessous de l'optimal : ${kpis.tauxSurvieAllaitement}%.`,
@@ -167,6 +173,7 @@ export class NotificationService {
         'survie_warning'
       ));
     }
+
 
     // 4. Synthèse réactive des Bandes (Phases réelles)
     const phaseA = (bandes.find(b => b.id === 'bande-a')?.phase) || kpis.phasesBandes.A;

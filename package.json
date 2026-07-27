@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json",
-    "api": "json-server --watch db.json --port 3000",
+    "start": "ng serve",
     "build": "ng build",
+
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:RAISSA_Project": "node dist/RAISSA_Project/server/server.mjs"
@@ -40,7 +40,6 @@
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
     "jsdom": "^28.0.0",
-    "json-server": "^1.0.0-beta.3",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.12",

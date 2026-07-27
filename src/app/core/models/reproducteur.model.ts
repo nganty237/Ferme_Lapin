@@ -9,7 +9,7 @@ export type EtatFemelle =
   | 'Réformée'
   | 'Morte';
 
-export type EtatMale = 'Actif' | 'Réformé' | 'Mort';
+export type EtatMale = 'Actif' | 'Mort';
 
 export interface Femelle {
   id: string;

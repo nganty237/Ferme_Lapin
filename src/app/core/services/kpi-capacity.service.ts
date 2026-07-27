@@ -162,8 +162,9 @@ export class KpiCapacityService {
       ? reproducteurs.filter(isFemelle).filter(r => r.etat !== 'Réformée' && r.etat !== 'Morte').length
       : (config.nombreFemelles || 33);
     const nbMalesActifs = reproducteurs && reproducteurs.length > 0
-      ? reproducteurs.filter(isMale).filter(r => r.etat !== 'Réformé' && r.etat !== 'Mort').length
+      ? reproducteurs.filter(isMale).filter(r => r.etat !== 'Mort').length
       : (config.nombreMales || 3);
+
 
     const cagesReproducteursOccupees = nbFemellesActives + nbMalesActifs;
     const cagesReproducteursTotales = (config.nombreFemelles || 33) + (config.nombreMales || 3);
