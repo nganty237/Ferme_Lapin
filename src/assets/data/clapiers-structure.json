@@ -1,0 +1,80 @@
+[
+  {
+    "id": "clap-m1",
+    "nom": "Clapier Maternité 1",
+    "numero": 1,
+    "type": "Maternité",
+    "nombreCases": 12,
+    "casesOccupees": 11,
+    "bandeId": "bande-a"
+  },
+  {
+    "id": "clap-m2",
+    "nom": "Clapier Maternité 2",
+    "numero": 2,
+    "type": "Maternité",
+    "nombreCases": 12,
+    "casesOccupees": 11,
+    "bandeId": "bande-b"
+  },
+  {
+    "id": "clap-m3",
+    "nom": "Clapier Maternité 3",
+    "numero": 3,
+    "type": "Maternité",
+    "nombreCases": 12,
+    "casesOccupees": 11,
+    "bandeId": "bande-c"
+  },
+  {
+    "id": "clap-s1",
+    "nom": "Clapier Sexage 1",
+    "numero": 4,
+    "type": "Sexage",
+    "nombreCases": 12,
+    "casesOccupees": 0
+  },
+  {
+    "id": "clap-e1",
+    "nom": "Clapier Engraissement 1",
+    "numero": 5,
+    "type": "Engraissement",
+    "nombreCases": 12,
+    "casesOccupees": 12,
+    "bandeId": "bande-a"
+  },
+  {
+    "id": "clap-e2",
+    "nom": "Clapier Engraissement 2",
+    "numero": 6,
+    "type": "Engraissement",
+    "nombreCases": 12,
+    "casesOccupees": 12,
+    "bandeId": "bande-a"
+  },
+  {
+    "id": "clap-e3",
+    "nom": "Clapier Engraissement 3",
+    "numero": 7,
+    "type": "Engraissement",
+    "nombreCases": 12,
+    "casesOccupees": 12,
+    "bandeId": "bande-a"
+  },
+  {
+    "id": "clap-e4",
+    "nom": "Clapier Engraissement 4",
+    "numero": 8,
+    "type": "Engraissement",
+    "nombreCases": 12,
+    "casesOccupees": 10
+  },
+  {
+    "id": "clap-e5",
+    "nom": "Clapier Engraissement 5",
+    "numero": 9,
+    "type": "Engraissement",
+    "nombreCases": 12,
+    "casesOccupees": 0
+  }
+]

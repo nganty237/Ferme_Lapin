@@ -1,19 +1,50 @@
-<div class="flex items-center gap-2 cursor-pointer select-none" [matMenuTriggerFor]="menu">
+<button type="button" class="flex items-center gap-2 cursor-pointer select-none px-2 py-1 rounded-lg hover:bg-slate-50 transition-colors border-0 bg-transparent" [matMenuTriggerFor]="menu">
   <div class="relative">
     <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs overflow-hidden">
       ER
     </div>
     <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
   </div>
-  <span class="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors">EDO Raissa</span>
+  <span class="text-xs font-semibold text-slate-700">EDO Raissa</span>
   <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #64748b; display: flex; align-items: center; justify-content: center;">
     keyboard_arrow_down
   </mat-icon>
-</div>
+</button>
 
-<mat-menu #menu="matMenu" xPosition="before" class="modern-user-menu">
-  <button mat-menu-item (click)="logout()" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-    <mat-icon style="color: #ef4444; font-size: 18px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">logout</mat-icon>
-    <span class="text-slate-700 font-medium">Déconnexion</span>
+
+<mat-menu #menu="matMenu" xPosition="before" class="modern-profile-menu">
+  <!-- En-tête de profil -->
+  <div class="px-4 py-3 flex flex-col gap-1 min-w-[220px]">
+    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Compte</span>
+    <div class="flex items-center gap-2 mt-1">
+      <div class="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-sm">
+        ER
+      </div>
+      <div class="flex flex-col">
+        <span class="text-sm font-semibold text-slate-800 leading-tight">EDO Raissa</span>
+        <span class="text-xs text-slate-500 leading-none">Administrateur</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-[1px] bg-slate-100 my-1"></div>
+
+  <!-- Actions principales -->
+  <button mat-menu-item class="profile-menu-item">
+    <mat-icon class="menu-icon">person</mat-icon>
+    <span class="text-sm text-slate-700">Mon Profil</span>
+  </button>
+  
+  <button mat-menu-item routerLink="/parametres" class="profile-menu-item">
+    <mat-icon class="menu-icon">settings</mat-icon>
+    <span class="text-sm text-slate-700">Paramètres</span>
+  </button>
+
+  <div class="h-[1px] bg-slate-100 my-1"></div>
+
+  <!-- Déconnexion -->
+  <button mat-menu-item (click)="logout()" class="profile-menu-item logout-item">
+    <mat-icon class="menu-icon logout-icon">logout</mat-icon>
+    <span class="text-sm font-semibold">Déconnexion</span>
   </button>
 </mat-menu>

@@ -24,6 +24,8 @@ import { BandeRepository, AffectationMaleGroup } from '../repositories/bande.rep
 import { EventRepository } from '../repositories/event.repository';
 import { VenteRepository } from '../repositories/vente.repository';
 
+import { DEFAULT_CONFIGURATION } from '../constants/farm-config.defaults';
+
 /**
  * Service Façade pour le stockage local (localStorage).
  * Agrège les repositories spécialisés (ReproducteurRepository, BandeRepository, EventRepository, VenteRepository)
@@ -38,27 +40,7 @@ export class StorageService extends StorageBaseRepository {
   private eventRepo = inject(EventRepository);
   private venteRepo = inject(VenteRepository);
 
-  private readonly DEFAULT_CONFIG: Configuration = {
-    nombreCagesTotal: 108,
-    nombreClapiers: 9,
-    nombreCasesParClapier: 12,
-    nombreFemelles: 33,
-    nombreMales: 3,
-    nombreBandes: 3,
-    nombreFemellesParBande: 11,
-    dureeGestationJours: 31,
-    jourPalpation: 15,
-    dureeAllaitementMinJours: 35,
-    dureeAllaitementMaxJours: 35,
-    dureeSexageJours: 30,
-    dureeEngraissementJours: 60,
-    taillePorteeMoyenne: 6,
-    densiteParCase: 3,
-    ageMaturiteSexuelleMois: 5,
-    decalageAgeBandesMois: 1,
-    prixAlimentKg: 350,
-    prixVenteDefaut: 3000
-  };
+  private readonly DEFAULT_CONFIG: Configuration = DEFAULT_CONFIGURATION;
 
   constructor() {
     super();
@@ -71,6 +53,7 @@ export class StorageService extends StorageBaseRepository {
   getConfiguration(): Configuration {
     return this.getObject<Configuration>(STORAGE_KEYS.CONFIGURATION, this.DEFAULT_CONFIG);
   }
+
 
   updateConfiguration(config: Partial<Configuration>): void {
     const current = this.getConfiguration();

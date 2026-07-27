@@ -14,8 +14,14 @@ export interface Configuration {
   dureeEngraissementJours: number;
   taillePorteeMoyenne: number;
   densiteParCase: number;
+  densiteSexageParCase: number;
   ageMaturiteSexuelleMois: number;
   decalageAgeBandesMois: number;
   prixAlimentKg: number;
   prixVenteDefaut: number;
+  seuilOccupationCritique?: number;
+  seuilOccupationWarning?: number;
+  seuilFeconditeMin?: number;
+  seuilSurvieMin?: number;
 }
+

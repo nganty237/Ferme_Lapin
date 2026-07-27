@@ -13,8 +13,9 @@
     "dureeAllaitementMaxJours": 35,
     "dureeSexageJours": 30,
     "dureeEngraissementJours": 60,
-    "taillePorteeMoyenne": 6,
+    "taillePorteeMoyenne": 7,
     "densiteParCase": 3,
+    "densiteSexageParCase": 7,
     "ageMaturiteSexuelleMois": 5,
     "decalageAgeBandesMois": 1,
     "prixAlimentKg": 350,
@@ -187,7 +188,8 @@
       "femelleId": "F001",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 1
+      "ordre": 1,
+      "id": "kkoWq-O1sAc"
     },
     {
       "bandeId": "bande-a",
@@ -195,7 +197,8 @@
       "femelleId": "F002",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 2
+      "ordre": 2,
+      "id": "ZpnwRCyn-ds"
     },
     {
       "bandeId": "bande-a",
@@ -203,7 +206,8 @@
       "femelleId": "F012",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 3
+      "ordre": 3,
+      "id": "qY8dBbdVHZw"
     },
     {
       "bandeId": "bande-a",
@@ -211,7 +215,8 @@
       "femelleId": "F013",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 4
+      "ordre": 4,
+      "id": "dg37f3fGOlY"
     },
     {
       "bandeId": "bande-a",
@@ -219,7 +224,8 @@
       "femelleId": "F023",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 5
+      "ordre": 5,
+      "id": "cNZtaGFK8Mg"
     },
     {
       "bandeId": "bande-a",
@@ -227,7 +233,8 @@
       "femelleId": "F024",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 6
+      "ordre": 6,
+      "id": "JW7xdPgUxIQ"
     },
     {
       "bandeId": "bande-a",
@@ -235,7 +242,8 @@
       "femelleId": "F003",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 7
+      "ordre": 7,
+      "id": "zea2fkT7B0c"
     },
     {
       "bandeId": "bande-a",
@@ -243,7 +251,8 @@
       "femelleId": "F004",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 8
+      "ordre": 8,
+      "id": "gs6gb-v24P8"
     },
     {
       "bandeId": "bande-a",
@@ -251,7 +260,8 @@
       "femelleId": "F014",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 9
+      "ordre": 9,
+      "id": "VJI_NlGAvXo"
     },
     {
       "bandeId": "bande-a",
@@ -259,7 +269,8 @@
       "femelleId": "F015",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 10
+      "ordre": 10,
+      "id": "STcozpW-Mmw"
     },
     {
       "bandeId": "bande-a",
@@ -267,7 +278,8 @@
       "femelleId": "F025",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 11
+      "ordre": 11,
+      "id": "41Yfla9Y410"
     },
     {
       "bandeId": "bande-b",
@@ -275,7 +287,8 @@
       "femelleId": "F005",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 1
+      "ordre": 1,
+      "id": "gR_MRMrVAfI"
     },
     {
       "bandeId": "bande-b",
@@ -283,7 +296,8 @@
       "femelleId": "F006",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 2
+      "ordre": 2,
+      "id": "bo5TbG7I-go"
     },
     {
       "bandeId": "bande-b",
@@ -291,7 +305,8 @@
       "femelleId": "F016",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 3
+      "ordre": 3,
+      "id": "uJnxxn9_qqU"
     },
     {
       "bandeId": "bande-b",
@@ -299,7 +314,8 @@
       "femelleId": "F017",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 4
+      "ordre": 4,
+      "id": "riscwt94YZI"
     },
     {
       "bandeId": "bande-b",
@@ -307,7 +323,8 @@
       "femelleId": "F026",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 5
+      "ordre": 5,
+      "id": "pvyNc1g7Uhs"
     },
     {
       "bandeId": "bande-b",
@@ -315,7 +332,8 @@
       "femelleId": "F027",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 6
+      "ordre": 6,
+      "id": "nBAa7arL05M"
     },
     {
       "bandeId": "bande-b",
@@ -323,7 +341,8 @@
       "femelleId": "F007",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 7
+      "ordre": 7,
+      "id": "nI8Wc6c0EhQ"
     },
     {
       "bandeId": "bande-b",
@@ -331,7 +350,8 @@
       "femelleId": "F008",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 8
+      "ordre": 8,
+      "id": "dZVAgxDRXzE"
     },
     {
       "bandeId": "bande-b",
@@ -339,7 +359,8 @@
       "femelleId": "F018",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 9
+      "ordre": 9,
+      "id": "OWC2Z8u_U8Y"
     },
     {
       "bandeId": "bande-b",
@@ -347,7 +368,8 @@
       "femelleId": "F019",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 10
+      "ordre": 10,
+      "id": "LfXtwQgV16Y"
     },
     {
       "bandeId": "bande-b",
@@ -355,7 +377,8 @@
       "femelleId": "F028",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 11
+      "ordre": 11,
+      "id": "WeMVYlPRhOk"
     },
     {
       "bandeId": "bande-c",
@@ -363,7 +386,8 @@
       "femelleId": "F009",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 1
+      "ordre": 1,
+      "id": "oUD9wTF0cD0"
     },
     {
       "bandeId": "bande-c",
@@ -371,7 +395,8 @@
       "femelleId": "F010",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 2
+      "ordre": 2,
+      "id": "UvsIO_kR1FY"
     },
     {
       "bandeId": "bande-c",
@@ -379,7 +404,8 @@
       "femelleId": "F020",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 3
+      "ordre": 3,
+      "id": "8sup_r1g5eE"
     },
     {
       "bandeId": "bande-c",
@@ -387,7 +413,8 @@
       "femelleId": "F021",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 4
+      "ordre": 4,
+      "id": "ifGZRCpZUY4"
     },
     {
       "bandeId": "bande-c",
@@ -395,7 +422,8 @@
       "femelleId": "F030",
       "jourSaillie": 1,
       "moment": "Matin",
-      "ordre": 5
+      "ordre": 5,
+      "id": "kXYTHalpW70"
     },
     {
       "bandeId": "bande-c",
@@ -403,7 +431,8 @@
       "femelleId": "F031",
       "jourSaillie": 1,
       "moment": "Soir",
-      "ordre": 6
+      "ordre": 6,
+      "id": "HiGFBnzONGY"
     },
     {
       "bandeId": "bande-c",
@@ -411,7 +440,8 @@
       "femelleId": "F011",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 7
+      "ordre": 7,
+      "id": "sNHfN_JW1Pw"
     },
     {
       "bandeId": "bande-c",
@@ -419,7 +449,8 @@
       "femelleId": "F022",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 8
+      "ordre": 8,
+      "id": "ePuY9r57M_M"
     },
     {
       "bandeId": "bande-c",
@@ -427,7 +458,8 @@
       "femelleId": "F029",
       "jourSaillie": 2,
       "moment": "Matin",
-      "ordre": 9
+      "ordre": 9,
+      "id": "wa2pNFX0TF8"
     },
     {
       "bandeId": "bande-c",
@@ -435,7 +467,8 @@
       "femelleId": "F032",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 10
+      "ordre": 10,
+      "id": "ynvDVmuwRmw"
     },
     {
       "bandeId": "bande-c",
@@ -443,7 +476,8 @@
       "femelleId": "F033",
       "jourSaillie": 2,
       "moment": "Soir",
-      "ordre": 11
+      "ordre": 11,
+      "id": "FfaU2T-tvVI"
     }
   ],
   "reproducteurs": [
@@ -2020,7 +2054,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e1"]
+      "clapiersIds": [
+        "clap-e1"
+      ]
     },
     {
       "id": "eng-a-02",
@@ -2034,7 +2070,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e1"]
+      "clapiersIds": [
+        "clap-e1"
+      ]
     },
     {
       "id": "eng-a-03",
@@ -2048,7 +2086,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e1"]
+      "clapiersIds": [
+        "clap-e1"
+      ]
     },
     {
       "id": "eng-a-04",
@@ -2062,7 +2102,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e1"]
+      "clapiersIds": [
+        "clap-e1"
+      ]
     },
     {
       "id": "eng-a-05",
@@ -2076,7 +2118,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e2"]
+      "clapiersIds": [
+        "clap-e2"
+      ]
     },
     {
       "id": "eng-a-06",
@@ -2090,7 +2134,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e2"]
+      "clapiersIds": [
+        "clap-e2"
+      ]
     },
     {
       "id": "eng-a-07",
@@ -2104,7 +2150,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e2"]
+      "clapiersIds": [
+        "clap-e2"
+      ]
     },
     {
       "id": "eng-a-08",
@@ -2118,7 +2166,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e2"]
+      "clapiersIds": [
+        "clap-e2"
+      ]
     },
     {
       "id": "eng-a-09",
@@ -2132,7 +2182,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e3"]
+      "clapiersIds": [
+        "clap-e3"
+      ]
     },
     {
       "id": "eng-a-10",
@@ -2146,7 +2198,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e3"]
+      "clapiersIds": [
+        "clap-e3"
+      ]
     },
     {
       "id": "eng-a-11",
@@ -2160,7 +2214,9 @@
       "nombreLapereaux": 6,
       "effectifDepart": 6,
       "casesOccupees": 2,
-      "clapiersIds": ["clap-e3"]
+      "clapiersIds": [
+        "clap-e3"
+      ]
     }
   ],
   "ventes": [
@@ -2201,5 +2257,15 @@
       "prixTotal": 165000
     }
   ],
-  "deces": []
+  "deces": [
+    {
+      "id": "ivemiKtg4yE",
+      "reproducteurId": "F012",
+      "typeAnimal": "Femelle",
+      "dateDeces": "2026-07-24",
+      "cause": "Stress / coup de chaleur",
+      "observations": ""
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

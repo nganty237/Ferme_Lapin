@@ -1,5 +1,12 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged, 
+  User 
+} from 'firebase/auth';
+import { auth } from '../firebase.config';
 
 @Injectable({
   providedIn: 'root'
@@ -8,35 +15,68 @@ export class AuthService {
   private router = inject(Router);
   
   // Signal réactif représentant l'état d'authentification de l'utilisateur
-  readonly isAuthenticatedSignal = signal<boolean>(this.checkToken());
+  readonly isAuthenticatedSignal = signal<boolean>(false);
+  readonly currentUserSignal = signal<User | null>(null);
 
-  private checkToken(): boolean {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      return !!localStorage.getItem('raissa_auth_token');
+  private isInitialized = false;
+  private resolveInitialized!: (value: boolean) => void;
+  private readonly initPromise = new Promise<boolean>((resolve) => {
+    this.resolveInitialized = resolve;
+  });
+
+  constructor() {
+    // Écouteur en temps réel de l'état d'authentification Firebase
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.currentUserSignal.set(user);
+        this.isAuthenticatedSignal.set(true);
+      } else {
+        this.currentUserSignal.set(null);
+        this.isAuthenticatedSignal.set(false);
+      }
+
+      if (!this.isInitialized) {
+        this.isInitialized = true;
+        this.resolveInitialized(true);
+      }
+    });
+  }
+
+  async ensureInitialized(): Promise<boolean> {
+    if (!this.isInitialized) {
+      await this.initPromise;
     }
-    return false;
+    return this.isAuthenticatedSignal();
   }
 
   isAuthenticated(): boolean {
     return this.isAuthenticatedSignal();
   }
 
-  login(username: string, password: string): boolean {
-    if (username === 'admin' && password === '12345678@2.0A') {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('raissa_auth_token', 'session-active-token');
+  async login(email: string, password: string): Promise<boolean> {
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      if (credential.user) {
+        this.currentUserSignal.set(credential.user);
+        this.isAuthenticatedSignal.set(true);
+        return true;
       }
-      this.isAuthenticatedSignal.set(true);
-      return true;
+      return false;
+    } catch (error) {
+      console.error('[AuthService] Erreur de connexion Firebase:', error);
+      return false;
     }
-    return false;
   }
 
-  logout(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('raissa_auth_token');
+  async logout(): Promise<void> {
+    try {
+      await signOut(auth);
+      this.currentUserSignal.set(null);
+      this.isAuthenticatedSignal.set(false);
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('[AuthService] Erreur de déconnexion Firebase:', error);
     }
-    this.isAuthenticatedSignal.set(false);
-    this.router.navigate(['/login']);
   }
 }
+

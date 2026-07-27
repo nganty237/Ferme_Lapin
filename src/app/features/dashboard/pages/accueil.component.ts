@@ -68,11 +68,47 @@ export class AccueilComponent {
 
   async renderCharts(): Promise<void> {
     if (typeof window === 'undefined' || !this.lineChartCanvas) return;
+
+    const {
+      Chart,
+      LineController,
+      BarController,
+      LineElement,
+      BarElement,
+      PointElement,
+      LinearScale,
+      CategoryScale,
+      Tooltip,
+      Legend,
+      Filler
+    } = await import('chart.js');
+    Chart.register(
+      LineController,
+      BarController,
+      LineElement,
+      BarElement,
+      PointElement,
+      LinearScale,
+      CategoryScale,
+      Tooltip,
+      Legend,
+      Filler
+    );
+
+    const existingLineChart = Chart.getChart(this.lineChartCanvas.nativeElement);
+    if (existingLineChart) {
+      existingLineChart.destroy();
+    }
+    
+    if (this.barChartCanvas?.nativeElement) {
+      const existingBarChart = Chart.getChart(this.barChartCanvas.nativeElement);
+      if (existingBarChart) {
+        existingBarChart.destroy();
+      }
+    }
+
     if (this.lineChart) this.lineChart.destroy();
     if (this.barChart) this.barChart.destroy();
-
-    const { Chart, registerables } = await import('chart.js');
-    Chart.register(...registerables);
 
     const misesBas = this.calcService.misesBas;
     const sevrages = this.calcService.sevrages;
@@ -103,7 +139,8 @@ export class AccueilComponent {
     misesBas.forEach(mb => {
       if (mb.dateMiseBas) {
         try {
-          const d = new Date(mb.dateMiseBas);
+          const parts = String(mb.dateMiseBas).substring(0, 10).split('-');
+          const d = parts.length === 3 ? new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])) : new Date(mb.dateMiseBas);
           const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
           const key = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
           if (mapMoisNes.has(key)) {
@@ -116,7 +153,8 @@ export class AccueilComponent {
     sevrages.forEach(s => {
       if (s.dateSevrage) {
         try {
-          const d = new Date(s.dateSevrage);
+          const parts = String(s.dateSevrage).substring(0, 10).split('-');
+          const d = parts.length === 3 ? new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])) : new Date(s.dateSevrage);
           const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
           const key = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
           if (mapMoisSevres.has(key)) {
@@ -192,21 +230,27 @@ export class AccueilComponent {
       }
     });
 
-    const ventesTriees = [...ventes].sort((a, b) => new Date(a.dateVente).getTime() - new Date(b.dateVente).getTime());
-    const ventesParMois: Record<string, number> = {};
-    for (const v of ventesTriees) {
+    const mapVentesParMois = new Map<string, number>();
+    for (const label of labels) {
+      mapVentesParMois.set(label, 0);
+    }
+
+    ventes.forEach(v => {
       if (v.dateVente) {
         try {
-          const dateVal = new Date(v.dateVente);
-          const monthStr = dateVal.toLocaleDateString('fr-FR', { month: 'short' });
-          const capitalizedMonth = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
-          ventesParMois[capitalizedMonth] = (ventesParMois[capitalizedMonth] || 0) + (v.vendus || 0);
-        } catch {
-        }
+          const parts = String(v.dateVente).substring(0, 10).split('-');
+          const d = parts.length === 3 ? new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])) : new Date(v.dateVente);
+          const monthStr = d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+          const key = monthStr.charAt(0).toUpperCase() + monthStr.slice(1).replace('.', '');
+          if (mapVentesParMois.has(key)) {
+            mapVentesParMois.set(key, mapVentesParMois.get(key)! + (v.vendus || 0));
+          }
+        } catch {}
       }
-    }
-    const moisLabels = Object.keys(ventesParMois);
-    const ventesData = Object.values(ventesParMois);
+    });
+
+    const moisLabels = labels;
+    const ventesData = labels.map(label => mapVentesParMois.get(label) || 0);
 
     const ctxBar = this.barChartCanvas.nativeElement.getContext('2d');
     let barGradient: any = primaryColor;

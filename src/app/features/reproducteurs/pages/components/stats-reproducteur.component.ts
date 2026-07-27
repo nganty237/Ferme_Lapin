@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { Reproducteur } from '@core/models';
 
 @Component({
   selector: 'app-stats-reproducteur',
-  imports: [DatePipe, MatIconModule],
+  imports: [DatePipe, RouterLink, MatIconModule],
   template: `
     <div class="space-y-6">
       <!-- Informations Générales -->
@@ -21,7 +22,9 @@ import { Reproducteur } from '@core/models';
             <span class="font-semibold text-slate-800">{{ reproducteur()?.sexe === 'F' ? 'Femelle' : 'Mâle' }}</span>
             
             <span class="text-slate-500 font-medium">Bande</span>
-            <span class="font-semibold text-slate-800">{{ bandName() || 'Aucune' }}</span>
+            <span class="font-semibold text-slate-800">
+              {{ reproducteur()?.sexe === 'M' ? 'Référentiel Mâle (Couvre les 3 bandes)' : (bandName() || 'Aucune') }}
+            </span>
 
             <span class="text-slate-500 font-medium">État actuel</span>
             <span>
@@ -43,6 +46,27 @@ import { Reproducteur } from '@core/models';
               <span class="font-semibold text-red-600">{{ dec.cause || 'Non spécifiée' }}</span>
             }
           </div>
+
+          <!-- Section Femelles Attribuées pour Mâle -->
+          @if (reproducteur()?.sexe === 'M' && assignedFemales().length > 0) {
+            <div class="border-b pb-4 border-slate-100">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-slate-500 text-xs font-bold uppercase tracking-wider">
+                  Femelles Attribuées ({{ assignedFemales().length }})
+                </span>
+                <span class="text-[11px] text-slate-400">11 femelles / mâle</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                @for (f of assignedFemales(); track f.id) {
+                  <a [routerLink]="['/reproducteurs', f.id]" 
+                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-100 text-xs font-medium hover:bg-emerald-100 transition-colors">
+                    <mat-icon style="font-size:12px;width:12px;height:12px;">female</mat-icon>
+                    {{ f.nom || f.id }}
+                  </a>
+                }
+              </div>
+            </div>
+          }
           
           <div>
             <span class="text-slate-500 text-xs font-bold uppercase tracking-wider block mb-1">Observations / Notes</span>
@@ -119,6 +143,7 @@ export class StatsReproducteurComponent {
   breederDeces = input<any>();
   femaleKpis = input<any>();
   maleKpis = input<any>();
+  assignedFemales = input<any[]>([]);
 
   getEtatClass(etat: string): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';

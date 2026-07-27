@@ -8,6 +8,7 @@ describe('KpiReproductionService', () => {
   const mockConfig: Configuration = {
     nombreCagesTotal: 108,
     densiteParCase: 3,
+    densiteSexageParCase: 7,
     dureeGestationJours: 31,
     jourPalpation: 15,
     dureeAllaitementMinJours: 30,
@@ -20,8 +21,11 @@ describe('KpiReproductionService', () => {
     nombreCasesParClapier: 12,
     taillePorteeMoyenne: 6,
     nombreFemelles: 33,
+    nombreFemellesParBande: 11,
     nombreMales: 3,
-    nombreBandes: 3
+    nombreBandes: 3,
+    ageMaturiteSexuelleMois: 5,
+    decalageAgeBandesMois: 1
   };
 
   beforeEach(() => {

@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, computed, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService, NotificationService } from '@core/services';
+import { CalculationService, BandeService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -32,6 +32,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 })
 export class SaisieVenteComponent {
   private calcService = inject(CalculationService);
+  private bandeService = inject(BandeService);
   private notifier = inject(NotificationService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -39,6 +40,14 @@ export class SaisieVenteComponent {
   config = toSignal(this.calcService.config$);
   kpis = toSignal(this.calcService.kpis$);
   ventes = toSignal(this.calcService.ventes$);
+  bandes = toSignal(this.bandeService.bandes$, { initialValue: [] });
+
+  // Liste réactive des bandes (priorité aux bandes en Engraissement, fallback sur toutes les bandes)
+  bandesEngraissement = computed(() => {
+    const list = this.bandes() || [];
+    const engrais = list.filter((b: any) => b.phase === 'Engraissement');
+    return engrais.length > 0 ? engrais : list;
+  });
 
   formVente: FormGroup;
   get venteForm(): FormGroup { return this.formVente; }
@@ -73,6 +82,7 @@ export class SaisieVenteComponent {
     const todayStr = new Date().toISOString().substring(0, 10);
     this.formVente = this.fb.group({
       date: [todayStr, Validators.required],
+      bandeId: ['', Validators.required],
       vendus: [10, [Validators.required, Validators.min(1)]],
       prixUnitaire: [3000, [Validators.required, Validators.min(0)]],
       client: ['Marché Local'],
@@ -102,10 +112,15 @@ export class SaisieVenteComponent {
     const prixUnitaire = Number(formValue.prixUnitaire);
     const prixTotal = vendus * prixUnitaire;
 
+    const selectedBandeId = formValue.bandeId;
+    const bandesList = this.bandes() || [];
+    const bande = (bandesList as any[]).find((b: any) => b.id === selectedBandeId);
+    const cycleId = `cycle-${selectedBandeId}-${bande?.numeroCycle || 1}`;
+
     this.calcService.addVente({
       id: `vnt_${Date.now()}`,
-      cycleId: 'cycle-bande-a-1',
-      bandeId: 'bande-a',
+      cycleId,
+      bandeId: selectedBandeId,
       dateVente: formValue.date,
       vendus,
       prixUnitaire,
@@ -122,6 +137,7 @@ export class SaisieVenteComponent {
     const todayStr = new Date().toISOString().substring(0, 10);
     this.formVente.reset({
       date: todayStr,
+      bandeId: '',
       vendus: 10,
       prixUnitaire: this.prixVenteDefaut(),
       client: 'Marché Local',

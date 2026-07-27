@@ -19,12 +19,6 @@ export const dashboardRoutes: Routes = [
       ),
   },
   {
-    path: 'previsions',
-    loadComponent: () =>
-      import('./pages/previsions.component').then((m) => m.PrevisionsComponent),
-  },
-
-  {
     path: 'optimisation',
     loadComponent: () =>
       import('./pages/optimisation.component').then(

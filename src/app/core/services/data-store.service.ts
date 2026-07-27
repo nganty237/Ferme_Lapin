@@ -4,7 +4,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { StorageService } from './storage.service';
-import { JsonServerDataService } from './json-server-data.service';
+import { FirestoreDataService } from './firestore-data.service';
+import { FirestoreSeedService } from './firestore-seed.service';
+import { AuthService } from './auth.service';
+import { DEFAULT_CONFIGURATION } from '../constants/farm-config.defaults';
+
 import { 
   Reproducteur, 
   Saillie, 
@@ -30,7 +34,9 @@ import { AppNotification } from './notification.service';
 })
 export class DataStoreService {
   private storageService = inject(StorageService);
-  private dataApi = inject(JsonServerDataService);
+  private dataApi = inject(FirestoreDataService);
+  private seedApi = inject(FirestoreSeedService);
+  private authService = inject(AuthService);
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
 
@@ -51,27 +57,8 @@ export class DataStoreService {
   private readonly _refCalendrier$ = new BehaviorSubject<CalendrierSaillieItem[]>([]);
   private readonly _notifications$ = new BehaviorSubject<AppNotification[]>([]);
 
-  private readonly _config$ = new BehaviorSubject<Configuration>({
-    nombreCagesTotal: 108,
-    nombreClapiers: 9,
-    nombreCasesParClapier: 12,
-    nombreFemelles: 33,
-    nombreMales: 3,
-    nombreBandes: 3,
-    nombreFemellesParBande: 11,
-    dureeGestationJours: 31,
-    jourPalpation: 15,
-    dureeAllaitementMinJours: 35,
-    dureeAllaitementMaxJours: 35,
-    dureeSexageJours: 30,
-    dureeEngraissementJours: 60,
-    taillePorteeMoyenne: 6,
-    densiteParCase: 3,
-    ageMaturiteSexuelleMois: 5,
-    decalageAgeBandesMois: 1,
-    prixAlimentKg: 350,
-    prixVenteDefaut: 3000
-  });
+  private readonly _config$ = new BehaviorSubject<Configuration>(DEFAULT_CONFIGURATION);
+
 
   readonly reproducteurs$ = this._reproducteurs$.asObservable();
   readonly saillies$ = this._saillies$.asObservable();
@@ -93,14 +80,24 @@ export class DataStoreService {
   readonly notifications$ = this._notifications$.asObservable();
 
   constructor() {
-    this.loadAllData();
+    // Si l'utilisateur est déjà connecté au démarrage, charger les données
+    if (this.authService.isAuthenticated()) {
+      this.loadAllData();
+    }
   }
 
-  loadAllData(): void {
+  async loadAllData(): Promise<void> {
+    // Ne charger AUCUNE donnée de la ferme si l'utilisateur n'est pas connecté
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
     if (!this.isBrowser()) {
       this.loadLocalData();
       return;
     }
+
+    await this.seedApi.ensureSeeded();
 
     forkJoin({
       reproducteurs: this.dataApi.getReproducteurs(),
@@ -252,6 +249,25 @@ export class DataStoreService {
   addVente(vente: Vente): void {
     const created = this.storageService.addVente(vente);
     this._ventes$.next([...this._ventes$.getValue(), created]);
+
+    // TK-09 : libérer les cages d'engraissement après une vente (3 lapins/cage)
+    const cagesLiberees = Math.ceil((vente.vendus || 0) / 3);
+    if (cagesLiberees > 0) {
+      const clapiers = [...this._clapiers$.getValue()];
+      const engraisIndexes = clapiers
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => c.type === 'Engraissement')
+        .sort((a, b) => (b.c.casesOccupees || 0) - (a.c.casesOccupees || 0));
+      let remaining = cagesLiberees;
+      for (const { c, i } of engraisIndexes) {
+        if (remaining <= 0) break;
+        const liberable = Math.min(remaining, c.casesOccupees || 0);
+        clapiers[i] = { ...c, casesOccupees: (c.casesOccupees || 0) - liberable };
+        remaining -= liberable;
+      }
+      this._clapiers$.next(clapiers);
+    }
+
     if (this.isBrowser()) {
       this.dataApi.createVente(created).subscribe({
         error: (err) => this.logApiError('addVente', err)
@@ -262,6 +278,20 @@ export class DataStoreService {
   addDeces(deces: Deces): void {
     const created = this.storageService.addDeces(deces);
     this._deces$.next([...this._deces$.getValue(), created]);
+
+    if (deces.reproducteurId) {
+      const list = this._reproducteurs$.getValue();
+      const idx = list.findIndex(r => r.id === deces.reproducteurId);
+      if (idx !== -1) {
+        const repro = list[idx];
+        const updated = {
+          ...repro,
+          etat: (repro.sexe === 'F' ? 'Morte' : 'Mort') as any
+        };
+        this.updateReproducteur(updated);
+      }
+    }
+
     if (this.isBrowser()) {
       this.dataApi.createDeces(created).subscribe({
         error: (err) => this.logApiError('addDeces', err)
@@ -350,6 +380,66 @@ export class DataStoreService {
     if (this.isBrowser()) {
       this.dataApi.updateConfiguration(updated).subscribe({
         error: (err) => this.logApiError('updateConfiguration', err)
+      });
+    }
+  }
+
+  updateVente(updated: Vente): void {
+    const list = this._ventes$.getValue().map(v => v.id === updated.id ? { ...v, ...updated } : v);
+    this._ventes$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.updateVente(updated).subscribe({
+        error: (err) => this.logApiError('updateVente', err)
+      });
+    }
+  }
+
+  deleteVente(id: string): void {
+    const list = this._ventes$.getValue().filter(v => v.id !== id);
+    this._ventes$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.deleteVente(id).subscribe({
+        error: (err) => this.logApiError('deleteVente', err)
+      });
+    }
+  }
+
+  updateMiseBas(updated: MiseBas): void {
+    const list = this._misesBas$.getValue().map(m => m.id === updated.id ? { ...m, ...updated } : m);
+    this._misesBas$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.updateMiseBas(updated).subscribe({
+        error: (err) => this.logApiError('updateMiseBas', err)
+      });
+    }
+  }
+
+  deleteMiseBas(id: string): void {
+    const list = this._misesBas$.getValue().filter(m => m.id !== id);
+    this._misesBas$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.deleteMiseBas(id).subscribe({
+        error: (err) => this.logApiError('deleteMiseBas', err)
+      });
+    }
+  }
+
+  updateSevrage(updated: Sevrage): void {
+    const list = this._sevrages$.getValue().map(s => s.id === updated.id ? { ...s, ...updated } : s);
+    this._sevrages$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.updateSevrage(updated).subscribe({
+        error: (err) => this.logApiError('updateSevrage', err)
+      });
+    }
+  }
+
+  deleteSevrage(id: string): void {
+    const list = this._sevrages$.getValue().filter(s => s.id !== id);
+    this._sevrages$.next(list);
+    if (this.isBrowser()) {
+      this.dataApi.deleteSevrage(id).subscribe({
+        error: (err) => this.logApiError('deleteSevrage', err)
       });
     }
   }

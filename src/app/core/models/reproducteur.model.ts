@@ -9,7 +9,7 @@ export type EtatFemelle =
   | 'Réformée'
   | 'Morte';
 
-export type EtatMale = 'Actif' | 'Réformé' | 'Mort';
+export type EtatMale = 'Actif' | 'Mort';
 
 export interface Femelle {
   id: string;
@@ -45,6 +45,7 @@ export function isMale(r: Reproducteur): r is Male {
 export type EtatBande =
   | 'Repos'
   | 'Saillie'
+  | 'Gestation'
   | 'Allaitement'
   | 'Sexage'
   | 'Engraissement'

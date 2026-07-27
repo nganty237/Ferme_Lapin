@@ -1,86 +1,308 @@
-<div class="page-container">
-      <app-page-header
-        title="Rentabilité par Portée"
-        subtitle="Suivi de la marge financière générée par chaque mise-bas et engraissement">
-      </app-page-header>
+<div class="page-container space-y-6">
+  
+  <!-- En-tête de page -->
+  <app-page-header
+    title="Simulateur de Rentabilité"
+    subtitle="Analyse prévisionnelle des coûts et marges d'engraissement">
+  </app-page-header>
 
-      <!-- Résumé économique global -->
-      @if (kpis()) {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Marge Brute Totale -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-emerald-100 bg-emerald-50/10 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Marge Brute Totale</span>
-            <strong class="text-2xl font-bold text-emerald-800 block mt-1">{{ kpis()!.margeBruteTotale | number:'1.0-0' }} FCFA</strong>
+  <!-- Section 1 : Contrôles Dynamiques Fermier & Normes Zootechniques Fixes -->
+  <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-4">
+    
+    <!-- En-tête des paramètres -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 cursor-pointer group" (click)="toggleParameters()">
+      <div>
+        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 group-hover:text-emerald-700 transition-colors">
+          <div class="flex items-center justify-center p-1 rounded-full bg-slate-100 group-hover:bg-emerald-100 text-emerald-700 transition-colors">
+            <mat-icon class="text-[20px] w-[20px] h-[20px]">{{ showParameters() ? 'expand_less' : 'tune' }}</mat-icon>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">trending_up</mat-icon>
-          </div>
-        </div>
+          Paramètres du Calcul Économique
+        </h3>
+        <p class="text-xs text-slate-500 mt-1">Ajustez les variables de votre élevage pour simuler la rentabilité de la bande</p>
+      </div>
 
-        <!-- Revenu Moyen / Portée -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-slate-100 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Revenu Moyen / Portée</span>
-            <strong class="text-2xl font-bold text-slate-700 block mt-1">{{ kpis()!.revenuMoyenPortee | number:'1.0-0' }} FCFA</strong>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">monetization_on</mat-icon>
-          </div>
-        </div>
-
-        <!-- Rentabilité / Femelle / An -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 border-slate-100 flex items-center justify-between p-5 hover:shadow-md transition-shadow">
-          <div>
-            <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Rentabilité / Femelle / An</span>
-            <strong class="text-2xl font-bold text-slate-700 block mt-1">{{ kpis()!.rentabiliteFemelleAn | number:'1.0-0' }} FCFA</strong>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600 border border-pink-100">
-            <mat-icon style="font-size: 26px; width: 26px; height: 26px;">female</mat-icon>
-          </div>
-        </div>
-        </div>
-      }
-
-      <!-- Tableau détaillé -->
-      <div class="bg-white border border-slate-200 rounded-xl p-6">
-        <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
-          <mat-icon class="text-emerald-700">attach_money</mat-icon> Liste des Portées & Marges
-        </p>
-
-        <div class="overflow-x-auto mt-4">
-          <table class="w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Portée</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Femelle Mère</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Lapereaux Vivants</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-center">Cages d'engraissement</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Revenu Brut</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Coût Alimentaire</th>
-                <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-right">Marge Nette</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (rows().length === 0) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td colspan="7" class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center py-8 text-slate-400">Aucune donnée économique disponible. Enregistrez des sevrages et ventes.</td>
-                </tr>
-              } @else {
-                @for (r of rows(); track r.id) {
-                  <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="px-4 py-3 border-b border-slate-100 align-middle font-bold text-slate-700">Portée #{{ r.id }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono font-semibold">{{ r.femelleId }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center">{{ r.vivants }}</td>
-                    <td class="px-4 py-3 text-slate-800 border-b border-slate-100 align-middle text-center font-mono">{{ r.cages }}</td>
-                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-slate-700 font-semibold">{{ r.revenu | number:'1.0-0' }} FCFA</td>
-                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-slate-500">{{ r.coutAliment | number:'1.0-0' }} FCFA</td>
-                    <td class="px-4 py-3 border-b border-slate-100 align-middle text-right font-mono text-emerald-700 font-bold">{{ r.marge | number:'1.0-0' }} FCFA</td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
+      <div class="flex items-center gap-2">
+        <button 
+          (click)="resetDefaults(); $event.stopPropagation()" 
+          type="button"
+          class="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer">
+          <mat-icon class="text-[16px] w-[16px] h-[16px]">restart_alt</mat-icon>
+          Réinitialiser (77 lapins)
+        </button>
       </div>
     </div>
+
+    @if (showParameters()) {
+      <div class="pt-3 border-t border-slate-100 space-y-4">
+        <!-- Formulaire des Données DYNAMIQUES (Modifiables par le Fermier) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Effectif Lapins -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+          Effectif de la Bande (Lapins)
+        </label>
+        <div class="relative">
+          <input 
+            type="number" 
+            [ngModel]="effectifLapins()" 
+            (ngModelChange)="effectifLapins.set($event)"
+            min="1" 
+            class="w-full text-sm font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all">
+          <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">lapins</span>
+        </div>
+      </div>
+
+      <!-- Prix du Sac d'Aliment -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+          Prix Sac d'Aliment (51 kg)
+        </label>
+        <div class="relative">
+          <input 
+            type="number" 
+            [ngModel]="prixSacAliment()" 
+            (ngModelChange)="prixSacAliment.set($event)"
+            min="0" 
+            step="500" 
+            class="w-full text-sm font-bold text-emerald-800 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all">
+          <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">FCFA</span>
+        </div>
+      </div>
+
+      <!-- Tarif Eau CAMWATER -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+          Tarif Eau CAMWATER (TTC / m³)
+        </label>
+        <div class="relative">
+          <input 
+            type="number" 
+            [ngModel]="prixEauM3()" 
+            (ngModelChange)="prixEauM3.set($event)"
+            min="0" 
+            class="w-full text-sm font-bold text-cyan-800 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-500 focus:bg-white outline-none transition-all">
+          <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">FCFA/m³</span>
+        </div>
+      </div>
+
+      <!-- Prix Vente Lapin -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600 block">
+          Prix Vente Lapin (2,5 kg)
+        </label>
+        <div class="relative">
+          <input 
+            type="number" 
+            [ngModel]="prixVenteLapin()" 
+            (ngModelChange)="prixVenteLapin.set($event)"
+            min="0" 
+            step="500" 
+            class="w-full text-sm font-bold text-purple-900 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:bg-white outline-none transition-all">
+          <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">FCFA</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Rappel des Normes Zootechniques STATIQUES (Non Modifiables) -->
+    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 font-medium">
+      <span class="text-slate-700 font-bold uppercase text-[10px] tracking-wider">Normes Zootechniques Fixes :</span>
+      <span class="flex items-center gap-1">
+        <mat-icon class="text-emerald-600 text-[14px] w-[14px] h-[14px]">restaurant</mat-icon>
+        Alimentation : <strong>110 g / lapin / jour</strong> (0,110 kg/j)
+      </span>
+      <span class="flex items-center gap-1">
+        <mat-icon class="text-cyan-600 text-[14px] w-[14px] h-[14px]">water_drop</mat-icon>
+        Abrévement : <strong>0,5 L d'eau / lapin / jour</strong>
+      </span>
+      <span class="flex items-center gap-1">
+        <mat-icon class="text-amber-600 text-[14px] w-[14px] h-[14px]">schedule</mat-icon>
+        Période : <strong>3 mois (90 jours)</strong>
+      </span>
+      <span class="flex items-center gap-1">
+        <mat-icon class="text-purple-600 text-[14px] w-[14px] h-[14px]">scale</mat-icon>
+        Poids Vente : <strong>2,5 kg / lapin fini</strong>
+      </span>
+    </div>
+      </div>
+    }
+
+  </div>
+
+  @if (bilan()) {
+
+    <!-- Section 2 : Les 4 KPIs Synthetiques du Bilan Financier -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Card Dépense Alimentation -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:border-slate-300 transition-colors">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Coût Alimentation Total</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">restaurant</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3">
+          <strong class="text-2xl font-bold text-slate-800 tracking-tight">{{ bilan().totalCoutAliment | number:'1.0-0' }} FCFA</strong>
+          <p class="text-xs text-slate-500 mt-1">
+            <span class="font-semibold text-slate-700">{{ bilan().totalAlimentKg | number:'1.1-1' }} kg</span>
+            <span class="text-slate-400"> ({{ bilan().totalSacsAliment | number:'1.1-1' }} sacs de 51 kg)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Card Dépense Eau CAMWATER -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:border-slate-300 transition-colors">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Coût Eau (CAMWATER)</span>
+          <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">water_drop</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3">
+          <strong class="text-2xl font-bold text-slate-800 tracking-tight">{{ bilan().totalCoutEau | number:'1.0-0' }} FCFA</strong>
+          <p class="text-xs text-slate-500 mt-1">
+            <span class="font-semibold text-slate-700">{{ bilan().totalEauLitres | number:'1.0-0' }} Litres</span>
+            <span class="text-slate-400"> ({{ bilan().totalEauM3 | number:'1.3-3' }} m³)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Card Chiffre d'Affaires Vente -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs hover:border-slate-300 transition-colors">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Chiffre d'Affaires Ventes</span>
+          <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">payments</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3">
+          <strong class="text-2xl font-bold text-purple-900 tracking-tight">{{ bilan().revenuBrutVente | number:'1.0-0' }} FCFA</strong>
+          <p class="text-xs text-slate-500 mt-1">
+            <span class="font-semibold text-slate-700">{{ bilan().effectifLapins }} lapins</span> × {{ bilan().prixVenteLapin | number:'1.0-0' }} FCFA
+          </p>
+        </div>
+      </div>
+
+      <!-- Card Marge Nette Réalisée -->
+      <div class="bg-emerald-50/90 border border-emerald-200 rounded-xl p-5 shadow-2xs">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Marge Nette Réalisée</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+            <mat-icon class="text-[18px] w-[18px] h-[18px]">trending_up</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3">
+          <strong class="text-2xl font-extrabold text-emerald-800 tracking-tight">+{{ bilan().margeNette | number:'1.0-0' }} FCFA</strong>
+          <p class="text-xs font-bold text-emerald-700 mt-1">
+            ROI : +{{ bilan().tauxRentabilite | number:'1.0-0' }} % sur charges directes
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section 3 : Tableau Synthétique Mensuel (Mois 1, Mois 2, Mois 3, Cumul) -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <mat-icon class="text-emerald-700 text-[20px] w-[20px] h-[20px]">table_chart</mat-icon>
+            Ventilation Mensuelle des Consommations & Dépenses (1 Bande)
+          </h3>
+          <p class="text-xs text-slate-500">Calcul basé sur l'effectif de {{ bilan().effectifLapins }} lapins de la bande sur 3 mois</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[11px] border-y border-slate-200">
+              <th class="py-3 px-4">Période</th>
+              <th class="py-3 px-3 text-center">Durée</th>
+              <th class="py-3 px-4 text-right">Aliment (kg)</th>
+              <th class="py-3 px-3 text-right">Sacs de 51 kg</th>
+              <th class="py-3 px-4 text-right">Coût Aliment (FCFA)</th>
+              <th class="py-3 px-4 text-right">Eau (Litres)</th>
+              <th class="py-3 px-3 text-right">Eau (m³)</th>
+              <th class="py-3 px-4 text-right">Coût Eau CAMWATER</th>
+              <th class="py-3 px-4 text-right font-bold text-slate-900 bg-slate-100/60">Dépense Mois (FCFA)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-medium">
+            @for (m of bilan().detailsMois; track m.moisIndex) {
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3.5 px-4 font-bold text-slate-800 flex items-center gap-2">
+                  <mat-icon class="text-slate-400 text-[16px] w-[16px] h-[16px]">calendar_today</mat-icon>
+                  Mois {{ m.moisIndex }}
+                </td>
+                <td class="py-3.5 px-3 text-center font-mono text-slate-500">{{ m.jours }} jours</td>
+                <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-800">{{ m.consoAlimentKg | number:'1.1-1' }} kg</td>
+                <td class="py-3.5 px-3 text-right font-mono text-slate-600">{{ m.nbrSacsAliment | number:'1.2-2' }} sacs</td>
+                <td class="py-3.5 px-4 text-right font-mono font-semibold text-emerald-800">{{ m.coutAliment | number:'1.0-0' }} FCFA</td>
+                <td class="py-3.5 px-4 text-right font-mono text-cyan-800">{{ m.volEauLitres | number:'1.0-0' }} L</td>
+                <td class="py-3.5 px-3 text-right font-mono text-cyan-700">{{ m.volEauM3 | number:'1.3-3' }} m³</td>
+                <td class="py-3.5 px-4 text-right font-mono font-semibold text-cyan-800">{{ m.coutEau | number:'1.0-0' }} FCFA</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 bg-slate-50/50">{{ m.coutTotalMois | number:'1.0-0' }} FCFA</td>
+              </tr>
+            }
+          </tbody>
+          <!-- Ligne Total Cumulé -->
+          <tfoot>
+            <tr class="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+              <td class="py-3.5 px-4 uppercase text-xs" colspan="2">CUMUL 3 MOIS (90 JOURS)</td>
+              <td class="py-3.5 px-4 text-right font-mono text-emerald-950 font-bold">{{ bilan().totalAlimentKg | number:'1.1-1' }} kg</td>
+              <td class="py-3.5 px-3 text-right font-mono text-emerald-950 font-bold">{{ bilan().totalSacsAliment | number:'1.1-1' }} sacs</td>
+              <td class="py-3.5 px-4 text-right font-mono font-extrabold text-emerald-900">{{ bilan().totalCoutAliment | number:'1.0-0' }} FCFA</td>
+              <td class="py-3.5 px-4 text-right font-mono text-cyan-950 font-bold">{{ bilan().totalEauLitres | number:'1.0-0' }} L</td>
+              <td class="py-3.5 px-3 text-right font-mono text-cyan-950 font-bold">{{ bilan().totalEauM3 | number:'1.3-3' }} m³</td>
+              <td class="py-3.5 px-4 text-right font-mono font-extrabold text-cyan-900">{{ bilan().totalCoutEau | number:'1.0-0' }} FCFA</td>
+              <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900 bg-slate-200/70 text-sm">
+                {{ bilan().totalCoutProduction | number:'1.0-0' }} FCFA
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 4 : Synthèse Technico-Économique Finale par Lapin -->
+    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-3">
+      <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+        <mat-icon class="text-slate-600 text-[20px] w-[20px] h-[20px]">analytics</mat-icon>
+        <h4 class="font-bold text-sm text-slate-800">Indicateurs Unitaire par Lapin Produit</h4>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+        
+        <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200/80">
+          <span class="text-slate-500 font-medium block">Dépense Totale Engagée</span>
+          <strong class="text-base font-bold text-slate-800 block mt-0.5">{{ bilan().totalCoutProduction | number:'1.0-0' }} FCFA</strong>
+          <span class="text-[10px] text-slate-400">Alimentation + Eau CAMWATER</span>
+        </div>
+
+        <div class="p-3.5 bg-amber-50/70 rounded-lg border border-amber-200/60">
+          <span class="text-amber-800 font-medium block">Dépense / Lapin Produit</span>
+          <strong class="text-base font-bold text-amber-900 block mt-0.5">{{ bilan().depenseParLapin | number:'1.0-0' }} FCFA / lapin</strong>
+          <span class="text-[10px] text-amber-700">Coût d'engraissement unitaire</span>
+        </div>
+
+        <div class="p-3.5 bg-purple-50/70 rounded-lg border border-purple-200/60">
+          <span class="text-purple-800 font-medium block">Chiffre d'Affaires Ventes</span>
+          <strong class="text-base font-bold text-purple-950 block mt-0.5">{{ bilan().revenuBrutVente | number:'1.0-0' }} FCFA</strong>
+          <span class="text-[10px] text-purple-700">{{ bilan().effectifLapins }} lapins × {{ bilan().prixVenteLapin | number:'1.0-0' }} FCFA</span>
+        </div>
+
+        <div class="p-3.5 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-900">
+          <span class="text-emerald-800 font-bold block uppercase text-[10px] tracking-wider">Bénéfice Net / Lapin</span>
+          <strong class="text-base font-black text-emerald-700 block mt-0.5">+{{ bilan().margeParLapin | number:'1.0-0' }} FCFA / lapin</strong>
+          <span class="text-[10px] text-emerald-600 font-bold">Marge nette totale : +{{ bilan().margeNette | number:'1.0-0' }} FCFA</span>
+        </div>
+
+      </div>
+    </div>
+
+  }
+
+</div>

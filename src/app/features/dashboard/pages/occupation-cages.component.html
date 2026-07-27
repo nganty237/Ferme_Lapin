@@ -103,12 +103,12 @@
               <span class="font-bold text-slate-800">{{ config()?.nombreCagesTotal || 108 }}</span>
             </div>
             <div class="flex justify-between items-center py-2 border-b border-slate-50">
-              <span class="text-slate-500 text-sm">Densité cible / case</span>
-              <span class="font-bold text-slate-800">{{ config()?.densiteParCase || 3 }} lapins</span>
+              <span class="text-slate-500 text-sm">Densités cibles</span>
+              <span class="font-bold text-slate-800 text-xs sm:text-sm">Sexage : {{ config()?.densiteSexageParCase || 7 }} | Engrais : {{ config()?.densiteParCase || 3 }} lapins</span>
             </div>
             <div class="flex justify-between items-center py-2">
               <span class="text-slate-500 text-sm">Capacité maximale</span>
-              <span class="font-bold text-slate-800">{{ kpis()?.capaciteTheorique || 252 }} lapins</span>
+              <span class="font-bold text-slate-800">{{ kpis()?.capaciteTheorique || 267 }} lapins</span>
             </div>
           </div>
         </div>

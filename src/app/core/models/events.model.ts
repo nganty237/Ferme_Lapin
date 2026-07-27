@@ -76,6 +76,7 @@ export interface Sexage {
   nombreMales: number;
   nombreFemelles: number;
   totalSexes: number;
+  retenus?: number;          // TK-11 : lapereaux retenus pour renouvellement du cheptel
   clapierSexageId?: string;
   clapierEngraissementId?: string;
 }

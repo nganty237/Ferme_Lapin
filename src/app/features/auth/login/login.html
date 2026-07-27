@@ -1,66 +1,105 @@
 <div class="h-screen w-screen flex overflow-hidden bg-white">
   <!-- Section Formulaire (Gauche) -->
-  <div class="w-full md:w-1/2 flex flex-col justify-between p-8 md:p-16">
+  <div class="w-full md:w-1/2 flex flex-col justify-between p-8 md:p-16 bg-white">
     
-    <!-- Back Link -->
-    <div>
-      <a routerLink="/" class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium decoration-none">
-        <mat-icon class="text-base" style="width: 16px; height: 16px; font-size: 16px; display: flex; align-items: center; justify-content: center;">arrow_back</mat-icon>
-        <span>Back</span>
-      </a>
-    </div>
-
-    <!-- Form Box -->
-    <div class="max-w-[400px] w-full mx-auto my-auto flex flex-col gap-8">
-      <div class="flex flex-col gap-2">
-        <h1 class="text-3xl font-extrabold text-slate-900 leading-tight">Let's log you in.</h1>
-        <p class="text-sm text-slate-500 leading-relaxed">
-          Connectez-vous pour accéder à la plateforme de gestion de votre élevage cunicole.
-        </p>
+    <!-- Conteneur centré de largeur max 400px qui aligne tout verticalement et horizontalement -->
+    <div class="max-w-[400px] w-full mx-auto flex-1 flex flex-col justify-between my-auto">
+      
+      <!-- Logo/Nom de la ferme -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="h-9 w-9 bg-emerald-700 flex items-center justify-center text-white" style="border-radius: 0px !important;">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">pets</mat-icon>
+          </div>
+          <span class="text-lg font-bold text-slate-800 tracking-tight">Ferme Raissa</span>
+        </div>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
-        <div class="flex flex-col gap-1.5">
-          <label for="username" class="text-xs font-semibold text-slate-600">Your e-mail or username</label>
-          <mat-form-field appearance="outline" class="w-full custom-form-field">
-            <input matInput id="username" formControlName="username" type="text" placeholder="admin" required />
-          </mat-form-field>
+      <!-- Form Box -->
+      <div class="flex flex-col gap-8 my-auto">
+        <div class="flex flex-col gap-2">
+          <h1 class="text-3xl font-extrabold text-slate-900 leading-tight">Let's log you in.</h1>
+          <p class="text-sm text-slate-500 leading-relaxed">
+            Connectez-vous pour accéder à la plateforme de gestion de votre élevage cunicole.
+          </p>
         </div>
 
-        <div class="flex flex-col gap-1.5">
-          <label for="password" class="text-xs font-semibold text-slate-600">Password</label>
-          <mat-form-field appearance="outline" class="w-full custom-form-field">
-            <input matInput id="password" formControlName="password" [type]="hidePassword() ? 'password' : 'text'" placeholder="••••••••" required />
-            <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility()" class="text-slate-400" style="background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-          </mat-form-field>
-        </div>
-
-        @if (errorMessage()) {
-          <div class="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-200 rounded-lg px-3 py-2 flex items-center gap-2">
-            <mat-icon class="text-rose-500 text-lg" style="width: 18px; height: 18px; font-size: 18px; display: flex; align-items: center; justify-content: center;">error_outline</mat-icon>
-            <span>{{ errorMessage() }}</span>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+          <div class="flex flex-col gap-1.5">
+            <label for="email" class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Adresse E-mail</label>
+            <div class="relative flex items-center">
+              <input 
+                id="email" 
+                formControlName="email" 
+                type="email" 
+                placeholder="ex: surflinkoyos@gmail.com" 
+                required 
+                class="w-full h-12 px-3.5 pr-10 text-sm text-slate-800 bg-white border border-slate-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none transition-all"
+              />
+              <mat-icon class="absolute right-3 text-slate-400 pointer-events-none" style="font-size: 20px; width: 20px; height: 20px;">mail_outline</mat-icon>
+            </div>
           </div>
-        }
 
-        <button mat-flat-button class="custom-login-btn w-full mt-2 py-6 text-sm font-semibold rounded-lg flex items-center justify-center gap-2" type="submit" [disabled]="loginForm.invalid" style="border: none; cursor: pointer;">
-          <span>login</span>
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">arrow_forward</mat-icon>
-        </button>
-      </form>
-    </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="password" class="text-xs font-semibold text-slate-700 uppercase tracking-wider">Mot de passe</label>
+            <div class="relative flex items-center">
+              <input 
+                id="password" 
+                formControlName="password" 
+                [type]="hidePassword() ? 'password' : 'text'" 
+                placeholder="••••••••" 
+                required 
+                class="w-full h-12 px-3.5 pr-10 text-sm text-slate-800 bg-white border border-slate-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none transition-all"
+              />
+              <button 
+                type="button" 
+                (click)="togglePasswordVisibility()" 
+                class="absolute right-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                style="background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+              >
+                <mat-icon style="font-size: 20px; width: 20px; height: 20px;">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+          </div>
 
-    <!-- Bottom Footer -->
-    <div class="text-center text-sm text-slate-500">
-      <span>Don't have an account ? </span>
-      <a class="text-blue-600 font-semibold hover:underline cursor-pointer">Let's Register</a>
+          @if (errorMessage()) {
+            <div class="text-xs text-rose-600 font-medium bg-rose-50 border border-rose-200 px-3.5 py-2.5 flex items-center gap-2">
+              <mat-icon class="text-rose-500 text-lg" style="width: 18px; height: 18px; font-size: 18px; display: flex; align-items: center; justify-content: center;">error_outline</mat-icon>
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <button 
+            type="submit" 
+            [disabled]="loginForm.invalid" 
+            class="w-full h-12 mt-2 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+          >
+            <span>Se connecter</span>
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">arrow_forward</mat-icon>
+          </button>
+        </form>
+      </div>
+
+      <!-- Bottom Footer -->
+      <div class="text-sm text-slate-500">
+        <span>Besoin d'un accès ? </span>
+        <a class="text-emerald-700 font-semibold hover:underline cursor-pointer">Contactez l'administration</a>
+      </div>
     </div>
   </div>
 
   <!-- Section Image & Dégradé (Droite) -->
-  <div class="hidden md:block w-1/2 h-full relative bg-slate-900">
-    <img src="assets/images/lapine.jpg" alt="Ferme de lapins" class="w-full h-full object-cover select-none pointer-events-none opacity-85" />
-    <div class="absolute inset-0 bg-gradient-to-tr from-slate-950/80 via-slate-900/30 to-transparent"></div>
+  <div class="hidden md:block w-1/2 h-full relative bg-emerald-950">
+    <img src="assets/images/lapine.jpg" alt="Ferme de lapins" class="w-full h-full object-cover select-none pointer-events-none opacity-80" />
+    <div class="absolute inset-0 bg-gradient-to-tr from-emerald-950/90 via-emerald-900/40 to-transparent"></div>
+    
+    <!-- Informations de marque overlay -->
+    <div class="absolute bottom-16 left-16 right-16 text-white flex flex-col gap-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Saveurs du Lapin</span>
+      <h2 class="text-3xl font-extrabold leading-tight">Optimisez la productivité de votre élevage.</h2>
+      <p class="text-sm text-emerald-100/80 leading-relaxed max-w-[450px]">
+        Suivez les cycles de reproduction, gérez l'espace des clapiers et analysez la rentabilité de vos bandes en temps réel.
+      </p>
+    </div>
   </div>
 </div>

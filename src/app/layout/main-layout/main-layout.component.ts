@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, afterNextRender, Component, HostListener, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { ToastContainerComponent, UserMenuComponent } from '@shared/components';
 import { SidebarComponent } from '@layout/sidebar/sidebar.component';
 
@@ -9,6 +9,7 @@ import { SidebarComponent } from '@layout/sidebar/sidebar.component';
   selector: 'app-main-layout',
   imports: [
     RouterOutlet,
+    RouterLink,
     MatButtonModule,
     MatIconModule,
     SidebarComponent,
@@ -20,13 +21,9 @@ import { SidebarComponent } from '@layout/sidebar/sidebar.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainLayoutComponent {
-  sidebarCollapsed = signal(false);
-
-  constructor() {
-    afterNextRender(() => {
-      this.checkScreenSize();
-    });
-  }
+  sidebarCollapsed = signal(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
 
   @HostListener('window:resize')
   onResize() {
