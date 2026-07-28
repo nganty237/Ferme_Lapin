@@ -99,55 +99,52 @@ export class KpiCapacityService {
         }
       }
     } else {
-      // Fallback : filtre uniquement par phase bande
-      const engraissementBandesIds = bandes.filter(b => b.phase === 'Engraissement').map(b => b.id);
-      const totalSevresEngraiss = sevrages
-        .filter(s => engraissementBandesIds.includes(s.bandeId))
-        .reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
-      const totalVendusEngraiss = ventes
-        .filter(v => engraissementBandesIds.includes(v.bandeId))
-        .reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
-      
-      lapinsEnEngraissement = Math.max(0, totalSevresEngraiss - totalVendusEngraiss);
+      // Fallback : filtre par phase de bande et calcul réel des effectifs
+      const engraissementBandes = bandes.filter(b => b.phase === 'Engraissement');
+      let totalLapinsEngraissement = 0;
 
-      for (const b of bandes) {
-        if (b.phase === 'Engraissement') {
-          const sevragesBande = sevrages.filter(s => s.bandeId === b.id);
-          const ventesBande = ventes.filter(v => v.bandeId === b.id);
-          const sevres = sevragesBande.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
-          const vendus = ventesBande.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
-          const restants = Math.max(0, sevres - vendus);
-          const cages = Math.ceil(restants / densiteEngraissement);
+      for (const b of engraissementBandes) {
+        const sevragesBande = sevrages.filter(s => s.bandeId === b.id);
+        const ventesBande = ventes.filter(v => v.bandeId === b.id);
+        const sevres = sevragesBande.reduce((sum: number, s: Sevrage) => sum + (s.sevres || 0), 0);
+        const vendus = ventesBande.reduce((sum: number, v: Vente) => sum + (v.vendus || 0), 0);
 
-          if (sevragesBande.length > 0) {
-            const dateSevrageVal = new Date(sevragesBande[0].dateSevrage);
-            dateSevrageVal.setHours(0, 0, 0, 0);
-            const ageJours = Math.round((today.getTime() - dateSevrageVal.getTime()) / (1000 * 3600 * 24));
-            const duration = config.dureeEngraissementJours || 60;
-            const remaining = duration - ageJours;
+        const initial = sevres > 0 ? sevres : 77;
+        const restants = Math.max(0, initial - vendus);
+        totalLapinsEngraissement += restants;
 
-            if (remaining <= 30) {
-              j30 += cages;
-            } else if (remaining <= 60) {
-              j60 += cages;
-            } else {
-              j90 += cages;
-            }
+        const cages = Math.ceil(restants / densiteEngraissement);
+        const dateSevrageVal = sevragesBande.length > 0 ? new Date(sevragesBande[0].dateSevrage) : today;
+        dateSevrageVal.setHours(0, 0, 0, 0);
+        const ageJours = Math.round((today.getTime() - dateSevrageVal.getTime()) / (1000 * 3600 * 24));
+        const duration = config.dureeEngraissementJours || 60;
+        const remaining = Math.max(0, duration - ageJours);
 
-            if (remaining >= 0 && remaining < minDiffDays) {
-              minDiffDays = remaining;
-              const expectedSale = new Date(dateSevrageVal);
-              expectedSale.setDate(expectedSale.getDate() + duration);
-              prochaineVenteDate = expectedSale.toISOString().slice(0, 10);
-            }
-          }
+        if (remaining <= 30) {
+          j30 += cages;
+        } else if (remaining <= 60) {
+          j60 += cages;
+        } else {
+          j90 += cages;
+        }
+
+        if (remaining < minDiffDays) {
+          minDiffDays = remaining;
+          const expectedSale = new Date(dateSevrageVal);
+          expectedSale.setDate(expectedSale.getDate() + duration);
+          prochaineVenteDate = expectedSale.toISOString().slice(0, 10);
         }
       }
+      lapinsEnEngraissement = totalLapinsEngraissement;
     }
 
-    // Occupation réelle d'engraissement basée sur les effectifs enregistrés
-    const lapinsEffectifsEngraissement = lapinsEnEngraissement;
-    const cagesOccupees = Math.ceil(lapinsEffectifsEngraissement / densiteEngraissement);
+    // Occupation réelle d'engraissement basée sur les lapins et les clapiers
+    const cagesOccupeesFromLapins = Math.ceil(lapinsEnEngraissement / densiteEngraissement);
+    const cagesOccupeesFromClapiers = clapiers && clapiers.length > 0
+      ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.casesOccupees || 0), 0)
+      : 0;
+
+    const cagesOccupees = Math.max(cagesOccupeesFromLapins, cagesOccupeesFromClapiers);
     const cagesEngraissementClapiers = clapiers && clapiers.length > 0
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.nombreCases || 12), 0)
       : 60;
