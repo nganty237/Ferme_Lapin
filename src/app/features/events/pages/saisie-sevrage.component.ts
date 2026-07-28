@@ -115,13 +115,14 @@ export class SaisieSevrageComponent {
       this.femellesFormArray.clear();
       mbs.forEach(mb => {
         const existingSev = allSevrages.find(s => s.miseBasId === mb.id || s.femelleId === mb.femelleId);
-        const sevresVal = existingSev ? existingSev.sevres : (mb.vivants || 0);
+        const vivants = mb.vivants || 0;
+        const sevresVal = existingSev ? Math.min(existingSev.sevres, vivants) : vivants;
 
         const group = this.fb.group({
           miseBasId: [mb.id],
           femelleId: [mb.femelleId],
-          vivantsInitiaux: [mb.vivants || 0],
-          sevres: [sevresVal, [Validators.required, Validators.min(0)]],
+          vivantsInitiaux: [vivants],
+          sevres: [sevresVal, [Validators.required, Validators.min(0), Validators.max(vivants)]],
           observations: ['']
         });
         this.femellesFormArray.push(group);
@@ -143,19 +144,15 @@ export class SaisieSevrageComponent {
   onSubmit() {
     if (this.sevrageForm.invalid) {
       this.sevrageForm.markAllAsTouched();
-      return;
-    }
-
-    const formValue = this.sevrageForm.value;
-    const femelles = formValue.femelles || [];
-
-    for (const f of femelles) {
-      const sevresNum = Number(f.sevres) || 0;
-      const vivantsNum = Number(f.vivantsInitiaux) || 0;
-      if (sevresNum > vivantsNum) {
-        this.notifier.error(`Erreur pour la femelle ${f.femelleId} : le nombre de sevrés (${sevresNum}) ne peut pas dépasser le nombre de vivants à la naissance (${vivantsNum}).`);
-        return;
+      const firstInvalid = this.femellesFormArray.controls.find(c => c.invalid);
+      if (firstInvalid && firstInvalid.get('sevres')?.hasError('max')) {
+        const viv = firstInvalid.get('vivantsInitiaux')?.value;
+        const fid = firstInvalid.get('femelleId')?.value;
+        this.notifier.error(`Le nombre de lapereaux sevrés pour la lapine ${this.getFemelleName(fid)} ne peut pas dépasser les ${viv} nés vivants.`);
+      } else {
+        this.notifier.error('Veuillez corriger les erreurs de saisie du sevrage.');
       }
+      return;
     }
 
     this.isSubmitting.set(true);

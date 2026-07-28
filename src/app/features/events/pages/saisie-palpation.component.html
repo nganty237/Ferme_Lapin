@@ -128,7 +128,8 @@
                     <div class="flex flex-wrap gap-2">
                       <label 
                         class="status-pill-radio"
-                        [class.active-positive]="ctrl.value.resultat === 'Positive'">
+                        [class.active-positive]="ctrl.value.resultat === 'Positive'"
+                        (click)="ctrl.get('resultat')?.setValue('Positive')">
                         <input type="radio" formControlName="resultat" value="Positive" class="hidden">
                         <mat-icon class="text-[15px] w-[15px] h-[15px]">check_circle</mat-icon>
                         Gestante (Confirmé)
@@ -136,7 +137,8 @@
 
                       <label
                         class="status-pill-radio"
-                        [class.active-negative]="ctrl.value.resultat === 'Negative'">
+                        [class.active-negative]="ctrl.value.resultat === 'Negative'"
+                        (click)="ctrl.get('resultat')?.setValue('Negative')">
                         <input type="radio" formControlName="resultat" value="Negative" class="hidden">
                         <mat-icon class="text-[15px] w-[15px] h-[15px]">cancel</mat-icon>
                         Vide (Négatif)
@@ -178,7 +180,28 @@
         </div>
       } @else {
         <!-- Empty State / Status Confirmation -->
-        @if ((selectedBandeStatut()?.nbGestantes || 0) > 0 && (selectedBandeStatut()?.nbGestantes === selectedBandeStatut()?.totalFemelles)) {
+        @if (selectedBandeStatut()?.estEnAllaitement) {
+          <div class="p-10 text-center bg-blue-50/60 border border-blue-200 rounded-xl">
+            <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-700 mx-auto flex items-center justify-center mb-3.5 shadow-xs">
+              <mat-icon class="text-[30px] w-[30px] h-[30px]">child_care</mat-icon>
+            </div>
+            <h4 class="font-bold text-blue-900 text-lg mb-1">
+              {{ selectedBandeStatut()?.nom }} en phase Allaitement
+            </h4>
+            <p class="text-sm text-blue-800 max-w-lg mx-auto leading-relaxed mb-4">
+              Les lapines de la <strong>{{ selectedBandeStatut()?.nom }}</strong> ont déjà été palpées et ont mis bas (statut actuel : En allaitement). La palpation pour cette bande est terminée pour ce cycle.
+            </p>
+            @if (prochaineBandeAPalper(); as prochaine) {
+              <button 
+                type="button"
+                (click)="onBandeChange(prochaine.id)"
+                class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-lg shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+                <mat-icon class="text-[18px]">arrow_forward</mat-icon>
+                Passer à la {{ prochaine.nom }}
+              </button>
+            }
+          </div>
+        } @else if ((selectedBandeStatut()?.nbGestantes || 0) > 0 && (selectedBandeStatut()?.nbGestantes === selectedBandeStatut()?.totalFemelles)) {
           <div class="p-10 text-center bg-emerald-50/50 border border-emerald-200 rounded-xl">
             <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center mb-3.5 shadow-xs">
               <mat-icon class="text-[30px] w-[30px] h-[30px]">verified</mat-icon>
@@ -186,9 +209,18 @@
             <h4 class="font-bold text-emerald-900 text-lg mb-1">
               Diagnostic 100% Positif — {{ selectedBandeStatut()?.nom }}
             </h4>
-            <p class="text-sm text-emerald-800 max-w-lg mx-auto leading-relaxed">
+            <p class="text-sm text-emerald-800 max-w-lg mx-auto leading-relaxed mb-4">
               Toutes les lapines ({{ selectedBandeStatut()?.nbGestantes }}/{{ selectedBandeStatut()?.totalFemelles }}) de la {{ selectedBandeStatut()?.nom }} ont été confirmées <strong>En gestation</strong>. Aucune palpation supplémentaire n'est en attente pour cette bande.
             </p>
+            @if (prochaineBandeAPalper(); as prochaine) {
+              <button 
+                type="button"
+                (click)="onBandeChange(prochaine.id)"
+                class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-lg shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+                <mat-icon class="text-[18px]">arrow_forward</mat-icon>
+                Passer à la {{ prochaine.nom }}
+              </button>
+            }
           </div>
         } @else {
           <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
@@ -196,9 +228,18 @@
               <mat-icon class="text-[24px]">check_circle_outline</mat-icon>
             </div>
             <h4 class="font-bold text-slate-700 text-base mb-1">Aucune saillie à palper</h4>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">
+            <p class="text-sm text-slate-500 max-w-md mx-auto mb-4">
               Toutes les lapines de cette bande ont déjà un diagnostic enregistré ou aucune saillie récente n'est en attente de palpation.
             </p>
+            @if (prochaineBandeAPalper(); as prochaine) {
+              <button 
+                type="button"
+                (click)="onBandeChange(prochaine.id)"
+                class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-lg shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+                <mat-icon class="text-[18px]">arrow_forward</mat-icon>
+                Passer à la {{ prochaine.nom }}
+              </button>
+            }
           </div>
         }
       }

@@ -111,7 +111,16 @@
                           type="number" 
                           formControlName="sevres" 
                           min="0" 
-                          class="form-input text-center w-24 font-bold text-indigo-700 text-sm mx-auto">
+                          [max]="ctrl.value.vivantsInitiaux"
+                          class="form-input text-center w-24 font-bold text-indigo-700 text-sm mx-auto transition-colors"
+                          [class.border-rose-500]="ctrl.get('sevres')?.invalid && (ctrl.get('sevres')?.touched || ctrl.get('sevres')?.dirty)"
+                          [class.text-rose-700]="ctrl.get('sevres')?.invalid"
+                          [class.bg-rose-50]="ctrl.get('sevres')?.invalid">
+                        @if (ctrl.get('sevres')?.hasError('max')) {
+                          <span class="block text-[10px] text-rose-600 font-bold mt-1">
+                            Max : {{ ctrl.value.vivantsInitiaux }} lapereaux
+                          </span>
+                        }
                       </td>
 
                       <!-- Survie Calculated Pill -->

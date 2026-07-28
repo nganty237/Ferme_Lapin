@@ -21,8 +21,11 @@ export interface BandeStatutPalpation {
   nbPalpationsAttente: number;
   nbGestantes: number;
   nbAuRepos: number;
+  nbEnAllaitement: number;
   statutLabel: string;
   estEligiblePalpation: boolean;
+  estEnAllaitement: boolean;
+  toutPalpe: boolean;
 }
 
 @Component({
@@ -60,7 +63,7 @@ export class SaisiePalpationComponent {
 
   selectedBandeId = signal<string>('bande-a');
   bandeSelectionnee = this.selectedBandeId;
-  uniquementAPalper = signal<boolean>(true); // Activé par défaut pour cibler directement la bande en gestation
+  uniquementAPalper = signal<boolean>(true); // Activé par défaut pour cibler directement la bande éligible
   isSubmitting = signal<boolean>(false);
 
   /**
@@ -76,19 +79,35 @@ export class SaisiePalpationComponent {
       const femellesBande = allRepros.filter(r => r.sexe === 'F' && r.bandeId === b.id && r.etat !== 'Morte' && r.etat !== 'Réformée');
       const totalFemelles = femellesBande.length || 11;
       
-      const sailliesBande = allSaillies.filter(s => s.bandeId === b.id);
-      const pendings = sailliesBande.filter(s => !allPalpations.some(p => p.saillieId === s.id));
-      const nbPalpationsAttente = pendings.length;
-      
+      const nbEnAllaitement = femellesBande.filter(f => f.etat === 'En allaitement').length;
       const nbGestantes = femellesBande.filter(f => f.etat === 'En gestation').length;
       const nbAuRepos = femellesBande.filter(f => f.etat === 'Au repos').length;
 
-      const estEnPhaseGestation = b.phase === 'Gestation' || b.phase === 'Saillie';
-      const estEligiblePalpation = estEnPhaseGestation || nbPalpationsAttente > 0;
+      const palpationsBande = allPalpations.filter(p => p.bandeId === b.id);
+
+      // Une bande est en allaitement/post-gestation si sa phase est Allaitement ou si au moins la moitié des femelles sont en allaitement
+      const estEnAllaitement = b.phase === 'Allaitement' || (femellesBande.length > 0 && nbEnAllaitement >= Math.ceil(femellesBande.length / 2));
+
+      const sailliesBande = allSaillies.filter(s => s.bandeId === b.id);
+      const pendings = sailliesBande.filter(s => !allPalpations.some(p => p.saillieId === s.id || p.femelleId === s.femelleId));
+      const nbPalpationsAttente = pendings.length;
+
+      // Palpation déjà complètement effectuée si toutes les lapines sont en gestation/allaitement ou palpations enregistrées
+      const toutPalpe = totalFemelles > 0 && (
+        (palpationsBande.length >= totalFemelles && nbGestantes > 0) ||
+        estEnAllaitement
+      );
+
+      const estEnPhaseSaillieOuGestation = b.phase === 'Saillie' || b.phase === 'Gestation';
+      const estEligiblePalpation = !estEnAllaitement && !toutPalpe && (estEnPhaseSaillieOuGestation || nbPalpationsAttente > 0 || (nbAuRepos > 0 && b.phase !== 'Repos' && b.phase !== 'Sexage' && b.phase !== 'Engraissement'));
 
       let statutLabel = '';
-      if (estEnPhaseGestation) {
-        statutLabel = `${totalFemelles} femelles (Phase ${b.phase})`;
+      if (estEnAllaitement) {
+        statutLabel = `En allaitement (${totalFemelles} lapines) — Mises-bas effectuées`;
+      } else if (toutPalpe) {
+        statutLabel = `Palpation terminée (${nbGestantes}/${totalFemelles} Gestantes)`;
+      } else if (estEnPhaseSaillieOuGestation || estEligiblePalpation) {
+        statutLabel = `${totalFemelles} femelles — À palper (Phase ${b.phase})`;
       } else {
         statutLabel = `Au repos (${totalFemelles} lapines)`;
       }
@@ -101,10 +120,43 @@ export class SaisiePalpationComponent {
         nbPalpationsAttente,
         nbGestantes,
         nbAuRepos,
+        nbEnAllaitement,
         statutLabel,
-        estEligiblePalpation
+        estEligiblePalpation,
+        estEnAllaitement,
+        toutPalpe
       };
     });
+  });
+
+  private findCandidateBande(statusList: BandeStatutPalpation[]): BandeStatutPalpation | undefined {
+    if (!statusList || statusList.length === 0) return undefined;
+
+    // 1. Chercher d'abord une bande explicitement éligible à la palpation
+    const eligible = statusList.find(b => b.estEligiblePalpation);
+    if (eligible) return eligible;
+
+    // 2. Si la bande A (ou autre) est en Allaitement / Palpée, déterminer la SUIVANTE dans la rotation (A -> B -> C -> A)
+    const order = ['bande-a', 'bande-b', 'bande-c'];
+    const lastActiveIndex = statusList.findIndex(b => b.estEnAllaitement || b.toutPalpe || b.phase === 'Allaitement');
+    if (lastActiveIndex !== -1) {
+      const nextId = order[(lastActiveIndex + 1) % order.length];
+      const nextBande = statusList.find(b => b.id === nextId);
+      if (nextBande) return nextBande;
+    }
+
+    // 3. Fallback: Première bande non en allaitement
+    const nonAllaitement = statusList.find(b => !b.estEnAllaitement);
+    return nonAllaitement || statusList[0];
+  }
+
+  prochaineBandeAPalper = computed(() => {
+    const list = this.bandesAvecStatut();
+    const candidate = this.findCandidateBande(list);
+    if (candidate && candidate.id !== this.selectedBandeId()) {
+      return candidate;
+    }
+    return null;
   });
 
   bandesDisponibles = computed(() => {
@@ -125,10 +177,25 @@ export class SaisiePalpationComponent {
     const selectedBande = this.selectedBandeId() as BandeId;
     if (!selectedBande) return [];
 
+    const selectedStatut = this.selectedBandeStatut();
+    if (selectedStatut?.estEnAllaitement || (selectedStatut?.toutPalpe && !selectedStatut?.estEligiblePalpation)) {
+      return [];
+    }
+
     const allSaillies = this.saillies() || [];
+    const allPalpations = this.palpations() || [];
     const repros = this.reproducteurs() || [];
 
-    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === selectedBande && r.etat !== 'Morte' && r.etat !== 'Réformée');
+    const femellesBande = repros.filter(r => 
+      r.sexe === 'F' && 
+      r.bandeId === selectedBande && 
+      r.etat !== 'Morte' && 
+      r.etat !== 'Réformée' &&
+      r.etat !== 'En allaitement'
+    );
+
+    if (femellesBande.length === 0) return [];
+
     const staticSaillies = this.bandeService.getCalendrierSaillie(selectedBande, new Date());
 
     let listForBande = allSaillies.filter(s => s.bandeId === selectedBande);
@@ -147,7 +214,11 @@ export class SaisiePalpationComponent {
 
     return listForBande.filter(s => {
       const repro = repros.find(r => r.id === s.femelleId);
-      if (repro && (repro.etat === 'Morte' || repro.etat === 'Réformée')) return false;
+      if (!repro || repro.etat === 'Morte' || repro.etat === 'Réformée' || repro.etat === 'En allaitement') return false;
+
+      const dejaPalpee = allPalpations.some(p => (p.saillieId === s.id || p.femelleId === s.femelleId) && p.bandeId === selectedBande);
+      if (dejaPalpee && repro.etat === 'En gestation') return false;
+
       return true;
     });
   });
@@ -160,13 +231,13 @@ export class SaisiePalpationComponent {
       palpationsArray: this.fb.array([])
     });
 
-    // Auto-détection et pré-sélection prioritaire au chargement initial uniquement
+    // Auto-détection et pré-sélection intelligente de la bande suivante à palper au chargement initial
     let initialized = false;
     effect(() => {
       const statusList = this.bandesAvecStatut();
       if (!initialized && statusList.length > 0) {
         initialized = true;
-        const candidate = statusList.find(b => b.phase === 'Gestation' || b.phase === 'Saillie' || b.estEligiblePalpation);
+        const candidate = this.findCandidateBande(statusList);
         if (candidate) {
           this.selectedBandeId.set(candidate.id);
           this.form.patchValue({ bandeId: candidate.id, bande: candidate.id });
@@ -291,4 +362,5 @@ export class SaisiePalpationComponent {
     this.initPalpationsForBande(defaultId);
   }
 }
+
 
