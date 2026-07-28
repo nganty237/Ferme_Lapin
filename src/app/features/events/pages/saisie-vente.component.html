@@ -62,14 +62,38 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Prix unitaire -->
           <div>
-            <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block mb-1.5">
-              Prix unitaire (FCFA / lapin) <span class="text-rose-500">*</span>
-            </label>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">
+                Prix unitaire (FCFA / lapin) <span class="text-rose-500">*</span>
+              </label>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                ~ {{ prixAuKgEquiv() }} FCFA / kg
+              </span>
+            </div>
             <input 
               type="number" 
               formControlName="prixUnitaire" 
               placeholder="Ex: 3000" 
               class="form-input w-full font-bold text-emerald-700 text-sm">
+            
+            <!-- Puces de Tarification Rapide -->
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              @for (preset of presetsPrix; track preset.label) {
+                <button 
+                  type="button"
+                  (click)="setPrixPreset(preset.prix)"
+                  class="px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-all cursor-pointer"
+                  [class.bg-emerald-700]="prixUnitaireInput() === preset.prix"
+                  [class.text-white]="prixUnitaireInput() === preset.prix"
+                  [class.border-emerald-700]="prixUnitaireInput() === preset.prix"
+                  [class.bg-slate-50]="prixUnitaireInput() !== preset.prix"
+                  [class.text-slate-600]="prixUnitaireInput() !== preset.prix"
+                  [class.border-slate-200]="prixUnitaireInput() !== preset.prix"
+                  [class.hover:bg-slate-100]="prixUnitaireInput() !== preset.prix">
+                  {{ preset.label }} ({{ preset.prix | number:'1.0-0' }} F)
+                </button>
+              }
+            </div>
           </div>
 
           <!-- Client -->
@@ -118,51 +142,88 @@
       </form>
     </div>
 
-    <!-- Section de calcul & rentabilité (Colonne Droite) -->
+    <!-- Section de calcul & rentabilité inspirée de la page Rentabilité (Colonne Droite) -->
     <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-xs flex flex-col justify-between">
       <div>
-        <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
-          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-            <mat-icon class="text-[18px]">calculate</mat-icon>
+        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+              <mat-icon class="text-[18px]">analytics</mat-icon>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Bilan Zootechnique & Financier</h4>
+              <p class="text-[11px] text-slate-500">Calculs réels par bande</p>
+            </div>
           </div>
-          <div>
-            <h4 class="font-bold text-slate-800 text-sm">Calculs de Rentabilité & Cages</h4>
-            <p class="text-[11px] text-slate-500">Estimations en temps réel</p>
-          </div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full border"
+                [class.bg-emerald-50]="tauxRentabilite() >= 20"
+                [class.text-emerald-700]="tauxRentabilite() >= 20"
+                [class.border-emerald-200]="tauxRentabilite() >= 20"
+                [class.bg-amber-50]="tauxRentabilite() < 20 && tauxRentabilite() >= 0"
+                [class.text-amber-700]="tauxRentabilite() < 20 && tauxRentabilite() >= 0"
+                [class.border-amber-200]="tauxRentabilite() < 20 && tauxRentabilite() >= 0"
+                [class.bg-red-50]="tauxRentabilite() < 0"
+                [class.text-red-700]="tauxRentabilite() < 0"
+                [class.border-red-200]="tauxRentabilite() < 0">
+            ROI : +{{ tauxRentabilite() }}%
+          </span>
         </div>
 
         <div class="flex flex-col gap-3">
-          <!-- Revenu Total -->
-          <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-100/70 text-emerald-800 flex items-center justify-center font-bold">
-              <mat-icon class="text-[20px]">payments</mat-icon>
+          <!-- Revenu Brut Encaissé -->
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <mat-icon class="text-[18px]">payments</mat-icon>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Revenu Brut</span>
+                <span class="text-xs font-medium text-slate-400">{{ nbVendusInput() }} lapins × {{ prixUnitaireInput() | number:'1.0-0' }} F</span>
+              </div>
             </div>
-            <div>
-              <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Revenu Total</span>
-              <span class="text-base font-bold text-slate-900">{{ totalRevenu() | number:'1.0-0' }} FCFA</span>
-            </div>
+            <span class="text-base font-bold text-slate-900">{{ totalRevenu() | number:'1.0-0' }} F</span>
           </div>
 
-          <!-- Cages libérées -->
-          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/60 rounded-xl flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-              <mat-icon class="text-[20px]">door_open</mat-icon>
+          <!-- Coût de Production Total -->
+          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center font-bold">
+                <mat-icon class="text-[18px]">inventory_2</mat-icon>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Coût de Production</span>
+                <span class="text-xs font-medium text-slate-400">{{ coutProductionParLapin() | number:'1.0-0' }} F / lapin (Aliment+Eau)</span>
+              </div>
             </div>
-            <div>
-              <span class="text-[10px] uppercase tracking-wider text-emerald-700 font-bold block">Cages libérées</span>
-              <span class="text-base font-bold text-emerald-900">{{ cagesLiberees() }} cages</span>
-            </div>
+            <span class="text-sm font-bold text-slate-700">- {{ coutTotalVente() | number:'1.0-0' }} F</span>
           </div>
 
-          <!-- Marge brute estimée -->
-          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/60 rounded-xl flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-              <mat-icon class="text-[20px]">trending_up</mat-icon>
+          <!-- Marge Nette Estimée -->
+          <div class="p-3 bg-emerald-50/80 border border-emerald-200/80 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <mat-icon class="text-[18px]">trending_up</mat-icon>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-emerald-800 font-bold block">Marge Nette</span>
+                <span class="text-xs font-medium text-emerald-700">+ {{ margeParLapin() | number:'1.0-0' }} F / lapin net</span>
+              </div>
             </div>
-            <div>
-              <span class="text-[10px] uppercase tracking-wider text-emerald-700 font-bold block">Marge brute estimée</span>
-              <span class="text-base font-bold text-emerald-900">{{ margeEstimee() | number:'1.0-0' }} FCFA</span>
+            <span class="text-base font-bold text-emerald-900">+ {{ margeNette() | number:'1.0-0' }} FCFA</span>
+          </div>
+
+          <!-- Cages Libérées -->
+          <div class="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                <mat-icon class="text-[18px]">door_open</mat-icon>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-blue-800 font-bold block">Cages Libérées</span>
+                <span class="text-xs font-medium text-blue-600">Densité 3 lapins / case</span>
+              </div>
             </div>
+            <span class="text-base font-bold text-blue-900">{{ cagesLiberees() }} cage(s)</span>
           </div>
         </div>
       </div>
@@ -170,11 +231,12 @@
       <div class="mt-5 p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-500 leading-relaxed">
         <h5 class="font-bold text-slate-700 mb-1 flex items-center gap-1">
           <mat-icon class="text-[14px] text-slate-400">info</mat-icon>
-          Détails des règles :
+          Normes d'Ingénierie Zootechnique :
         </h5>
         <ul class="list-disc pl-4 flex flex-col gap-1 text-[11px]">
-          <li><strong>Cages libérées</strong> : Lapins vendus divisés par la densité (3 lapins/cage).</li>
-          <li><strong>Marge brute</strong> : Revenu moins le coût de production estimé ({{ coutProductionParLapin() | number:'1.0-0' }} FCFA/lapin).</li>
+          <li><strong>Consommation Aliment</strong> : 110 g / jour sur 90 jours = 9,9 kg ({{ coutProductionParLapin() | number:'1.0-0' }} FCFA / lapin).</li>
+          <li><strong>Prix Moyen du Sac</strong> : {{ prixSacAliment() | number:'1.0-0' }} FCFA (51 kg).</li>
+          <li><strong>Autonomisation du Cycle</strong> : Si la bande est vendue en totalité, elle bascule automatiquement au <strong>Repos</strong> (cycle suivant +1).</li>
         </ul>
       </div>
     </div>
