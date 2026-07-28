@@ -180,7 +180,28 @@
         </div>
       } @else {
         <!-- Empty State / Status Confirmation -->
-        @if (selectedBandeStatut()?.estEnAllaitement) {
+        @if (selectedBandeStatut()?.phase === 'Repos') {
+          <div class="p-10 text-center bg-amber-50/60 border border-amber-200 rounded-xl">
+            <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-700 mx-auto flex items-center justify-center mb-3.5 shadow-xs">
+              <mat-icon class="text-[30px] w-[30px] h-[30px]">pause_circle_outline</mat-icon>
+            </div>
+            <h4 class="font-bold text-amber-900 text-lg mb-1">
+              {{ selectedBandeStatut()?.nom }} actuellement au Repos
+            </h4>
+            <p class="text-sm text-amber-800 max-w-lg mx-auto leading-relaxed mb-4">
+              Les saillies n'ont pas encore été effectuées pour la <strong>{{ selectedBandeStatut()?.nom }}</strong>. La palpation (diagnostic à J+15) ne peut pas être enregistrée tant que la bande n'est pas en phase <strong>Saillie</strong> ou <strong>Gestation</strong>.
+            </p>
+            @if (prochaineBandeAPalper(); as prochaine) {
+              <button 
+                type="button"
+                (click)="onBandeChange(prochaine.id)"
+                class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-lg shadow-xs inline-flex items-center gap-2 transition-all cursor-pointer">
+                <mat-icon class="text-[18px]">arrow_forward</mat-icon>
+                Passer à la {{ prochaine.nom }}
+              </button>
+            }
+          </div>
+        } @else if (selectedBandeStatut()?.estEnAllaitement) {
           <div class="p-10 text-center bg-blue-50/60 border border-blue-200 rounded-xl">
             <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-700 mx-auto flex items-center justify-center mb-3.5 shadow-xs">
               <mat-icon class="text-[30px] w-[30px] h-[30px]">child_care</mat-icon>

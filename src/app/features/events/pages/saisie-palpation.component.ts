@@ -99,7 +99,11 @@ export class SaisiePalpationComponent {
       );
 
       const estEnPhaseSaillieOuGestation = b.phase === 'Saillie' || b.phase === 'Gestation';
-      const estEligiblePalpation = !estEnAllaitement && !toutPalpe && (estEnPhaseSaillieOuGestation || nbPalpationsAttente > 0 || (nbAuRepos > 0 && b.phase !== 'Repos' && b.phase !== 'Sexage' && b.phase !== 'Engraissement'));
+      const estEnRepos = b.phase === 'Repos' || b.phase === 'Sexage' || b.phase === 'Engraissement';
+
+      // Une bande au repos n'est PAS éligible à la palpation car les saillies n'ont pas encore eu lieu.
+      // Seule une bande en phase Saillie ou Gestation (ou ayant des saillies actives en attente) est éligible.
+      const estEligiblePalpation = !estEnAllaitement && !toutPalpe && !estEnRepos && (estEnPhaseSaillieOuGestation || nbPalpationsAttente > 0);
 
       let statutLabel = '';
       if (estEnAllaitement) {
@@ -109,7 +113,7 @@ export class SaisiePalpationComponent {
       } else if (estEnPhaseSaillieOuGestation || estEligiblePalpation) {
         statutLabel = `${totalFemelles} femelles — À palper (Phase ${b.phase})`;
       } else {
-        statutLabel = `Au repos (${totalFemelles} lapines)`;
+        statutLabel = `Au repos (${totalFemelles} lapines) — Non saillies`;
       }
 
       return {
