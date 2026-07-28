@@ -133,7 +133,7 @@ export class BandeLifecycleService {
         .filter(v => v.bandeId === b.id)
         .reduce((sum, v) => sum + (v.vendus || 0), 0);
 
-      const restants = Math.max(0, (totalSexes || 70) - totalVendus);
+      const restants = Math.max(0, totalSexes - totalVendus);
       totalLapinsEngraissement += restants;
     });
 

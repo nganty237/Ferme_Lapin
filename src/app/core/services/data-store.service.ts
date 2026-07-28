@@ -126,10 +126,10 @@ export class DataStoreService {
     ).subscribe((data) => {
       if (!data) return;
 
-      const cleanedRepros = this.sanitizeReproducteurs(data.reproducteurs || []);
+      const repros = data.reproducteurs || [];
 
       this.storageService.importData({
-        REPRODUCTEURS: cleanedRepros,
+        REPRODUCTEURS: repros,
         SAILLIES: data.saillies,
         MISES_BAS: data.misesBas,
         SEVRAGES: data.sevrages,
@@ -147,7 +147,7 @@ export class DataStoreService {
         REFERENTIEL_CALENDRIER: data.refCalendrier
       });
 
-      this._reproducteurs$.next(cleanedRepros);
+      this._reproducteurs$.next(repros);
       this._saillies$.next(data.saillies || []);
       this._misesBas$.next(data.misesBas || []);
       this._sevrages$.next(data.sevrages || []);
@@ -167,9 +167,7 @@ export class DataStoreService {
   }
 
   private loadLocalData(): void {
-    const rawRepros = this.storageService.getAllReproducteurs();
-    const cleanedRepros = this.sanitizeReproducteurs(rawRepros);
-    this._reproducteurs$.next(cleanedRepros);
+    this._reproducteurs$.next(this.storageService.getAllReproducteurs());
     this._saillies$.next(this.storageService.getAllSaillies());
     this._misesBas$.next(this.storageService.getAllMisesBas());
     this._sevrages$.next(this.storageService.getAllSevrages());
@@ -186,40 +184,6 @@ export class DataStoreService {
     this._refBandes$.next(this.storageService.getReferentielBandes());
     this._refMales$.next(this.storageService.getReferentielMales());
     this._refCalendrier$.next(this.storageService.getReferentielCalendrierSaillie());
-  }
-
-  private sanitizeReproducteurs(repros: Reproducteur[]): Reproducteur[] {
-    const bandeAIds = ['F001','F002','F003','F004','F012','F013','F014','F015','F023','F024','F025'];
-    const bandeBIds = ['F005','F006','F007','F008','F016','F017','F018','F019','F026','F027','F028'];
-    const bandeCIds = ['F009','F010','F011','F020','F021','F022','F029','F030','F031','F032','F033'];
-
-    let hasChanges = false;
-    const cleaned = repros.map(r => {
-      if (r.sexe === 'F') {
-        if (bandeAIds.includes(r.id)) {
-          if (r.etat !== 'En gestation' || r.bandeId !== 'bande-a') {
-            hasChanges = true;
-            return { ...r, bandeId: 'bande-a' as const, etat: 'En gestation' as any };
-          }
-        } else if (bandeBIds.includes(r.id)) {
-          if (r.etat !== 'Au repos' || r.bandeId !== 'bande-b') {
-            hasChanges = true;
-            return { ...r, bandeId: 'bande-b' as const, etat: 'Au repos' as any };
-          }
-        } else if (bandeCIds.includes(r.id)) {
-          if (r.etat !== 'Au repos' || r.bandeId !== 'bande-c') {
-            hasChanges = true;
-            return { ...r, bandeId: 'bande-c' as const, etat: 'Au repos' as any };
-          }
-        }
-      }
-      return r;
-    });
-
-    if (hasChanges) {
-      this.storageService.importData({ REPRODUCTEURS: cleaned });
-    }
-    return cleaned;
   }
 
   private isBrowser(): boolean {

@@ -60,13 +60,13 @@ export class SaisieMiseBasComponent {
     return allBandes.map(b => {
       const femellesBande = allRepros.filter(r => r.sexe === 'F' && r.bandeId === b.id && r.etat !== 'Morte' && r.etat !== 'Réformée');
       const totalFemelles = femellesBande.length || 11;
-      const estEnPhaseAttente = b.phase === 'Gestation' || b.phase === 'Saillie' || b.phase === 'Allaitement' || (b.phase as string) === 'MiseBas';
+      const estEnPhaseAttente = b.phase === 'Gestation';
 
       let statutLabel = '';
       if (estEnPhaseAttente) {
         statutLabel = `Phase ${b.phase} — ${totalFemelles} lapines prêtes`;
       } else {
-        statutLabel = `Au repos (${totalFemelles} lapines)`;
+        statutLabel = `Phase ${b.phase} (${totalFemelles} lapines)`;
       }
 
       return {
@@ -79,7 +79,7 @@ export class SaisieMiseBasComponent {
   });
 
   /**
-   * Filtrage et préparation des 11 femelles de la bande sélectionnée pour la mise-bas
+   * Filtrage et préparation des femelles en gestation de la bande sélectionnée pour la mise-bas
    */
   sailliesEligibles = computed(() => {
     const bandeId = this.selectedBandeId() as any;
@@ -88,7 +88,7 @@ export class SaisieMiseBasComponent {
     const allSaillies = this.saillies() || [];
     const repros = this.reproducteurs() || [];
 
-    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === bandeId && r.etat !== 'Morte' && r.etat !== 'Réformée');
+    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === bandeId && (r.etat === 'En gestation' || r.etat === 'Au repos'));
     const staticSaillies = this.bandeService.getCalendrierSaillie(bandeId, new Date());
 
     let listForBande = allSaillies.filter(s => s.bandeId === bandeId);
@@ -208,6 +208,8 @@ export class SaisieMiseBasComponent {
     try {
       const val = this.form.value;
       const arrayValues = this.porteesArray.value;
+      const rawDate = val.dateMiseBas;
+      const dateIso = typeof rawDate === 'string' ? rawDate : new Date(rawDate).toISOString().substring(0, 10);
 
       const misesBasAEnregistrer = arrayValues.map((p: any) => {
         const vivants = Number(p.vivants) || 0;
@@ -221,7 +223,7 @@ export class SaisieMiseBasComponent {
           id: `mb_${Date.now()}_${p.femelleId}`,
           saillieId: p.saillieId,
           femelleId: p.femelleId,
-          dateMiseBas: val.dateMiseBas,
+          dateMiseBas: dateIso,
           vivants,
           mortsNes,
           nes: vivants + mortsNes,
@@ -233,14 +235,16 @@ export class SaisieMiseBasComponent {
       });
 
       this.bandeService.confirmerMiseBas(val.bandeId, misesBasAEnregistrer);
-      this.notifier.success(`${misesBasAEnregistrer.length} mise(s)-bas enregistrée(s) avec succès pour la ${val.bandeId}.`);
+      this.notifier.success(`${misesBasAEnregistrer.length} mise(s)-bas enregistrée(s) avec succès pour la ${val.bandeId}. La bande est maintenant en Allaitement.`);
+      this.onReset();
     } finally {
       this.isSubmitting.set(false);
     }
   }
 
   onReset(): void {
-    this.form.reset({ bandeId: 'bande-a', dateMiseBas: new Date() });
+    const todayStr = new Date().toISOString().substring(0, 10);
+    this.form.reset({ bandeId: 'bande-a', dateMiseBas: todayStr });
     this.selectedBandeId.set('bande-a');
   }
 }
