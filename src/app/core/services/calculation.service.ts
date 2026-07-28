@@ -87,6 +87,7 @@ export class CalculationService {
   get engraissements(): Engraissement[] { return this.dataStore.engraissements; }
   get ventes(): Vente[] { return this.dataStore.ventes; }
   get deces(): Deces[] { return this.dataStore.deces; }
+  get clapiers(): Clapier[] { return this.dataStore.clapiers; }
   get config(): Configuration { return this.dataStore.config; }
   get notifications(): AppNotification[] { return this.dataStore.notifications; }
 

@@ -84,18 +84,32 @@ export class FicheReproducteurComponent {
     return allDeces.find((d: any) => d.reproducteurId === r.id);
   });
 
+  private referentielService = inject(ReferentielService);
+
+  assignedMale = computed(() => {
+    const r = this.reproducteur();
+    if (!r || r.sexe !== 'F') return null;
+    const allRepros = this.reproducteurs() || [];
+    const maleId = (r as any).maleResponsableId || this.referentielService.getMaleResponsable(r.id);
+    if (!maleId) return null;
+    const maleObj = allRepros.find((m: any) => (m.id || '').toLowerCase() === maleId.toLowerCase());
+    return maleObj ? { id: maleObj.id, nom: maleObj.nom || maleObj.id } : { id: maleId, nom: maleId };
+  });
+
   femaleSaillies = computed(() => {
     const r = this.reproducteur();
     if (!r || r.sexe !== 'F') return [];
     const allSaillies = this.saillies() || [];
     const allRepros = this.reproducteurs() || [];
+    const rIdLower = (r.id || '').toLowerCase();
+
     return allSaillies
-      .filter((s: any) => s.femelleId === r.id)
+      .filter((s: any) => s.femelleId && s.femelleId.toLowerCase() === rIdLower)
       .map((s: any) => {
-        const male = allRepros.find((m: any) => m.id === s.maleId);
+        const male = allRepros.find((m: any) => (m.id || '').toLowerCase() === (s.maleId || '').toLowerCase());
         return {
           ...s,
-          maleName: male ? male.nom : s.maleId
+          maleName: male ? (male.nom || male.id) : s.maleId
         };
       })
       .sort((a: any, b: any) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
@@ -106,21 +120,87 @@ export class FicheReproducteurComponent {
     if (!r || r.sexe !== 'F') return [];
     const allMisesBas = this.misesBas() || [];
     const allSevrages = this.sevrages() || [];
+    const rIdLower = (r.id || '').toLowerCase();
+
     return allMisesBas
-      .filter((mb: any) => mb.femelleId === r.id)
+      .filter((mb: any) => mb.femelleId && mb.femelleId.toLowerCase() === rIdLower)
       .map((mb: any) => {
-        const sevrage = allSevrages.find((s: any) => s.miseBasId === mb.id);
+        const sevrage = allSevrages.find((s: any) => s.miseBasId === mb.id || (s.femelleId && s.femelleId.toLowerCase() === rIdLower && s.cycleId === mb.cycleId));
+        const vivants = mb.vivants !== undefined ? mb.vivants : (mb.nombreLapereaux !== undefined ? mb.nombreLapereaux : (mb.nes || 0));
+        const mortsNes = mb.mortsNes !== undefined ? mb.mortsNes : 0;
+        const total = vivants + mortsNes;
+        const viabiliteCalculee = mb.viabiliteCalculee !== undefined ? mb.viabiliteCalculee : (total > 0 ? Math.round((vivants / total) * 100) : 100);
+
         return {
           ...mb,
+          vivants,
+          mortsNes,
+          viabiliteCalculee,
           sevrageDate: sevrage ? sevrage.dateSevrage : null,
-          sevrageSevres: sevrage ? sevrage.sevres : null,
+          sevrageSevres: sevrage ? (sevrage.sevres !== undefined ? sevrage.sevres : (sevrage as any).nombreLapereaux) : null,
           sevrageCages: sevrage ? sevrage.cagesOccupees : null
         };
       })
       .sort((a: any, b: any) => new Date(b.dateMiseBas).getTime() - new Date(a.dateMiseBas).getTime());
   });
 
-  private referentielService = inject(ReferentielService);
+  femaleKpis = computed(() => {
+    const r = this.reproducteur();
+    if (!r || r.sexe !== 'F') return null;
+
+    const sailliesList = this.femaleSaillies();
+    const porteesList = this.femalePortees();
+
+    const totalSaillies = sailliesList.length;
+    const sailliesReussies = Math.max(sailliesList.filter((s: any) => s.reussie).length, porteesList.length);
+    const tauxReussiteSaillies = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : (porteesList.length > 0 ? 100 : 0);
+
+    const totalPortees = porteesList.length;
+    const totalVivants = porteesList.reduce((sum: number, mb: any) => sum + (mb.vivants || 0), 0);
+    const tailleMoyennePortee = totalPortees > 0 ? Math.round((totalVivants / totalPortees) * 10) / 10 : 0;
+
+    const totalSevres = porteesList.reduce((sum: number, mb: any) => sum + (mb.sevrageSevres || 0), 0);
+    const totalVivantsPourSevrage = porteesList.filter((mb: any) => mb.sevrageSevres !== null).reduce((sum: number, mb: any) => sum + (mb.vivants || 0), 0);
+    const tauxSurvieSevrage = totalVivantsPourSevrage > 0 ? Math.round((totalSevres / totalVivantsPourSevrage) * 100) : 0;
+
+    return {
+      totalSaillies,
+      tauxReussiteSaillies,
+      totalPortees,
+      tailleMoyennePortee,
+      tauxSurvieSevrage
+    };
+  });
+
+  gestationActiveInfo = computed(() => {
+    const r = this.reproducteur();
+    if (!r || r.sexe !== 'F' || r.etat !== 'En gestation') return null;
+    const saillies = this.femaleSaillies();
+    const assigned = this.assignedMale();
+    const latestSaillie = saillies.length > 0 ? saillies[0] : null;
+    
+    const maleId = latestSaillie?.maleId || assigned?.id || 'M01';
+    const maleName = latestSaillie?.maleName || assigned?.nom || maleId;
+    const dateSaillie = latestSaillie?.dateSaillie;
+    const dateMiseBasPrevue = latestSaillie?.dateMiseBasPrevue;
+    
+    let joursRestants: number | null = null;
+    if (dateMiseBasPrevue) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(dateMiseBasPrevue);
+      target.setHours(0, 0, 0, 0);
+      joursRestants = Math.max(0, Math.ceil((target.getTime() - today.getTime()) / (1000 * 3600 * 24)));
+    }
+
+    return {
+      maleId,
+      maleName,
+      dateSaillie,
+      dateMiseBasPrevue,
+      joursRestants
+    };
+  });
 
   assignedFemales = computed(() => {
     const r = this.reproducteur();
@@ -138,50 +218,60 @@ export class FicheReproducteurComponent {
     const allSaillies = this.saillies() || [];
     const allRepros = this.reproducteurs() || [];
     const allMisesBas = this.misesBas() || [];
-    const rIdLower = r.id.toLowerCase();
+    const allBandes = this.bandes() || [];
+    const rIdLower = (r.id || '').toLowerCase();
 
-    return allSaillies
+    const explicitList = allSaillies
       .filter((s: any) => s.maleId && s.maleId.toLowerCase() === rIdLower)
       .map((s: any) => {
-        const female = allRepros.find((f: any) => f.id.toLowerCase() === (s.femelleId || '').toLowerCase());
-        const hasMiseBas = allMisesBas.some((mb: any) => mb.saillieId === s.id);
+        const female = allRepros.find((f: any) => (f.id || '').toLowerCase() === (s.femelleId || '').toLowerCase());
+        const hasMiseBas = allMisesBas.some((mb: any) => mb.saillieId === s.id || (mb.femaleId && mb.femaleId.toLowerCase() === (s.femelleId || '').toLowerCase()));
         const reussieStatus = s.reussie !== undefined ? s.reussie : (hasMiseBas ? true : null);
 
         return {
           ...s,
-          femaleName: female ? female.nom : s.femelleId,
+          femaleName: female ? (female.nom || female.id) : s.femelleId,
           reussie: reussieStatus
         };
-      })
-      .sort((a: any, b: any) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
-  });
+      });
 
-  femaleKpis = computed(() => {
-    const r = this.reproducteur();
-    if (!r || r.sexe !== 'F') return null;
+    if (explicitList.length > 0) {
+      return explicitList.sort((a: any, b: any) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
+    }
 
-    const sailliesList = this.femaleSaillies();
-    const porteesList = this.femalePortees();
+    // Synchronisation dynamique si les saillies explicites ne sont pas encore enregistrées en base
+    const fallbackList: any[] = [];
+    const refBandes = this.referentielService.getReferentielBandes();
+    const activeBandes = allBandes.filter((b: any) => b.phase === 'Saillie' || b.phase === 'Gestation');
 
-    const totalSaillies = sailliesList.length;
-    const sailliesReussies = sailliesList.filter((s: any) => s.reussie).length;
-    const tauxReussiteSaillies = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 0;
+    activeBandes.forEach((b: any) => {
+      const refB = refBandes.find(rb => rb.id === b.id);
+      if (refB) {
+        const maleGroup = refB.groupesParMale.find(g => (g.maleId || '').toLowerCase() === rIdLower);
+        if (maleGroup && maleGroup.femellesIds) {
+          maleGroup.femellesIds.forEach((fId: string) => {
+            const female = allRepros.find((f: any) => (f.id || '').toLowerCase() === fId.toLowerCase());
+            const dateSaillieStr = b.dateDemarragePhase || new Date().toISOString().slice(0, 10);
+            const dateSaillieVal = new Date(dateSaillieStr);
+            const dateMBVal = new Date(dateSaillieVal);
+            dateMBVal.setDate(dateMBVal.getDate() + 31);
 
-    const totalPortees = porteesList.length;
-    const totalVivants = porteesList.reduce((sum: number, mb: any) => sum + (mb.vivants || 0), 0);
-    const tailleMoyennePortee = totalPortees > 0 ? Math.round((totalVivants / totalPortees) * 10) / 10 : 0;
+            fallbackList.push({
+              id: `sync-sal-${b.id}-${fId}`,
+              bandeId: b.id,
+              maleId: r.id,
+              femelleId: fId,
+              femaleName: female ? (female.nom || female.id) : fId,
+              dateSaillie: dateSaillieStr,
+              dateMiseBasPrevue: dateMBVal.toISOString().slice(0, 10),
+              reussie: null // En attente
+            });
+          });
+        }
+      }
+    });
 
-    const totalSevres = porteesList.reduce((sum: number, mb: any) => sum + (mb.sevrageSevres || 0), 0);
-    const totalVivantsPourSevrage = porteesList.filter((mb: any) => mb.sevrageSevres !== null).reduce((sum: number, mb: any) => sum + (mb.vivants || 0), 0);
-    const tauxSurvieSevrage = totalVivantsPourSevrage > 0 ? Math.round((totalSevres / totalVivantsPourSevrage) * 100) : 0;
-
-    return {
-      totalSaillies,
-      tauxReussiteSaillies,
-      totalPortees,
-      tailleMoyennePortee,
-      tauxSurvieSevrage
-    };
+    return fallbackList.sort((a: any, b: any) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
   });
 
   maleKpis = computed(() => {

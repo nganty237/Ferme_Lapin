@@ -85,15 +85,21 @@ export class SaisieMiseBasComponent {
     const bandeId = this.selectedBandeId() as any;
     if (!bandeId) return [];
 
+    const bandeObj = (this.bandes() || []).find(b => b.id === bandeId);
+    // Règle d'exclusivité zootechnique : Seule la bande en phase Gestation peut enregistrer des mises-bas
+    if (!bandeObj || bandeObj.phase !== 'Gestation') {
+      return [];
+    }
+
     const allSaillies = this.saillies() || [];
     const repros = this.reproducteurs() || [];
 
-    const femellesBande = repros.filter(r => r.sexe === 'F' && r.bandeId === bandeId && (r.etat === 'En gestation' || r.etat === 'Au repos'));
+    const femellesGestation = repros.filter(r => r.sexe === 'F' && r.bandeId === bandeId && (r.etat === 'En gestation' || r.etat === 'Au repos'));
     const staticSaillies = this.bandeService.getCalendrierSaillie(bandeId, new Date());
 
-    let listForBande = allSaillies.filter(s => s.bandeId === bandeId);
+    let listForBande: any[] = allSaillies.filter(s => s.bandeId === bandeId);
 
-    if (listForBande.length < femellesBande.length && staticSaillies.length > 0) {
+    if (listForBande.length < femellesGestation.length && staticSaillies.length > 0) {
       staticSaillies.forEach(st => {
         if (!listForBande.some(s => s.femelleId === st.femelleId)) {
           listForBande.push(st);
@@ -103,6 +109,16 @@ export class SaisieMiseBasComponent {
 
     if (listForBande.length === 0 && staticSaillies.length > 0) {
       listForBande = staticSaillies;
+    }
+
+    if (listForBande.length === 0 && femellesGestation.length > 0) {
+      const todayStr = new Date().toISOString().substring(0, 10);
+      listForBande = femellesGestation.map(f => ({
+        id: `sal-temp-${f.id}`,
+        bandeId,
+        femelleId: f.id,
+        dateSaillie: todayStr
+      }));
     }
 
     return listForBande.filter(s => {
@@ -120,12 +136,14 @@ export class SaisieMiseBasComponent {
       portees: this.fb.array([])
     });
 
-    // Auto-détection et pré-sélection prioritaire de la bande en phase Gestation / Saillie / Allaitement
+    // Auto-détection et pré-sélection prioritaire au chargement initial uniquement
+    let initialized = false;
     effect(() => {
       const allBandes = this.bandes() || [];
-      if (allBandes.length > 0) {
+      if (!initialized && allBandes.length > 0) {
+        initialized = true;
         const candidate = allBandes.find(b => b.phase === 'Gestation' || b.phase === 'Saillie' || b.phase === 'Allaitement');
-        if (candidate && this.selectedBandeId() !== candidate.id) {
+        if (candidate) {
           this.selectedBandeId.set(candidate.id);
           this.form.patchValue({ bandeId: candidate.id, bande: candidate.id });
         }

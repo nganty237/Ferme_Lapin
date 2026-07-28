@@ -86,17 +86,19 @@ export class SaisieSexageComponent {
         this.bandeSelectionnee.set(bandeId || null);
       });
 
-    // Auto-sélection initiale de la bande sevrée prête pour le sexage
+    // Auto-sélection initiale au chargement uniquement
+    let initialized = false;
     effect(() => {
       const allBandes = this.bandes() || [];
       const allSevrages = this.sevrages() || [];
-      if (allBandes.length > 0) {
+      if (!initialized && allBandes.length > 0) {
+        initialized = true;
         const activeBande = allBandes.find(b => {
           const sevs = allSevrages.filter(s => s.bandeId === b.id);
           return sevs.length > 0 || b.phase === 'Sexage' || b.phase === 'Engraissement';
         }) || allBandes[0];
 
-        if (activeBande && this.bandeSelectionnee() !== activeBande.id) {
+        if (activeBande) {
           this.bandeSelectionnee.set(activeBande.id);
           this.sexageForm.patchValue({ bande: activeBande.id }, { emitEvent: false });
         }

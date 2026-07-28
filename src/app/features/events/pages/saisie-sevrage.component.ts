@@ -94,12 +94,14 @@ export class SaisieSevrageComponent {
         this.bandeSelectionnee.set(bandeId || null);
       });
 
-    // Auto-sélection de la bande actuellement en phase Allaitement
+    // Auto-sélection au chargement initial uniquement
+    let initialized = false;
     effect(() => {
       const allBandes = this.bandes() || [];
-      if (allBandes.length > 0) {
+      if (!initialized && allBandes.length > 0) {
+        initialized = true;
         const candidate = allBandes.find(b => b.phase === 'Allaitement');
-        if (candidate && this.bandeSelectionnee() !== candidate.id) {
+        if (candidate) {
           this.bandeSelectionnee.set(candidate.id);
           this.sevrageForm.patchValue({ bande: candidate.id }, { emitEvent: false });
         }

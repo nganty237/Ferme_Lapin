@@ -160,12 +160,14 @@ export class SaisiePalpationComponent {
       palpationsArray: this.fb.array([])
     });
 
-    // Auto-détection et pré-sélection prioritaire de la bande en phase Gestation / Saillie
+    // Auto-détection et pré-sélection prioritaire au chargement initial uniquement
+    let initialized = false;
     effect(() => {
       const statusList = this.bandesAvecStatut();
-      if (statusList.length > 0) {
+      if (!initialized && statusList.length > 0) {
+        initialized = true;
         const candidate = statusList.find(b => b.phase === 'Gestation' || b.phase === 'Saillie' || b.estEligiblePalpation);
-        if (candidate && this.selectedBandeId() !== candidate.id) {
+        if (candidate) {
           this.selectedBandeId.set(candidate.id);
           this.form.patchValue({ bandeId: candidate.id, bande: candidate.id });
         }
