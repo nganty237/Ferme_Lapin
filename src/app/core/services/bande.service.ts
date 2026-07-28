@@ -190,6 +190,24 @@ export class BandeService {
   changerPhase(bandeId: BandeId, phase: EtatBande, datePhase: Date = new Date()): void {
     this.dataStore.updateBande(bandeId, { phase, dateDemarragePhase: datePhase.toISOString() });
     
+    // Synchronisation automatique de l'état des lapines de la bande avec la nouvelle phase
+    const repros = this.storageService.getAllReproducteurs();
+    repros.forEach(r => {
+      if (isFemelle(r) && r.bandeId === bandeId && r.etat !== 'Morte' && r.etat !== 'Réformée') {
+        let nvlEtat = r.etat;
+        if (phase === 'Gestation' || phase === 'Saillie') {
+          nvlEtat = 'En gestation';
+        } else if (phase === 'Allaitement') {
+          nvlEtat = 'En allaitement';
+        } else if (phase === 'Repos' || phase === 'Sexage' || phase === 'Engraissement') {
+          nvlEtat = 'Au repos';
+        }
+        if (nvlEtat !== r.etat) {
+          this.dataStore.updateReproducteur({ ...r, etat: nvlEtat as any });
+        }
+      }
+    });
+
     // Déclenchement automatique de la réactualisation des cases et clapiers occupés
     const bandes = this.dataStore.bandes || [];
     const sevrages = this.dataStore.sevrages || [];
