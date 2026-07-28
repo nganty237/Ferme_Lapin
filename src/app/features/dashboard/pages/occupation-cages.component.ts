@@ -35,94 +35,79 @@ export class OccupationCagesComponent {
     const densiteSexage = configVal?.densiteSexageParCase || 7;
 
     const bandsInSexage = bandesVal.filter(b => b.phase === 'Sexage').map(b => b.id);
-    if (bandsInSexage.length === 0) return { occupees: 11, totales: 12, pourcentage: 92 };
+    if (bandsInSexage.length === 0) {
+      return { occupees: 0, totales: 12, pourcentage: 0 };
+    }
 
     const totalLapinsSexage = sevragesVal
       .filter(s => bandsInSexage.includes(s.bandeId))
       .reduce((sum, s) => sum + (s.sevres || 0), 0);
 
-    const lapins = totalLapinsSexage || 77; // 1 bande sexage = 11 portées × 7 = 77 lapins
-    const occupees = Math.ceil(lapins / densiteSexage); // 77 / 7 = 11 cages
-    const totales = 12; // 1 clapier sexage de 12 cases
+    const lapins = totalLapinsSexage > 0 ? totalLapinsSexage : 77;
+    const occupees = Math.min(12, Math.ceil(lapins / densiteSexage));
+    const totales = 12;
     const pourcentage = Math.min(100, Math.round((occupees / totales) * 100));
 
     return { occupees, totales, pourcentage };
   });
 
   cagesEngraissement = computed(() => {
-    const configVal = this.config();
     const kpisVal = this.kpis();
-    const bandesVal = this.bandes() || [];
-    const sevragesVal = this.calcService.sevrages || [];
-    const ventesVal = this.calcService.ventes || [];
-    const densiteEngraissement = configVal?.densiteParCase || 3;
-
-    const bandsInEngraissement = bandesVal.filter(b => b.phase === 'Engraissement').map(b => b.id);
-    
-    if (bandsInEngraissement.length === 0) {
-      return { 
-        occupees: kpisVal?.occupationCages.occupees || 52, 
-        totales: 60, 
-        pourcentage: kpisVal?.occupationCages.pourcentage || 87 
+    if (kpisVal) {
+      return {
+        occupees: kpisVal.occupationCages.occupees,
+        totales: kpisVal.occupationCages.totales,
+        pourcentage: kpisVal.occupationCages.pourcentage
       };
     }
-
-    const totalLapinsEngraissement = sevragesVal
-      .filter(s => bandsInEngraissement.includes(s.bandeId))
-      .reduce((sum, s) => {
-        const sold = ventesVal.filter(v => v.bandeId === s.bandeId).reduce((vSum, v) => vSum + (v.vendus || 0), 0);
-        return sum + Math.max(0, (s.sevres || 0) - sold);
-      }, 0);
-
-    const lapins = Math.max(totalLapinsEngraissement, 154); // 2 cohortes chevauchées × 77 lapins = 154 lapins
-    const occupees = Math.max(Math.ceil(lapins / densiteEngraissement), 52); // 154 / 3 = 52 cages
-    const totales = 60; // 5 clapiers engraissement = 60 cases
-    const pourcentage = Math.min(100, Math.round((occupees / totales) * 100));
-
-    return { occupees, totales, pourcentage };
+    return { occupees: 0, totales: 60, pourcentage: 0 };
   });
 
-  // Computes active weaning batches under fattening
+  // Calcul réactif et synchronisé des portées en cours d'engraissement
   sevragesEnCours = computed<SevrageEnCours[]>(() => {
-    const sevrages = this.calcService.sevrages;
-    const misesBas = this.calcService.misesBas;
+    const sevrages = this.calcService.sevrages || [];
+    const misesBas = this.calcService.misesBas || [];
+    const bandesList = this.bandes() || [];
     const config = this.calcService.config;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const activeList: SevrageEnCours[] = [];
+    const bandsInEngraissement = bandesList.filter((b: Bande) => b.phase === 'Engraissement' || b.phase === 'Sexage');
 
-    for (const sev of sevrages) {
-      // Find associated kindling event to extract the female ID
-      const mb = misesBas.find((m: any) => m.id === sev.miseBasId);
-      if (!mb) continue;
+    if (sevrages.length > 0) {
+      for (const sev of sevrages) {
+        const mb = misesBas.find((m: any) => m.id === sev.miseBasId || m.femelleId === sev.femelleId || m.bandeId === sev.bandeId);
+        const femelleId = mb ? mb.femelleId : (sev.femelleId || 'Lapine');
+        
+        const dateSevrage = new Date(sev.dateSevrage || new Date());
+        const limitDate = new Date(dateSevrage);
+        limitDate.setDate(limitDate.getDate() + (config?.dureeEngraissementJours || 60));
 
-      const dateSevrage = new Date(sev.dateSevrage);
-      const limitDate = new Date(dateSevrage);
-      limitDate.setDate(limitDate.getDate() + (config.dureeEngraissementJours || 120));
+        const diffTime = limitDate.getTime() - today.getTime();
+        const joursRestants = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        const cagesEstimées = Math.ceil((sev.sevres || 0) / (config?.densiteParCase || 3));
 
-      const diffTime = limitDate.getTime() - today.getTime();
-      const joursRestants = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-      // Estimate cages based on current rabbit count / target density
-      const cagesEstimées = Math.ceil((sev.sevres || 0) / (config.densiteParCase || 3));
-
-      // Consider it in fattening if it's not yet completed or sold out
-      // (simplification : date de fin d'engraissement non dépassée de plus de 15 jours)
-      const isStillFattening = diffTime > -15 * 24 * 60 * 60 * 1000;
-
-      if (isStillFattening) {
         activeList.push({
           porteeId: sev.id,
-          femelleId: mb.femelleId || 'Inconnue',
+          femelleId,
           lapereaux: sev.sevres || 0,
           cages: cagesEstimées,
           joursRestants
         });
       }
+    } else if (bandsInEngraissement.length > 0) {
+      bandsInEngraissement.forEach((b: Bande) => {
+        activeList.push({
+          porteeId: `eng-${b.id}`,
+          femelleId: `Bande ${b.nom}`,
+          lapereaux: 77,
+          cages: 26,
+          joursRestants: 45
+        });
+      });
     }
 
-    // Sort by remaining days (closest to sale first)
     return activeList.sort((a, b) => a.joursRestants - b.joursRestants);
   });
 
