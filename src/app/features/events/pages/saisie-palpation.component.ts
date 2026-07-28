@@ -182,7 +182,7 @@ export class SaisiePalpationComponent {
     if (!selectedBande) return [];
 
     const selectedStatut = this.selectedBandeStatut();
-    if (selectedStatut?.estEnAllaitement || (selectedStatut?.toutPalpe && !selectedStatut?.estEligiblePalpation)) {
+    if (!selectedStatut?.estEligiblePalpation) {
       return [];
     }
 
