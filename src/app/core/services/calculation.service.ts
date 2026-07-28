@@ -88,6 +88,7 @@ export class CalculationService {
   get ventes(): Vente[] { return this.dataStore.ventes; }
   get deces(): Deces[] { return this.dataStore.deces; }
   get clapiers(): Clapier[] { return this.dataStore.clapiers; }
+  get bandes(): Bande[] { return this.dataStore.bandes; }
   get config(): Configuration { return this.dataStore.config; }
   get notifications(): AppNotification[] { return this.dataStore.notifications; }
 

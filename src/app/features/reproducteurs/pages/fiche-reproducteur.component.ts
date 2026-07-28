@@ -64,7 +64,19 @@ export class FicheReproducteurComponent {
   reproducteur = computed(() => {
     const id = this.reproducteurId();
     const list = this.reproducteurs() || [];
-    return list.find(r => r.id === id);
+    const found = list.find(r => r.id === id);
+    if (!found) return undefined;
+
+    if (found.sexe === 'F') {
+      const bandeId = this.referentielService.getBandeDeFemelle(found.id);
+      const bandeObj = (this.bandes() || []).find((b: any) => b.id === bandeId);
+      let realEtat = found.etat || 'Au repos';
+      if (bandeObj && bandeObj.phase === 'Repos') {
+        realEtat = 'Au repos';
+      }
+      return { ...found, etat: realEtat as any };
+    }
+    return found;
   });
 
   bandName = computed(() => {

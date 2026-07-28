@@ -106,7 +106,11 @@ export class ListeFemellesComponent {
       const bandeId = this.referentielService.getBandeDeFemelle(f.id);
       const bandeLabel = bandeId === 'bande-a' ? 'Bande A' : bandeId === 'bande-b' ? 'Bande B' : 'Bande C';
 
-
+      const bandeObj = (this.calcService.bandes || []).find((b: any) => b.id === bandeId);
+      let realEtat = f.etat || 'Au repos';
+      if (bandeObj && bandeObj.phase === 'Repos') {
+        realEtat = 'Au repos';
+      }
 
       return {
         id: f.id,
@@ -118,7 +122,7 @@ export class ListeFemellesComponent {
         tailleMoyenne,
         survie,
         cages,
-        etat: f.etat || 'Au repos'
+        etat: realEtat
       };
     });
 
