@@ -2,7 +2,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, DestroyRef, Elemen
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalculationService, NotificationService } from '@core/services';
-import { MetricCardComponent, PageHeaderComponent, AlertCardComponent, EmptyStateComponent } from '@shared/components';
+import { MetricCardComponent, PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import type { Chart } from 'chart.js';
@@ -14,8 +14,6 @@ import type { Chart } from 'chart.js';
     DecimalPipe,
     MetricCardComponent,
     PageHeaderComponent,
-    AlertCardComponent,
-    EmptyStateComponent,
     MatButtonModule,
     MatIconModule
   ],
