@@ -12,12 +12,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { provideNativeDateAdapter } from '@angular/material/core';
 
-export interface PresetPrix {
-  label: string;
-  prix: number;
-  description: string;
-}
-
 @Component({
   selector: 'app-saisie-vente',
   providers: [provideNativeDateAdapter()],
@@ -57,14 +51,6 @@ export class SaisieVenteComponent {
   readonly DUREE_ENGRAISSEMENT_JOURS = 90;      // 90 jours
   readonly POIDS_MOYEN_LAPIN_KG = 2.5;          // 2.5kg par lapin fini
 
-  // Tarifs préréglés du marché
-  presetsPrix: PresetPrix[] = [
-    { label: 'Standard', prix: 3000, description: '1 200 FCFA/kg (2.5 kg)' },
-    { label: 'Poids Lourd', prix: 3500, description: '1 400 FCFA/kg (2.5 kg+)' },
-    { label: 'Premium', prix: 4000, description: '1 600 FCFA/kg (Resto/Hôtel)' },
-    { label: 'En Gros', prix: 2500, description: '1 000 FCFA/kg (Grossiste)' }
-  ];
-
   // Liste réactive des bandes d'engraissement
   bandesEngraissement = computed(() => {
     const list = this.bandes() || [];
@@ -77,24 +63,24 @@ export class SaisieVenteComponent {
   clients = ['Marché Local', 'Centragel', 'Hôtel / Restaurant', 'Particulier', 'Grossiste', 'Autre'];
 
   nbVendusInput = signal<number>(10);
-  prixUnitaireInput = signal<number>(3000);
+  prixUnitaireInput = signal<number>(10000);
 
   // Prix du sac d'aliment calculé selon la configuration
   prixSacAliment = computed(() => {
     const configVal = this.config();
     const prixKg = configVal?.prixAlimentKg || 350;
-    return prixKg * 51; // Ex: 350 FCFA/kg * 51 = 17 850 FCFA
+    return prixKg * 51;
   });
 
   // Coût de production zootechnique par lapin sur 90 jours
   coutProductionParLapin = computed(() => {
-    const consoAlimentKg = 90 * this.CONSO_JOUR_LAPIN_KG; // 9.9 kg
+    const consoAlimentKg = 90 * this.CONSO_JOUR_LAPIN_KG;
     const sacs = consoAlimentKg / this.POIDS_SAC_ALIMENT_KG;
     const coutAliment = sacs * (this.prixSacAliment() || 11000);
 
-    const eauLitres = 90 * this.CONSO_JOUR_EAU_LITRE; // 45 L
+    const eauLitres = 90 * this.CONSO_JOUR_EAU_LITRE;
     const eauM3 = eauLitres / 1000;
-    const coutEau = eauM3 * 364; // Tarif CAMWATER
+    const coutEau = eauM3 * 364;
 
     return Math.round(coutAliment + coutEau);
   });
@@ -141,7 +127,7 @@ export class SaisieVenteComponent {
       date: [todayStr, Validators.required],
       bandeId: ['', Validators.required],
       vendus: [10, [Validators.required, Validators.min(1)]],
-      prixUnitaire: [3000, [Validators.required, Validators.min(0)]],
+      prixUnitaire: [10000, [Validators.required, Validators.min(0)]],
       client: ['Marché Local'],
       observations: ['']
     });
@@ -153,11 +139,6 @@ export class SaisieVenteComponent {
     this.formVente.get('prixUnitaire')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(p => this.prixUnitaireInput.set(Number(p) || 0));
-  }
-
-  setPrixPreset(prix: number): void {
-    this.formVente.patchValue({ prixUnitaire: prix });
-    this.prixUnitaireInput.set(prix);
   }
 
   onSubmit(): void {
@@ -214,11 +195,11 @@ export class SaisieVenteComponent {
       date: todayStr,
       bandeId: '',
       vendus: 10,
-      prixUnitaire: 3000,
+      prixUnitaire: 10000,
       client: 'Marché Local',
       observations: ''
     });
     this.nbVendusInput.set(10);
-    this.prixUnitaireInput.set(3000);
+    this.prixUnitaireInput.set(10000);
   }
 }
