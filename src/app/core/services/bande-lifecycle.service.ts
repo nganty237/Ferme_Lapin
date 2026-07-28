@@ -129,11 +129,15 @@ export class BandeLifecycleService {
       const totalSexes = sexages
         .filter(sx => sx.bandeId === b.id)
         .reduce((sum, sx) => sum + (sx.totalSexes || 0), 0);
+      const totalSevres = sevrages
+        .filter(sv => sv.bandeId === b.id)
+        .reduce((sum, sv) => sum + (sv.sevres || 0), 0);
       const totalVendus = ventes
         .filter(v => v.bandeId === b.id)
         .reduce((sum, v) => sum + (v.vendus || 0), 0);
 
-      const restants = Math.max(0, totalSexes - totalVendus);
+      const effectifInitial = totalSexes > 0 ? totalSexes : (totalSevres > 0 ? totalSevres : 77);
+      const restants = Math.max(0, effectifInitial - totalVendus);
       totalLapinsEngraissement += restants;
     });
 
