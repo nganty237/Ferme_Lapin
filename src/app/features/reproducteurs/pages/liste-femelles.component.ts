@@ -108,8 +108,18 @@ export class ListeFemellesComponent {
 
       const bandeObj = (this.calcService.bandes || []).find((b: any) => b.id === bandeId);
       let realEtat = f.etat || 'Au repos';
-      if (bandeObj && bandeObj.phase === 'Repos') {
-        realEtat = 'Au repos';
+      if (bandeObj) {
+        if (bandeObj.phase === 'Repos') {
+          realEtat = 'Au repos';
+        } else if (bandeObj.phase === 'Gestation' || bandeObj.phase === 'Saillie') {
+          if (realEtat !== 'Morte' && realEtat !== 'Réformée') {
+            realEtat = 'En gestation';
+          }
+        } else if (bandeObj.phase === 'Allaitement') {
+          if (realEtat !== 'Morte' && realEtat !== 'Réformée') {
+            realEtat = 'En allaitement';
+          }
+        }
       }
 
       return {
