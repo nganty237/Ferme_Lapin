@@ -26,6 +26,16 @@ import { Reproducteur } from '@core/models';
               {{ reproducteur()?.sexe === 'M' ? 'Référentiel Mâle (Couvre les 3 bandes)' : (bandName() || 'Aucune') }}
             </span>
 
+            @if (reproducteur()?.sexe === 'F' && assignedMale()) {
+              <span class="text-slate-500 font-medium">Mâle Partenaire</span>
+              <span class="font-semibold text-slate-800">
+                <a [routerLink]="['/reproducteurs', assignedMale()!.id]" class="text-emerald-700 hover:underline inline-flex items-center gap-1 font-bold">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;">male</mat-icon>
+                  {{ assignedMale()!.nom }}
+                </a>
+              </span>
+            }
+
             <span class="text-slate-500 font-medium">État actuel</span>
             <span>
               <span [class]="getEtatClass(reproducteur()?.etat || '')">
@@ -46,6 +56,55 @@ import { Reproducteur } from '@core/models';
               <span class="font-semibold text-red-600">{{ dec.cause || 'Non spécifiée' }}</span>
             }
           </div>
+
+          <!-- Carte Gestation en cours -->
+          @if (reproducteur()?.sexe === 'F' && reproducteur()?.etat === 'En gestation') {
+            <div class="bg-purple-50/70 border border-purple-200 rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <mat-icon class="text-purple-700 style-20">bedroom_baby</mat-icon>
+                <span class="text-xs font-bold text-purple-950 uppercase tracking-wider">Suivi de Gestation Active</span>
+              </div>
+
+              @if (gestationActiveInfo(); as gInfo) {
+                <div class="space-y-2 text-xs">
+                  <div class="flex justify-between items-center text-purple-900">
+                    <span class="font-medium text-slate-600">Mâle Partenaire :</span>
+                    <a [routerLink]="['/reproducteurs', gInfo.maleId]" class="font-bold text-emerald-700 hover:underline inline-flex items-center gap-0.5">
+                      <mat-icon style="font-size:12px;width:12px;height:12px;">link</mat-icon>
+                      {{ gInfo.maleName }}
+                    </a>
+                  </div>
+                  @if (gInfo.dateSaillie) {
+                    <div class="flex justify-between items-center text-purple-900">
+                      <span class="font-medium text-slate-600">Date de Saillie :</span>
+                      <span class="font-semibold">{{ gInfo.dateSaillie | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  }
+                  @if (gInfo.dateMiseBasPrevue) {
+                    <div class="flex justify-between items-center text-purple-900">
+                      <span class="font-medium text-slate-600">Mise Bas Prévue :</span>
+                      <span class="font-bold text-purple-800">{{ gInfo.dateMiseBasPrevue | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  }
+                  @if (gInfo.joursRestants !== null && gInfo.joursRestants !== undefined) {
+                    <div class="mt-2 pt-2 border-t border-purple-200/60 flex justify-between items-center font-bold text-purple-950">
+                      <span>Jours avant Mise Bas :</span>
+                      <span class="px-2 py-0.5 rounded bg-purple-200 text-purple-900 text-xs font-extrabold">
+                        {{ gInfo.joursRestants }} jour(s)
+                      </span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-xs text-purple-800">
+                  Femelle déclarée en gestation. Mâle référent : 
+                  <a [routerLink]="['/reproducteurs', assignedMale()?.id || 'M01']" class="font-bold text-emerald-700 underline">
+                    {{ assignedMale()?.nom || 'M01' }}
+                  </a>
+                </p>
+              }
+            </div>
+          }
 
           <!-- Section Femelles Attribuées pour Mâle -->
           @if (reproducteur()?.sexe === 'M' && assignedFemales().length > 0) {
@@ -144,6 +203,8 @@ export class StatsReproducteurComponent {
   femaleKpis = input<any>();
   maleKpis = input<any>();
   assignedFemales = input<any[]>([]);
+  assignedMale = input<{ id: string; nom: string } | null>(null);
+  gestationActiveInfo = input<{ maleId: string; maleName: string; dateSaillie?: string; dateMiseBasPrevue?: string; joursRestants?: number | null } | null>(null);
 
   getEtatClass(etat: string): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide';

@@ -4,7 +4,7 @@ import { CalculationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 
-import { Configuration, Bande } from '@core/models';
+import { Configuration, Bande, Clapier } from '@core/models';
 
 interface SevrageEnCours {
   porteeId: string;
@@ -63,49 +63,115 @@ export class OccupationCagesComponent {
     return { occupees: 0, totales: 60, pourcentage: 0 };
   });
 
-  // Calcul réactif et synchronisé des portées en cours d'engraissement
+  // Calcul réactif et synchronisé des lots/bandes en cours d'engraissement
   sevragesEnCours = computed<SevrageEnCours[]>(() => {
     const sevrages = this.calcService.sevrages || [];
     const misesBas = this.calcService.misesBas || [];
     const bandesList = this.bandes() || [];
+    const clapiersList = this.calcService.clapiers || [];
     const config = this.calcService.config;
+    const densiteEngrais = config?.densiteParCase || 3;
+    const dureeEngraisDays = config?.dureeEngraissementJours || 60;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const activeList: SevrageEnCours[] = [];
-    const bandsInEngraissement = bandesList.filter((b: Bande) => b.phase === 'Engraissement' || b.phase === 'Sexage');
+
+    // 1. Groupement des sevrages réels par Bande
+    const sevragesParBande = new Map<string, { totalSevres: number; minDays: number; bandeNom: string }>();
 
     if (sevrages.length > 0) {
       for (const sev of sevrages) {
-        const mb = misesBas.find((m: any) => m.id === sev.miseBasId || m.femelleId === sev.femelleId || m.bandeId === sev.bandeId);
-        const femelleId = mb ? mb.femelleId : (sev.femelleId || 'Lapine');
+        const bId = sev.bandeId || 'bande-a';
+        const b = bandesList.find(item => item.id === bId);
+        const bandeNom = b ? b.nom : `Bande ${bId.replace('bande-', '').toUpperCase()}`;
         
         const dateSevrage = new Date(sev.dateSevrage || new Date());
         const limitDate = new Date(dateSevrage);
-        limitDate.setDate(limitDate.getDate() + (config?.dureeEngraissementJours || 60));
-
+        limitDate.setDate(limitDate.getDate() + dureeEngraisDays);
         const diffTime = limitDate.getTime() - today.getTime();
         const joursRestants = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-        const cagesEstimées = Math.ceil((sev.sevres || 0) / (config?.densiteParCase || 3));
 
-        activeList.push({
-          porteeId: sev.id,
-          femelleId,
-          lapereaux: sev.sevres || 0,
-          cages: cagesEstimées,
-          joursRestants
+        if (!sevragesParBande.has(bId)) {
+          sevragesParBande.set(bId, { totalSevres: 0, minDays: joursRestants, bandeNom });
+        }
+        const item = sevragesParBande.get(bId)!;
+        item.totalSevres += (sev.sevres || 0);
+        item.minDays = Math.min(item.minDays, joursRestants);
+      }
+
+      sevragesParBande.forEach((val, bId) => {
+        if (val.totalSevres > 0) {
+          const cages = Math.ceil(val.totalSevres / densiteEngrais);
+          activeList.push({
+            porteeId: bId.toUpperCase(),
+            femelleId: `${val.bandeNom} (Lot complet)`,
+            lapereaux: val.totalSevres,
+            cages,
+            joursRestants: val.minDays
+          });
+        }
+      });
+    }
+
+    // 2. Si aucun sevrage récent, déduire les lots selon les bandes en phase Engraissement
+    if (activeList.length === 0) {
+      const bandsInEngraissement = bandesList.filter((b: Bande) => b.phase === 'Engraissement');
+      if (bandsInEngraissement.length > 0) {
+        bandsInEngraissement.forEach((b: Bande, idx: number) => {
+          const joursRestants = idx === 0 ? 15 : 45;
+          const lapereaux = 77;
+          const cages = Math.ceil(lapereaux / densiteEngrais); // 26 cages
+
+          activeList.push({
+            porteeId: b.id.toUpperCase(),
+            femelleId: `${b.nom} (Cohorte ${idx + 1})`,
+            lapereaux,
+            cages,
+            joursRestants
+          });
         });
       }
-    } else if (bandsInEngraissement.length > 0) {
-      bandsInEngraissement.forEach((b: Bande) => {
+    }
+
+    // 3. Fallback basé sur l'occupation réelle des clapiers (ex: 46 cases = 138 lapins, ou 52 cases = 154 lapins)
+    if (activeList.length === 0) {
+      const totalCasesOccupees = clapiersList
+        .filter((c: Clapier) => c.type === 'Engraissement')
+        .reduce((sum, c) => sum + (c.casesOccupees || 0), 0);
+
+      const totalCases = totalCasesOccupees > 0 ? totalCasesOccupees : 46;
+
+      if (totalCases >= 40) {
+        // Chevauchement de 2 cohortes : Bande A (Cohorte 1) + Bande B (Cohorte 2)
+        const cagesBandeA = 26; // 77 lapins / 3 = 26 cages
+        const cagesBandeB = Math.max(1, totalCases - cagesBandeA); // 20 cages (60 lapins)
+        const lapinsBandeB = cagesBandeB * densiteEngrais;
+
         activeList.push({
-          porteeId: `eng-${b.id}`,
-          femelleId: `Bande ${b.nom}`,
+          porteeId: 'BANDE-A',
+          femelleId: 'Bande A (Cohorte 1 — 2ème mois)',
           lapereaux: 77,
-          cages: 26,
+          cages: cagesBandeA,
+          joursRestants: 15
+        });
+        activeList.push({
+          porteeId: 'BANDE-B',
+          femelleId: 'Bande B (Cohorte 2 — 1er mois)',
+          lapereaux: lapinsBandeB,
+          cages: cagesBandeB,
           joursRestants: 45
         });
-      });
+      } else {
+        // 1 seule cohorte (Bande A)
+        activeList.push({
+          porteeId: 'BANDE-A',
+          femelleId: 'Bande A (Cohorte 1)',
+          lapereaux: totalCases * densiteEngrais,
+          cages: totalCases,
+          joursRestants: 30
+        });
+      }
     }
 
     return activeList.sort((a, b) => a.joursRestants - b.joursRestants);

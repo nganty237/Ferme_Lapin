@@ -139,11 +139,14 @@
             </button>
           </div>
         } @else {
-          <div class="flex flex-col items-center justify-center text-center p-12 text-slate-400">
-            <mat-icon class="text-[48px] w-[48px] h-[48px] text-slate-300 mb-3">child_friendly</mat-icon>
-            <h4 class="font-bold text-slate-700 text-base mb-1">Aucune lapine trouvée pour cette bande</h4>
-            <p class="text-xs text-slate-500 max-w-md">
-              Veuillez sélectionner une bande active en gestation pour enregistrer ses naissances.
+          <div class="p-12 text-center bg-slate-50/50 border border-slate-200 border-dashed rounded-xl">
+            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center mb-3">
+              <mat-icon class="text-[24px]">block</mat-icon>
+            </div>
+            <h4 class="font-bold text-slate-700 text-base mb-1">La {{ selectedBande()?.nom }} n'est pas en période de mise-bas</h4>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">
+              La phase actuelle de cette bande est : <strong class="text-slate-700">{{ selectedBande()?.phase || 'Repos' }}</strong>.<br>
+              Conformément à la règle de rotation, seule la bande en phase de <strong>Gestation</strong> peut procéder à l'enregistrement des naissances (mises-bas).
             </p>
           </div>
         }

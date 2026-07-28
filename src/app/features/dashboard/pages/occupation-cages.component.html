@@ -71,6 +71,12 @@
                    [class]="getProgressBarClass(cagesSexage().pourcentage)">
               </div>
             </div>
+            @if (cagesSexage().occupees === 0) {
+              <p class="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
+                <mat-icon style="font-size:13px;width:13px;height:13px;" class="text-slate-400">info</mat-icon>
+                <span>Aucune bande en phase de sexage actuellement. Lors du sexage d'une bande (77 lapereaux à 7/case), 11 cases sont occupées.</span>
+              </p>
+            }
           </div>
         </div>
         
@@ -117,22 +123,22 @@
     </div>
   }
 
-  <!-- Tableau Sevrages en cours -->
+  <!-- Tableau Lots d'Engraissement en cours -->
   <div class="bg-white border border-slate-200 rounded-xl p-6">
     <p class="text-base font-semibold text-slate-800 mb-5 flex items-center gap-2">
       <mat-icon class="text-emerald-700">hourglass_bottom</mat-icon>
-      Portées en Cours d'Engraissement (Détails)
+      Lots &amp; Cohortes en Cours d'Engraissement (Détails)
     </p>
 
     <div class="overflow-x-auto mt-4" style="max-height: 400px;">
       <table class="w-full border-separate border-spacing-0 text-sm">
         <thead>
           <tr>
-            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Portée ID</th>
-            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Femelle</th>
-            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Lapereaux</th>
-            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Cages Estimées</th>
-            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Jours Restants</th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">ID Lot</th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Bande / Cohorte</th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Lapereaux (Effectif)</th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Cages Occupées (3/case)</th>
+            <th class="px-4 py-3 font-semibold text-xs text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-200 text-left">Temps Restant (Sur 60 j.)</th>
           </tr>
         </thead>
         <tbody>
