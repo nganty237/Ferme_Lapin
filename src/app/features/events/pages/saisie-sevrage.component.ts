@@ -47,7 +47,7 @@ export class SaisieSevrageComponent {
   bandesAvecStatut = computed(() => {
     const allBandes = this.bandes() || [];
     return allBandes.map(b => {
-      const estEnAllaitement = b.phase === 'Allaitement' || b.phase === 'Sexage' || (b.phase as string) === 'MiseBas';
+      const estEnAllaitement = b.phase === 'Allaitement';
       return {
         ...b,
         statutLabel: estEnAllaitement ? `Phase ${b.phase} — Prête au sevrage` : `Au repos (${b.phase})`
@@ -94,11 +94,11 @@ export class SaisieSevrageComponent {
         this.bandeSelectionnee.set(bandeId || null);
       });
 
-    // Auto-sélection prioritaire de la bande actuellement en phase Allaitement / MiseBas / Sexage
+    // Auto-sélection de la bande actuellement en phase Allaitement
     effect(() => {
       const allBandes = this.bandes() || [];
       if (allBandes.length > 0) {
-        const candidate = allBandes.find(b => b.phase === 'Allaitement' || (b.phase as string) === 'MiseBas' || b.phase === 'Sexage');
+        const candidate = allBandes.find(b => b.phase === 'Allaitement');
         if (candidate && this.bandeSelectionnee() !== candidate.id) {
           this.bandeSelectionnee.set(candidate.id);
           this.sevrageForm.patchValue({ bande: candidate.id }, { emitEvent: false });
@@ -113,34 +113,17 @@ export class SaisieSevrageComponent {
       this.femellesFormArray.clear();
       mbs.forEach(mb => {
         const existingSev = allSevrages.find(s => s.miseBasId === mb.id || s.femelleId === mb.femelleId);
-        const sevresVal = existingSev ? existingSev.sevres : (mb.vivants || 7);
+        const sevresVal = existingSev ? existingSev.sevres : (mb.vivants || 0);
 
         const group = this.fb.group({
           miseBasId: [mb.id],
           femelleId: [mb.femelleId],
-          vivantsInitiaux: [mb.vivants || 7],
+          vivantsInitiaux: [mb.vivants || 0],
           sevres: [sevresVal, [Validators.required, Validators.min(0)]],
           observations: ['']
         });
         this.femellesFormArray.push(group);
       });
-    });
-  }
-
-  initFemellesArray() {
-    this.femellesFormArray.clear();
-    const mbs = this.misesBasBande();
-    
-    mbs.forEach(mb => {
-      const group = this.fb.group({
-        miseBasId: [mb.id],
-        femelleId: [mb.femelleId],
-        vivantsInitiaux: [mb.vivants],
-        sevres: [mb.vivants, [Validators.required, Validators.min(0)]], // Default to what was born alive
-        observations: ['']
-      });
-
-      this.femellesFormArray.push(group);
     });
   }
 
@@ -152,7 +135,7 @@ export class SaisieSevrageComponent {
   getTauxSurvie(sevres: any, vivants: any): number {
     const s = Number(sevres) || 0;
     const v = Number(vivants) || 0;
-    return v > 0 ? Math.round((s / v) * 100) : 0;
+    return v > 0 ? Math.min(100, Math.round((s / v) * 100)) : 0;
   }
 
   onSubmit() {
@@ -160,6 +143,19 @@ export class SaisieSevrageComponent {
       this.sevrageForm.markAllAsTouched();
       return;
     }
+
+    const formValue = this.sevrageForm.value;
+    const femelles = formValue.femelles || [];
+
+    for (const f of femelles) {
+      const sevresNum = Number(f.sevres) || 0;
+      const vivantsNum = Number(f.vivantsInitiaux) || 0;
+      if (sevresNum > vivantsNum) {
+        this.notifier.error(`Erreur pour la femelle ${f.femelleId} : le nombre de sevrés (${sevresNum}) ne peut pas dépasser le nombre de vivants à la naissance (${vivantsNum}).`);
+        return;
+      }
+    }
+
     this.isSubmitting.set(true);
 
     try {

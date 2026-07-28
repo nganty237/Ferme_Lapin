@@ -210,7 +210,7 @@ export class FicheReproducteurComponent {
     const saillieIds = new Set(explicitSaillies.map((s: any) => s.id));
     const porteesProduites = allMisesBas.filter((mb: any) => saillieIds.has(mb.saillieId) || mb.maleId === r.id).length;
 
-    const sailliesReussies = Math.max(explicitSaillies.filter((s: any) => s.reussie === true).length, porteesProduites, totalSaillies);
+    const sailliesReussies = Math.min(totalSaillies, Math.max(explicitSaillies.filter((s: any) => s.reussie === true).length, porteesProduites));
     const tauxFertilite = totalSaillies > 0 ? Math.round((sailliesReussies / totalSaillies) * 100) : 100;
 
     return {
@@ -288,7 +288,7 @@ export class FicheReproducteurComponent {
       if (r.sexe === 'F') {
         this.calcService.updateReproducteur({ ...r, etat: 'Réformée' });
       } else {
-        this.calcService.updateReproducteur({ ...r, etat: 'Mort' });
+        this.calcService.updateReproducteur({ ...r, etat: 'Réformé' as any });
       }
 
       this.showDeleteConfirm = false;

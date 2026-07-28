@@ -246,6 +246,8 @@ export class SaisiePalpationComponent {
     try {
       const val = this.form.value;
       const arrayValues = this.palpationsArray.value;
+      const rawDate = val.datePalpation;
+      const dateIso = typeof rawDate === 'string' ? rawDate : new Date(rawDate).toISOString().substring(0, 10);
 
       arrayValues.forEach((p: any) => {
         const bande = (this.bandes() || []).find(b => b.id === val.bandeId);
@@ -255,19 +257,22 @@ export class SaisiePalpationComponent {
           cycleId: `cycle-${val.bandeId}-${bande?.numeroCycle || 1}`,
           femelleId: p.femelleId,
           bandeId: val.bandeId,
-          datePalpation: val.datePalpation,
+          datePalpation: dateIso,
           resultat: p.resultat,
           observations: p.observations
         });
 
         if (p.resultat === 'Negative') {
-          const dateReSaillie = new Date(val.datePalpation);
+          const dateReSaillie = new Date(dateIso);
           dateReSaillie.setDate(dateReSaillie.getDate() + 2);
           this.bandeService.replanifierSaillieFemelle(p.femelleId, val.bandeId as BandeId, dateReSaillie);
         }
       });
 
-      this.notifier.success(`${arrayValues.length} palpation(s) enregistrée(s) avec succès.`);
+      // Passation explicite de la bande en phase Gestation
+      this.bandeService.changerPhase(val.bandeId, 'Gestation');
+
+      this.notifier.success(`${arrayValues.length} palpation(s) enregistrée(s). La ${val.bandeId.toUpperCase()} est maintenant en phase Gestation.`);
       this.initPalpationsForBande(val.bandeId);
     } finally {
       this.isSubmitting.set(false);

@@ -194,7 +194,7 @@ export class SaisieSaillieComponent {
     refB.groupesParMale.forEach(grp => {
       grp.femellesIds.forEach(fId => {
         const repro = repros.find(r => r.id === fId);
-        if (!repro || (repro.etat !== 'Morte' && repro.etat !== 'Réformée')) {
+        if (repro && repro.etat !== 'Morte' && repro.etat !== 'Réformée') {
           result.push({
             maleId: grp.maleId,
             femelleId: fId,
@@ -252,7 +252,8 @@ export class SaisieSaillieComponent {
       maleId: ['', Validators.required],
       dateSaillie: [todayStr, Validators.required],
       date: [todayStr],
-      moment: ['Matin', Validators.required]
+      moment: ['Matin', Validators.required],
+      observations: ['']
     });
 
     // Détection réactive intelligente de la prochaine bande déverrouillée et prête dans la rotation cunicole
@@ -310,8 +311,8 @@ export class SaisieSaillieComponent {
   }
 
   onSubmitIndiv(): void {
-    if (this.formIndividuelle.invalid && !this.formIndividuelle.get('maleId')?.value) {
-      this.notifier.error('Veuillez remplir correctement la femelle.');
+    if (this.formIndividuelle.invalid) {
+      this.notifier.error('Veuillez remplir correctement la femelle et la date de saillie.');
       return;
     }
 

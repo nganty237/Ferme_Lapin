@@ -65,7 +65,7 @@ export class SaisieSexageComponent {
     if (!bandeId) return [];
 
     const allSevrages = this.sevrages() || [];
-    return allSevrages.filter(s => s.bandeId === bandeId).slice(0, 11);
+    return allSevrages.filter(s => s.bandeId === bandeId);
   });
 
   get porteesFormArray() {
@@ -154,16 +154,31 @@ export class SaisieSexageComponent {
       this.sexageForm.markAllAsTouched();
       return;
     }
+
+    const formValue = this.sexageForm.value;
+    const portees = formValue.portees || [];
+
+    // Validation stricte des totaux sexés et des retenus
+    for (const p of portees) {
+      const totalSexes = (Number(p.males) || 0) + (Number(p.femelles) || 0);
+      const expected = Number(p.totalSevres) || 0;
+      if (totalSexes !== expected) {
+        this.notifier.error(`Incohérence pour la femelle ${p.femelleId} : ${totalSexes} sexés (${p.males}M + ${p.femelles}F) ≠ ${expected} sevrés.`);
+        return;
+      }
+      if ((Number(p.retenus) || 0) > (Number(p.femelles) || 0)) {
+        this.notifier.error(`Impossible de retenir ${p.retenus} femelle(s) pour ${p.femelleId} qui n'a que ${p.femelles} femelle(s) sexée(s).`);
+        return;
+      }
+    }
+
     this.isSubmitting.set(true);
 
     try {
-      const formValue = this.sexageForm.value;
       const dateSexage = new Date(formValue.dateCommune).toISOString();
-
-      // TK-06 : cycleId dynamique depuis la bande
       const bande = (this.bandes() || []).find(b => b.id === formValue.bande);
 
-      formValue.portees.forEach((p: any) => {
+      portees.forEach((p: any) => {
         this.bandeService.enregistrerSexage({
           id: `sex-${Date.now()}-${p.femelleId}`,
           cycleId: `cycle-${formValue.bande}-${bande?.numeroCycle || 1}`,
@@ -172,16 +187,15 @@ export class SaisieSexageComponent {
           nombreMales: Number(p.males) || 0,
           nombreFemelles: Number(p.femelles) || 0,
           totalSexes: (Number(p.males) || 0) + (Number(p.femelles) || 0),
-          retenus: Number(p.retenus) || 0,  // TK-11 : inclure les retenus pour renouvellement
+          retenus: Number(p.retenus) || 0,
           clapierSexageId: 'clap-s1'
         });
       });
 
-      // Fix P0 #4 : déclenchement immédiat du transfert en engraissement après sexage.
+      // Déclenchement immédiat du transfert en engraissement après sexage
       this.bandeService.transfererEngraissement(formValue.bande as BandeId, new Date(dateSexage));
 
-      this.notifier.success('Sexage enregistré avec succès.');
-      // TK-07 : reset date en format ISO string
+      this.notifier.success(`Sexage de ${portees.length} portée(s) enregistré avec succès. Bande transférée en Engraissement.`);
       this.sexageForm.reset({ dateCommune: new Date().toISOString().substring(0, 10) });
       this.porteesFormArray.clear();
     } catch (e) {
