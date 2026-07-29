@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "outputDirectory": "dist/RAISSA_Project/browser",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.csr.html"
+    }
+  ]
+}
