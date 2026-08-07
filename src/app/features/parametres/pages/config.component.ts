@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, ChangeDetectorRef, DestroyRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StorageService, CalculationService, NotificationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +26,8 @@ export class ConfigComponent implements OnInit {
   private calcService = inject(CalculationService);
   private fb = inject(FormBuilder);
   private notifier = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   configForm!: FormGroup;
 
@@ -36,8 +39,24 @@ export class ConfigComponent implements OnInit {
       densiteParCase: [config.densiteParCase || 3, [Validators.required, Validators.min(1)]],
       densiteSexageParCase: [config.densiteSexageParCase || 7, [Validators.required, Validators.min(1)]],
       prixAlimentKg: [config.prixAlimentKg || 350, [Validators.required, Validators.min(0)]],
-      prixVenteDefaut: [config.prixVenteDefaut || 3000, [Validators.required, Validators.min(0)]]
+      prixVenteDefaut: [config.prixVenteDefaut || 10000, [Validators.required, Validators.min(0)]]
     });
+
+    this.calcService.config$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((c) => {
+        if (c) {
+          this.configForm.patchValue({
+            nombreCagesTotal: c.nombreCagesTotal ?? 108,
+            nombreFemelles: c.nombreFemelles ?? 33,
+            densiteParCase: c.densiteParCase ?? 3,
+            densiteSexageParCase: c.densiteSexageParCase ?? 7,
+            prixAlimentKg: c.prixAlimentKg ?? 350,
+            prixVenteDefaut: c.prixVenteDefaut ?? 10000
+          }, { emitEvent: false });
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   saveConfig(): void {
@@ -50,6 +69,7 @@ export class ConfigComponent implements OnInit {
       };
       this.calcService.updateConfiguration(updatedConfig);
       this.notifier.success('Configuration enregistrée avec succès.');
+      this.cdr.markForCheck();
     } else {
       this.notifier.error('Veuillez corriger les erreurs du formulaire.');
     }
@@ -63,9 +83,10 @@ export class ConfigComponent implements OnInit {
       densiteParCase: config.densiteParCase || 3,
       densiteSexageParCase: config.densiteSexageParCase || 7,
       prixAlimentKg: config.prixAlimentKg || 350,
-      prixVenteDefaut: config.prixVenteDefaut || 3000
+      prixVenteDefaut: config.prixVenteDefaut || 10000
     });
     this.notifier.info('Modifications annulées.');
+    this.cdr.markForCheck();
   }
 
   exportData(): void {
@@ -105,7 +126,7 @@ export class ConfigComponent implements OnInit {
         if (confirm('Importer cette sauvegarde ? Toutes vos données actuelles seront écrasées.')) {
           this.storageService.importData(json);
           this.calcService.loadAllData();
-          this.ngOnInit();
+          this.cdr.markForCheck();
           this.notifier.success('Sauvegarde restaurée avec succès.');
         }
       } catch (err) {
@@ -118,12 +139,11 @@ export class ConfigComponent implements OnInit {
   }
 
   resetDatabase(): void {
-    if (confirm('Réinitialiser la base de données locale avec les données de démonstration ? Vos données actuelles seront perdues.')) {
+    if (confirm('Réinitialiser la base de données locale et recharger les données ? Vos modifications locales non synchronisées seront réinitialisées.')) {
       this.storageService.clearAll();
-      this.storageService.initSeedData(true);
       this.calcService.loadAllData();
-      this.ngOnInit();
-      this.notifier.success('Données de démonstration restaurées.');
+      this.cdr.markForCheck();
+      this.notifier.success('Base de données réinitialisée et rechargée.');
     }
   }
 
@@ -131,7 +151,7 @@ export class ConfigComponent implements OnInit {
     if (confirm('DANGER : Supprimer définitivement toutes vos données locales ? Cette action est irréversible.')) {
       this.storageService.clearAll();
       this.calcService.loadAllData();
-      this.ngOnInit();
+      this.cdr.markForCheck();
       this.notifier.success('Toutes les données ont été effacées.');
     }
   }

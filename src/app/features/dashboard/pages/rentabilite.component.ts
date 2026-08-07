@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CalculationService } from '@core/services';
 import { PageHeaderComponent } from '@shared/components';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,6 +49,8 @@ export interface BilanZootechniqueBande {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RentabiliteComponent {
+  private calcService = inject(CalculationService);
+  config = toSignal(this.calcService.config$);
 
   // Données STATIQUES (Normes Zootechniques & Référentiels d'Élevage Fixes)
   readonly CONSO_JOUR_LAPIN_KG = 0.110;        // 110 g / lapin / jour (Norme rationnement)
@@ -57,21 +61,41 @@ export class RentabiliteComponent {
 
   // Données DYNAMIQUES (Variables modifiables par le fermier)
   effectifLapins = signal<number>(77);
-  prixSacAliment = signal<number>(11000);
+  prixSacAliment = signal<number>(350 * 51);
   prixEauM3 = signal<number>(364);
   prixVenteLapin = signal<number>(10000);
 
   // Visibilité des paramètres
   showParameters = signal<boolean>(false);
 
+  constructor() {
+    this.syncWithConfig();
+  }
+
+  private syncWithConfig(): void {
+    const cfg = this.calcService.config;
+    if (cfg) {
+      if (cfg.prixAlimentKg) {
+        this.prixSacAliment.set(cfg.prixAlimentKg * this.POIDS_SAC_ALIMENT_KG);
+      }
+      if (cfg.prixVenteDefaut) {
+        this.prixVenteLapin.set(cfg.prixVenteDefaut);
+      }
+    }
+  }
+
   /**
    * Calcul d'ingénierie zootechnique et financière pour une bande sur 3 mois (90 jours).
    */
   bilan = computed<BilanZootechniqueBande>(() => {
+    const cfg = this.config();
+    const defaultSac = cfg?.prixAlimentKg ? cfg.prixAlimentKg * this.POIDS_SAC_ALIMENT_KG : 11000;
+    const defaultVente = cfg?.prixVenteDefaut || 10000;
+
     const effectif = Math.max(1, this.effectifLapins() || 77);
-    const prixSac = Math.max(0, this.prixSacAliment() || 11000);
+    const prixSac = Math.max(0, this.prixSacAliment() ?? defaultSac);
     const tarifEau = Math.max(0, this.prixEauM3() || 364);
-    const prixVente = Math.max(0, this.prixVenteLapin() || 10000);
+    const prixVente = Math.max(0, this.prixVenteLapin() ?? defaultVente);
 
     const detailsMois: DetailsMoisCalcul[] = [];
     let totalAlimentKg = 0;
@@ -146,10 +170,11 @@ export class RentabiliteComponent {
   });
 
   resetDefaults(): void {
+    const cfg = this.config();
     this.effectifLapins.set(77);
-    this.prixSacAliment.set(11000);
+    this.prixSacAliment.set(cfg?.prixAlimentKg ? cfg.prixAlimentKg * this.POIDS_SAC_ALIMENT_KG : 350 * 51);
     this.prixEauM3.set(364);
-    this.prixVenteLapin.set(10000);
+    this.prixVenteLapin.set(cfg?.prixVenteDefaut || 10000);
   }
 
   toggleParameters(): void {

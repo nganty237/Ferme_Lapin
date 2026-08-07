@@ -123,14 +123,27 @@ export class SaisieVenteComponent {
 
   constructor() {
     const todayStr = new Date().toISOString().substring(0, 10);
+    const defaultPrixVente = this.calcService.config?.prixVenteDefaut || 10000;
+
     this.formVente = this.fb.group({
       date: [todayStr, Validators.required],
       bandeId: ['', Validators.required],
       vendus: [10, [Validators.required, Validators.min(1)]],
-      prixUnitaire: [10000, [Validators.required, Validators.min(0)]],
+      prixUnitaire: [defaultPrixVente, [Validators.required, Validators.min(0)]],
       client: ['Marché Local'],
       observations: ['']
     });
+
+    this.prixUnitaireInput.set(defaultPrixVente);
+
+    this.calcService.config$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(c => {
+        if (c?.prixVenteDefaut && this.formVente.get('prixUnitaire')?.pristine) {
+          this.formVente.patchValue({ prixUnitaire: c.prixVenteDefaut }, { emitEvent: false });
+          this.prixUnitaireInput.set(c.prixVenteDefaut);
+        }
+      });
 
     this.formVente.get('vendus')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -191,15 +204,16 @@ export class SaisieVenteComponent {
 
   onReset(): void {
     const todayStr = new Date().toISOString().substring(0, 10);
+    const defaultPrixVente = this.config()?.prixVenteDefaut || 10000;
     this.formVente.reset({
       date: todayStr,
       bandeId: '',
       vendus: 10,
-      prixUnitaire: 10000,
+      prixUnitaire: defaultPrixVente,
       client: 'Marché Local',
       observations: ''
     });
     this.nbVendusInput.set(10);
-    this.prixUnitaireInput.set(10000);
+    this.prixUnitaireInput.set(defaultPrixVente);
   }
 }
