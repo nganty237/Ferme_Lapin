@@ -20,9 +20,9 @@
     </app-metric-card>
 
     <app-metric-card
-      label="Productivité / femelle"
-      [value]="kpis()!.productiviteParFemelleAn + ' / an'"
-      hint="Lapereaux nés par femelle active par an"
+      label="Portées / femelle"
+      [value]="kpis()!.porteesParFemelleAn + ' portée(s)'"
+      hint="Nombre de mises bas par lapine (objectif : 6/an)"
       icon="trending_up"
       iconBg="var(--color-primary-alpha)" iconColor="var(--color-primary)">
     </app-metric-card>
@@ -183,7 +183,7 @@
             @if (kpis()!.occupationCages.pourcentage > 80) {
               ⚠️ Engraissement saturé à {{ kpis()!.occupationCages.pourcentage }}%. <strong>Ne planifiez pas de nouvelles saillies</strong> pour éviter de manquer de cages au sevrage.
             } @else {
-              ✅ Espace suffisant. <strong>Vous pouvez saillir les femelles de la prochaine bande</strong> (cages disponibles : {{ kpis()!.occupationCages.totales - kpis()!.occupationCages.occupees }}).
+             Espace suffisant. <strong>Vous pouvez saillir les femelles de la prochaine bande</strong> (cages disponibles : {{ kpis()!.occupationCages.totales - kpis()!.occupationCages.occupees }}).
             }
           </span>
         </div>

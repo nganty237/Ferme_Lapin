@@ -49,6 +49,20 @@ export class SaisieSexageComponent {
   bandesDisponibles = computed(() => this.bandes() || []);
   selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
 
+  /** Nombre de femelles actives (non Mortes, non Réformées) dans la bande sélectionnée. */
+  femellesActivesCount = computed(() => {
+    const bandeId = this.bandeSelectionnee();
+    const repros = this.reproducteurs() || [];
+    if (!bandeId) return 11;
+    const count = repros.filter(r =>
+      r.sexe === 'F' &&
+      (r as any).bandeId === bandeId &&
+      r.etat !== 'Morte' &&
+      r.etat !== 'Réformée'
+    ).length;
+    return count > 0 ? count : 11;
+  });
+
   bandesAvecStatut = computed(() => {
     const allBandes = this.bandes() || [];
     return allBandes.map(b => {
@@ -65,7 +79,12 @@ export class SaisieSexageComponent {
     if (!bandeId) return [];
 
     const allSevrages = this.sevrages() || [];
-    return allSevrages.filter(s => s.bandeId === bandeId);
+    const repros = this.reproducteurs() || [];
+    return allSevrages.filter(s => {
+      if (s.bandeId !== bandeId) return false;
+      const female = repros.find(r => r.id === s.femelleId);
+      return !female || (female.etat !== 'Morte' && female.etat !== 'Réformée');
+    });
   });
 
   get porteesFormArray() {

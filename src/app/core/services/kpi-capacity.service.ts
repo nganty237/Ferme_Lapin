@@ -146,10 +146,12 @@ export class KpiCapacityService {
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.casesOccupees || 0), 0)
       : 0;
 
-    // Synchronisation réactive : 46 cases occupées par défaut pour le chevauchement de 2 cohortes en engraissement (77%)
+    // Synchronisation réactive : le fallback de 46 cases ne s'applique QUE si aucune donnée réelle n'est présente
     const fallbackCagesEngrais = 46;
-
-    const cagesOccupees = Math.max(cagesOccupeesFromLapins, cagesOccupeesFromClapiers, fallbackCagesEngrais);
+    const hasRealData = cagesOccupeesFromLapins > 0 || cagesOccupeesFromClapiers > 0;
+    const cagesOccupees = hasRealData
+      ? Math.max(cagesOccupeesFromLapins, cagesOccupeesFromClapiers)
+      : fallbackCagesEngrais;
     const cagesEngraissementClapiers = clapiers && clapiers.length > 0
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.nombreCases || 12), 0)
       : 60;

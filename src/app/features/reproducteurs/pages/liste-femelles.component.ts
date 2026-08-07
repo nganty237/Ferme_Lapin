@@ -38,6 +38,7 @@ export class ListeFemellesComponent {
   saillies = toSignal(this.calcService.saillies$);
   misesBas = toSignal(this.calcService.misesBas$);
   sevrages = toSignal(this.calcService.sevrages$);
+  bandes = toSignal(this.calcService.bandes$);
 
   filtreBande = '';
   filtreEtat = '';
@@ -55,6 +56,7 @@ export class ListeFemellesComponent {
     const repros = (this.reproducteurs() || []).filter(isFemelle);
     const mbList = this.misesBas() || [];
     const sevList = this.sevrages() || [];
+    const allBandes = this.bandes() || [];
 
     let rows: FemelleRow[] = repros.map(f => {
       const femellesMb = mbList.filter((m: any) => m.femelleId === f.id);
@@ -102,22 +104,28 @@ export class ListeFemellesComponent {
         .reduce((sum, m) => sum + (m.vivants || 0), 0);
       const survie = totalVivantsSevres > 0 ? Math.round((totalSevres / totalVivantsSevres) * 100) : 0;
 
-      const maleResponsableId = this.referentielService.getMaleResponsable(f.id);
-      const bandeId = this.referentielService.getBandeDeFemelle(f.id);
+      const maleResponsableId = f.maleResponsableId || this.referentielService.getMaleResponsable(f.id);
+      const bandeId = f.bandeId || this.referentielService.getBandeDeFemelle(f.id);
       const bandeLabel = bandeId === 'bande-a' ? 'Bande A' : bandeId === 'bande-b' ? 'Bande B' : 'Bande C';
 
-      const bandeObj = (this.calcService.bandes || []).find((b: any) => b.id === bandeId);
+      const bandeObj = allBandes.find((b: any) => b.id === bandeId);
+      // Les états terminaux (Morte, Réformée) sont toujours prioritaires sur la phase de la bande
       let realEtat = f.etat || 'Au repos';
-      if (bandeObj) {
-        if (bandeObj.phase === 'Repos') {
-          realEtat = 'Au repos';
-        } else if (bandeObj.phase === 'Gestation' || bandeObj.phase === 'Saillie') {
-          if (realEtat !== 'Morte' && realEtat !== 'Réformée') {
-            realEtat = 'En gestation';
-          }
-        } else if (bandeObj.phase === 'Allaitement') {
-          if (realEtat !== 'Morte' && realEtat !== 'Réformée') {
-            realEtat = 'En allaitement';
+      if (realEtat !== 'Morte' && realEtat !== 'Réformée') {
+        if (bandeObj) {
+          switch (bandeObj.phase) {
+            case 'Saillie':
+            case 'Gestation':
+              realEtat = 'En gestation';
+              break;
+            case 'Allaitement':
+              realEtat = 'En allaitement';
+              break;
+            case 'Repos':
+            case 'Sexage':
+            case 'Engraissement':
+              realEtat = 'Au repos';
+              break;
           }
         }
       }
