@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService, BandeService, NotificationService } from '@core/services';
+import { CalculationService, BandeService, NotificationService, ReferentielService } from '@core/services';
 import { BandeId } from '@core/models';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,6 +33,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 export class SaisieSexageComponent {
   private calcService = inject(CalculationService);
   private bandeService = inject(BandeService);
+  private referentielService = inject(ReferentielService);
   private notifier = inject(NotificationService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -48,6 +49,19 @@ export class SaisieSexageComponent {
 
   bandesDisponibles = computed(() => this.bandes() || []);
   selectedBande = computed(() => (this.bandes() || []).find(b => b.id === this.bandeSelectionnee()));
+
+  /** Nombre de femelles actives (non Mortes, non Réformées) dans la bande sélectionnée. */
+  femellesActivesCount = computed(() => {
+    const bandeId = this.bandeSelectionnee();
+    const repros = this.reproducteurs() || [];
+    if (!bandeId) return 11;
+    const count = repros.filter(r => {
+      if (r.sexe !== 'F' || r.etat === 'Morte' || r.etat === 'Réformée') return false;
+      const fBande = (r as any).bandeId || this.referentielService.getBandeDeFemelle(r.id);
+      return fBande === bandeId;
+    }).length;
+    return count > 0 ? count : 11;
+  });
 
   bandesAvecStatut = computed(() => {
     const allBandes = this.bandes() || [];
@@ -65,7 +79,12 @@ export class SaisieSexageComponent {
     if (!bandeId) return [];
 
     const allSevrages = this.sevrages() || [];
-    return allSevrages.filter(s => s.bandeId === bandeId);
+    const repros = this.reproducteurs() || [];
+    return allSevrages.filter(s => {
+      if (s.bandeId !== bandeId) return false;
+      const female = repros.find(r => r.id === s.femelleId);
+      return !female || (female.etat !== 'Morte' && female.etat !== 'Réformée');
+    });
   });
 
   get porteesFormArray() {
