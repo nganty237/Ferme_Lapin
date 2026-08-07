@@ -23,7 +23,7 @@ export const DEFAULT_CONFIGURATION: Configuration = {
   ageMaturiteSexuelleMois: 5,
   decalageAgeBandesMois: 1,
   prixAlimentKg: 350,
-  prixVenteDefaut: 3000,
+  prixVenteDefaut: 10000,
   seuilOccupationCritique: 95,
   seuilOccupationWarning: 80,
   seuilFeconditeMin: 70,
