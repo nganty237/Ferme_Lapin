@@ -185,44 +185,59 @@ export class SaisiePalpationComponent {
       return [];
     }
 
-    const allSaillies = this.saillies() || [];
-    const allPalpations = this.palpations() || [];
-    const repros = this.reproducteurs() || [];
+    const allSaillies   = this.saillies()      || [];
+    const allPalpations = this.palpations()    || [];
+    const repros        = this.reproducteurs() || [];
 
-    const femellesBande = repros.filter(r => 
-      r.sexe === 'F' && 
-      r.bandeId === selectedBande && 
-      r.etat !== 'Morte' && 
+    // ── 1. Femelles actives de la bande ────────────────────────────────────
+    const femellesBande = repros.filter(r =>
+      r.sexe === 'F' &&
+      r.bandeId === selectedBande &&
+      r.etat !== 'Morte' &&
       r.etat !== 'Réformée' &&
       r.etat !== 'En allaitement'
     );
-
     if (femellesBande.length === 0) return [];
 
+    // ── 2. Saillies de la bande — triées du plus récent au plus ancien ──────
+    const sailliesBande = [...allSaillies.filter(s => s.bandeId === selectedBande)]
+      .sort((a, b) => new Date(b.dateSaillie).getTime() - new Date(a.dateSaillie).getTime());
+
+    // ── 3. Déduplication : une seule entrée par femelle (la plus récente) ───
+    const seenFemelles = new Set<string>();
+    const sailliesDeduped: typeof sailliesBande = [];
+    for (const s of sailliesBande) {
+      if (!seenFemelles.has(s.femelleId)) {
+        seenFemelles.add(s.femelleId);
+        sailliesDeduped.push(s);
+      }
+    }
+
+    // ── 4. Compléter avec le calendrier statique pour les femelles absentes ─
     const staticSaillies = this.bandeService.getCalendrierSaillie(selectedBande, new Date());
-
-    let listForBande = allSaillies.filter(s => s.bandeId === selectedBande);
-
-    if (listForBande.length < femellesBande.length && staticSaillies.length > 0) {
-      staticSaillies.forEach(st => {
-        if (!listForBande.some(s => s.femelleId === st.femelleId)) {
-          listForBande.push(st);
-        }
-      });
+    for (const st of staticSaillies) {
+      if (!seenFemelles.has(st.femelleId)) {
+        seenFemelles.add(st.femelleId);
+        sailliesDeduped.push(st);
+      }
     }
 
-    if (listForBande.length === 0 && staticSaillies.length > 0) {
-      listForBande = staticSaillies;
-    }
-
-    return listForBande.filter(s => {
+    // ── 5. Filtrage final ────────────────────────────────────────────────────
+    return sailliesDeduped.filter(s => {
       const repro = repros.find(r => r.id === s.femelleId);
+      // Exclure les femelles inactives
       if (!repro || repro.etat === 'Morte' || repro.etat === 'Réformée' || repro.etat === 'En allaitement') return false;
 
-      const dejaPalpee = allPalpations.some(p => (p.saillieId === s.id || p.femelleId === s.femelleId) && p.bandeId === selectedBande);
-      if (dejaPalpee && repro.etat === 'En gestation') return false;
-
-      return true;
+      // Exclure si une palpation existe POUR CETTE SAILLIE (par id)
+      // OU si une palpation a été enregistrée APRÈS la date de saillie (évite la pollution inter-cycles)
+      const dejaPalpee = allPalpations.some(p =>
+        p.bandeId === selectedBande && (
+          p.saillieId === s.id ||
+          (p.femelleId === s.femelleId &&
+           new Date(p.datePalpation) >= new Date(s.dateSaillie))
+        )
+      );
+      return !dejaPalpee;
     });
   });
 
