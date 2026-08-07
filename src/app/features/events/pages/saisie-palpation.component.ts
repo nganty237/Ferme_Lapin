@@ -166,8 +166,7 @@ export class SaisiePalpationComponent {
   bandesDisponibles = computed(() => {
     const list = this.bandesAvecStatut();
     if (this.uniquementAPalper()) {
-      const filtered = list.filter(b => b.estEligiblePalpation);
-      return filtered.length > 0 ? filtered : list;
+      return list.filter(b => b.estEligiblePalpation);
     }
     return list;
   });
@@ -288,7 +287,12 @@ export class SaisiePalpationComponent {
   }
 
   toggleFiltreSeulementAPalper(): void {
-    this.uniquementAPalper.update(v => !v);
+    const nextVal = !this.uniquementAPalper();
+    this.uniquementAPalper.set(nextVal);
+    const avail = this.bandesDisponibles();
+    if (nextVal && avail.length > 0 && !avail.some(b => b.id === this.selectedBandeId())) {
+      this.onBandeChange(avail[0].id);
+    }
   }
 
   private initPalpationsForBande(bandeId: string): void {

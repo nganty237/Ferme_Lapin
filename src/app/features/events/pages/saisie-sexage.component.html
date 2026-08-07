@@ -117,6 +117,8 @@
                           type="number" 
                           formControlName="males" 
                           min="0" 
+                          [max]="ctrl.value.totalSevres || 0"
+                          (input)="onMalesInputChange($index, $any($event.target).value)"
                           class="form-input text-center w-20 font-bold text-blue-700 text-sm mx-auto">
                       </td>
 
@@ -126,6 +128,8 @@
                           type="number" 
                           formControlName="femelles" 
                           min="0" 
+                          [max]="ctrl.value.totalSevres || 0"
+                          (input)="onFemellesInputChange($index, $any($event.target).value)"
                           class="form-input text-center w-20 font-bold text-rose-600 text-sm mx-auto">
                       </td>
 
@@ -149,6 +153,8 @@
                           type="number" 
                           formControlName="retenus" 
                           min="0" 
+                          [max]="ctrl.value.femelles || 0"
+                          (input)="onRetenusInputChange($index, $any($event.target).value)"
                           placeholder="Ex: 2" 
                           class="form-input w-28 text-xs font-medium">
                       </td>
