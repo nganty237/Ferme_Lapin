@@ -146,12 +146,12 @@ export class KpiCapacityService {
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.casesOccupees || 0), 0)
       : 0;
 
-    // Synchronisation réactive : le fallback de 46 cases ne s'applique QUE si aucune donnée réelle n'est présente
-    const fallbackCagesEngrais = 46;
-    const hasRealData = cagesOccupeesFromLapins > 0 || cagesOccupeesFromClapiers > 0;
-    const cagesOccupees = hasRealData
-      ? Math.max(cagesOccupeesFromLapins, cagesOccupeesFromClapiers)
-      : fallbackCagesEngrais;
+    // Occupation réelle des cages d'engraissement basée prioritairement sur les effectifs réels de lapins
+    const cagesOccupees = lapinsEnEngraissement > 0
+      ? cagesOccupeesFromLapins
+      : (clapiers && clapiers.length > 0
+          ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.casesOccupees || 0), 0)
+          : 0);
     const cagesEngraissementClapiers = clapiers && clapiers.length > 0
       ? clapiers.filter(c => c.type === 'Engraissement').reduce((sum, c) => sum + (c.nombreCases || 12), 0)
       : 60;

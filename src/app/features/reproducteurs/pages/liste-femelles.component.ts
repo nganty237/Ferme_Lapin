@@ -104,8 +104,10 @@ export class ListeFemellesComponent {
         .reduce((sum, m) => sum + (m.vivants || 0), 0);
       const survie = totalVivantsSevres > 0 ? Math.round((totalSevres / totalVivantsSevres) * 100) : 0;
 
-      const maleResponsableId = f.maleResponsableId || this.referentielService.getMaleResponsable(f.id);
-      const bandeId = f.bandeId || this.referentielService.getBandeDeFemelle(f.id);
+      // IMPORTANT: on ignore f.bandeId et f.maleResponsableId (données potentiellement corrompues en LocalStorage)
+      // On se base UNIQUEMENT sur le référentiel officiel pour garantir la structure correcte des bandes
+      const maleResponsableId = this.referentielService.getMaleResponsable(f.id);
+      const bandeId = this.referentielService.getBandeDeFemelle(f.id);
       const bandeLabel = bandeId === 'bande-a' ? 'Bande A' : bandeId === 'bande-b' ? 'Bande B' : 'Bande C';
 
       const bandeObj = allBandes.find((b: any) => b.id === bandeId);
