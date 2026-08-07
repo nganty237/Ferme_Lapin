@@ -8,7 +8,7 @@ describe('KpiCapacityService', () => {
   const mockConfig: Configuration = {
     nombreCagesTotal: 108,
     densiteParCase: 3,
-    dureeGestationJours: 30,
+    dureeGestationJours: 31,
     dureeAllaitementMinJours: 30,
     dureeAllaitementMaxJours: 30,
     dureeSexageJours: 30,
