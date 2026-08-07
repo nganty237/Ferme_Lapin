@@ -294,7 +294,7 @@ export class KpiReproductionService {
         nombrePortees: nbPortees,
         lapereauTotal: nes,
         tauxSurvie: nes > 0 ? Math.round((sevres / nes) * 100) : 0,
-        revenuEstime: sevres * 3000
+        revenuEstime: sevres * 10000
       };
     });
   }

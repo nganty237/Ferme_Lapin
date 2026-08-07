@@ -197,7 +197,7 @@ export class KpiCapacityService {
     const cagesNeeded = Math.ceil(lapinsParBande / densiteEngraissement); // 77 / 3 = 26 cages
 
     const investissement = cagesNeeded * coutUneCage; // 26 × 15 000 = 390 000 FCFA
-    const prixVente = config.prixVenteDefaut || 3000;
+    const prixVente = config.prixVenteDefaut || 10000;
     const coutProd = (config.dureeEngraissementJours || 60) * 0.1 * (config.prixAlimentKg || 350);
     const margeParLapin = Math.max(500, prixVente - coutProd);
     const revenuNetMensuel = Math.round(lapinsParBande * margeParLapin); // 77 × 900 = 69 300 FCFA
