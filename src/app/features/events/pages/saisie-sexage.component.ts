@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup, FormArray } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalculationService, BandeService, NotificationService } from '@core/services';
+import { CalculationService, BandeService, NotificationService, ReferentielService } from '@core/services';
 import { BandeId } from '@core/models';
 import { PageHeaderComponent } from '@shared/components';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,6 +33,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 export class SaisieSexageComponent {
   private calcService = inject(CalculationService);
   private bandeService = inject(BandeService);
+  private referentielService = inject(ReferentielService);
   private notifier = inject(NotificationService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -54,12 +55,11 @@ export class SaisieSexageComponent {
     const bandeId = this.bandeSelectionnee();
     const repros = this.reproducteurs() || [];
     if (!bandeId) return 11;
-    const count = repros.filter(r =>
-      r.sexe === 'F' &&
-      (r as any).bandeId === bandeId &&
-      r.etat !== 'Morte' &&
-      r.etat !== 'Réformée'
-    ).length;
+    const count = repros.filter(r => {
+      if (r.sexe !== 'F' || r.etat === 'Morte' || r.etat === 'Réformée') return false;
+      const fBande = (r as any).bandeId || this.referentielService.getBandeDeFemelle(r.id);
+      return fBande === bandeId;
+    }).length;
     return count > 0 ? count : 11;
   });
 
