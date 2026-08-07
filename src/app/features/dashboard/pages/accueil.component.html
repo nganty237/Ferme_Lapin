@@ -183,7 +183,7 @@
             @if (kpis()!.occupationCages.pourcentage > 80) {
               ⚠️ Engraissement saturé à {{ kpis()!.occupationCages.pourcentage }}%. <strong>Ne planifiez pas de nouvelles saillies</strong> pour éviter de manquer de cages au sevrage.
             } @else {
-              ✅ Espace suffisant. <strong>Vous pouvez saillir les femelles de la prochaine bande</strong> (cages disponibles : {{ kpis()!.occupationCages.totales - kpis()!.occupationCages.occupees }}).
+             Espace suffisant. <strong>Vous pouvez saillir les femelles de la prochaine bande</strong> (cages disponibles : {{ kpis()!.occupationCages.totales - kpis()!.occupationCages.occupees }}).
             }
           </span>
         </div>
