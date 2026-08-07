@@ -26,7 +26,7 @@ export class KpiFinanceService {
     config: Configuration,
     reproducteurs: Reproducteur[] = []
   ): FinanceKPIs {
-    const prixVenteDefault = config.prixVenteDefaut || 3000;
+    const prixVenteDefault = config.prixVenteDefaut || 10000;
     const prixAlimentKg = config.prixAlimentKg || 350;
     const dureeEngraissementJours = config.dureeEngraissementJours || 60;
 

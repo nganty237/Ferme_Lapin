@@ -19,7 +19,7 @@
     "ageMaturiteSexuelleMois": 5,
     "decalageAgeBandesMois": 1,
     "prixAlimentKg": 350,
-    "prixVenteDefaut": 3000
+    "prixVenteDefaut": 10000
   },
   "referentiel_males": [
     {
