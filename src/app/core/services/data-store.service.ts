@@ -153,7 +153,18 @@ export class DataStoreService {
       this._sevrages$.next(data.sevrages || []);
       this._ventes$.next(data.ventes || []);
       this._deces$.next(data.deces || []);
-      this._config$.next(data.config);
+      // Fusion avec DEFAULT_CONFIGURATION : les valeurs Firestore priment,
+      // SAUF prixVenteDefaut qui utilise la valeur maximale (défaut ou Firestore)
+      // pour éviter qu'une ancienne valeur stale (ex: 3000) n'écrase le défaut (10000).
+      const mergedConfig: Configuration = {
+        ...DEFAULT_CONFIGURATION,
+        ...data.config,
+        prixVenteDefaut: Math.max(
+          data.config?.prixVenteDefaut || 0,
+          DEFAULT_CONFIGURATION.prixVenteDefaut
+        )
+      };
+      this._config$.next(mergedConfig);
       this._bandes$.next(data.bandes || []);
       this._clapiers$.next(data.clapiers || []);
       this._palpations$.next(data.palpations || []);
