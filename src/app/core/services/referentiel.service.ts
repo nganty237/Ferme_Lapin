@@ -7,7 +7,7 @@ import {
   GroupeFemellsParMale 
 } from '../models';
 import { StorageService } from './storage.service';
-import { DEFAULT_REFERENTIEL_BANDES } from '../constants/farm-referentiels.defaults';
+import { DEFAULT_REFERENTIEL_BANDES, DEFAULT_CALENDRIER_SAILLIE } from '../constants/farm-referentiels.defaults';
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +58,11 @@ export class ReferentielService {
 
   getCalendrierSaillieStatique(bandeId: BandeId): CalendrierSaillieItem[] {
     const items = this.storageService.getReferentielCalendrierSaillie();
-    return items.filter(item => item.bandeId === bandeId);
+    const fromStorage = items.filter(item => item.bandeId === bandeId);
+    // Fallback : si le localStorage ne contient pas les entrées pour cette bande,
+    // on utilise le calendrier par défaut (source de vérité statique)
+    if (fromStorage.length > 0) return fromStorage;
+    return DEFAULT_CALENDRIER_SAILLIE.filter(item => item.bandeId === bandeId);
   }
 }
 
