@@ -170,6 +170,42 @@ export class SaisieSexageComponent {
     return (Number(males) || 0) + (Number(femelles) || 0);
   }
 
+  onMalesInputChange(index: number, rawVal: any): void {
+    const group = this.porteesFormArray.at(index) as FormGroup;
+    if (!group) return;
+
+    const total = Number(group.get('totalSevres')?.value) || 0;
+    let males = Math.max(0, Math.min(total, Number(rawVal) || 0));
+    let femelles = Math.max(0, total - males);
+    let retenus = Number(group.get('retenus')?.value) || 0;
+    if (retenus > femelles) retenus = femelles;
+
+    group.patchValue({ males, femelles, retenus }, { emitEvent: false });
+  }
+
+  onFemellesInputChange(index: number, rawVal: any): void {
+    const group = this.porteesFormArray.at(index) as FormGroup;
+    if (!group) return;
+
+    const total = Number(group.get('totalSevres')?.value) || 0;
+    let femelles = Math.max(0, Math.min(total, Number(rawVal) || 0));
+    let males = Math.max(0, total - femelles);
+    let retenus = Number(group.get('retenus')?.value) || 0;
+    if (retenus > femelles) retenus = femelles;
+
+    group.patchValue({ males, femelles, retenus }, { emitEvent: false });
+  }
+
+  onRetenusInputChange(index: number, rawVal: any): void {
+    const group = this.porteesFormArray.at(index) as FormGroup;
+    if (!group) return;
+
+    const femelles = Number(group.get('femelles')?.value) || 0;
+    let retenus = Math.max(0, Math.min(femelles, Number(rawVal) || 0));
+
+    group.patchValue({ retenus }, { emitEvent: false });
+  }
+
   onSubmit() {
     if (this.sexageForm.invalid) {
       this.sexageForm.markAllAsTouched();

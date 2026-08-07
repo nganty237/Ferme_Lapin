@@ -16,10 +16,14 @@
             class="form-select"
             [ngModel]="selectedBandeId()"
             (ngModelChange)="onBandeChange($event)">
-            @for (b of bandesDisponibles(); track b.id) {
-              <option [value]="b.id">
-                {{ b.nom }} — {{ b.statutLabel }}
-              </option>
+            @if (bandesDisponibles().length === 0) {
+              <option value="" disabled selected>Aucune bande à palper actuellement</option>
+            } @else {
+              @for (b of bandesDisponibles(); track b.id) {
+                <option [value]="b.id">
+                  {{ b.nom }} — {{ b.statutLabel }}
+                </option>
+              }
             }
           </select>
         </div>
